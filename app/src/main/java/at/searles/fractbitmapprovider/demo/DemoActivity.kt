@@ -35,7 +35,7 @@ class DemoActivity : AppCompatActivity() {
     private fun initBitmapModel() {
         bitmapModel = RenderScriptBitmapModel(RenderScript.create(this))
 
-        val memento = bitmapModel.createBitmapMemento(500,500)
+        val memento = bitmapModel.createBitmapMemento(2000,1500)
         bitmapModel.setBitmapMemento(memento)
     }
 

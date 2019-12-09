@@ -6,11 +6,8 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.Float3
 import android.renderscript.RenderScript
-import at.searles.fractimageview.ScalableBitmapModel
 
-class RenderScriptBitmapModel(val rs: RenderScript): ScalableBitmapModel() {
-
-    private val scaleMatrix = Matrix()
+class RenderScriptBitmapModel(val rs: RenderScript): CoordinatesBitmapModel() {
 
     private val calcScript: ScriptC_calc = ScriptC_calc(rs)
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
@@ -18,12 +15,10 @@ class RenderScriptBitmapModel(val rs: RenderScript): ScalableBitmapModel() {
     override val bitmap: Bitmap
         get() = bitmapMemento.bitmap
 
-    override val normMatrix: Matrix
-        get() = scaleMatrix
-
-    override fun scale(normMatrix: Matrix) {
-        scaleMatrix.postConcat(normMatrix)
-    }
+    /**
+     * This matrix is used to transform the shown image.
+     */
+    override val normMatrix: Matrix = Matrix()
 
     lateinit var bitmapMemento: BitmapMemento
         private set
@@ -37,6 +32,27 @@ class RenderScriptBitmapModel(val rs: RenderScript): ScalableBitmapModel() {
 
         this.bitmapScript._width = value.width
         this.bitmapScript._height = value.height
+
+        updateScaleInScripts()
+    }
+
+    private fun updateScaleInScripts() {
+        val centerX = width / 2.0
+        val centerY = height / 2.0
+        val factor = 1.0 / if (centerX < centerY) centerX else centerY
+
+        val scale = ScriptField_Scale.Item().apply {
+            a = scale.xx * factor
+            b = scale.yx * factor
+            c = scale.xy * factor
+            d = scale.yy * factor
+
+            e = scale.cx - (a * centerX + b * centerY)
+            f = scale.cy - (c * centerX + d * centerY)
+        }
+
+        calcScript._scale = scale
+        bitmapScript._scale = scale
     }
 
     fun createBitmapMemento(width: Int, height: Int): BitmapMemento {
@@ -49,6 +65,12 @@ class RenderScriptBitmapModel(val rs: RenderScript): ScalableBitmapModel() {
         lightVector.x = x
         lightVector.y = y
         lightVector.z = z
+    }
+
+    override fun notifyScaleRequested() {
+        popNormMatrix()
+        updateScaleInScripts()
+        calc()
     }
 
     fun calc() {
@@ -73,4 +95,8 @@ class RenderScriptBitmapModel(val rs: RenderScript): ScalableBitmapModel() {
             rsBitmap.copyTo(bitmap)
         }
     }
+
+    // TODO
+    // Command pattern
+    //
 }

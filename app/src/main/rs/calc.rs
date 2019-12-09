@@ -16,15 +16,19 @@
  * height.
  * To indicate that a point is outdated, it should be set to
  */
+#include "scale.rsh"
 
-int width; // width of bitmap. range of x is 0 to width.
+int width; // width of bitmap. range of data is from 0 to inclusive width!
 int height;
 
+// ---------------------------------------------------------------------------------------------- //
+
 static float3 valueAt(double2 p) {
-    return (float3) {0, 0, sin(sqrt((float) (p.x * p.x + p.y * p.y)))};
+    float z = sin(sqrt((float) (40 * (p.x * p.x + p.y * p.y))));
+    return (float3) {p.x, p.y, z};
 }
 
-float3 __attribute__((kernel)) calculate(float3 in, uint32_t x) {
+float3 RS_KERNEL calculate(float3 in, uint32_t x) {
     /*float3 out = in;
 
     if(out.x >= 0) {
@@ -34,8 +38,9 @@ float3 __attribute__((kernel)) calculate(float3 in, uint32_t x) {
     uint32_t y = x / (width + 1);
     x = x % (width + 1);
 
-    double2 pt = (double2) { 2.0 * x - (double) width, 2.0 * y - (double) height } / (double2) { width, height };
-    float3 value = valueAt(12.0 * pt);
+    double2 pt = mapCoordinates(x, y);
+
+    float3 value = valueAt(pt);
     return value;
 }
 
