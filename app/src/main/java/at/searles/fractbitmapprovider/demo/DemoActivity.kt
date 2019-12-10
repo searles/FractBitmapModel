@@ -49,7 +49,7 @@ class DemoActivity : AppCompatActivity() {
     fun startRotation() {
         val task = object: Runnable {
             override fun run() {
-                bitmapModel.setLightVector(sin(alpha).toFloat(), cos(alpha).toFloat(), 0f)
+                bitmapModel.setLightVector(0.8f * sin(alpha).toFloat(), 0.8f * cos(alpha).toFloat(), 0.6f)
                 alpha += 0.05
                 syncBitmap()
                 handler.postDelayed(this, 25)

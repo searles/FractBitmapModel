@@ -6,6 +6,8 @@
 #pragma rs java_package_name(at.searles.fractbitmapprovider)
 
 #include "scale.rsh"
+#include "palette.rsh"
+#include "lab.rsh"
 
 int width;
 int height;
@@ -59,6 +61,18 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
     float3 p01 = bitmapData[x + (y + 1) * (width + 1)];
     float3 p11 = bitmapData[x + (y + 1) * (width + 1) + 1];
 
+    // step 1: obtain color.
+    /*float4 color00 = colorAt(p00.x, p00.y);
+    float4 color10 = colorAt(p10.x, p10.y);
+    float4 color01 = colorAt(p01.x, p01.y);
+    float4 color11 = colorAt(p11.x, p11.y);
+
+    float4 color = (color00 + color10 + color01 + color11) / 4.f;*/
+
+    float4 color = (float4) { 60.f, 30.f, 0.f, 1.f};
+
+    // step 2: obtain 3d shade
+
     // TODO check whether c/b is confused
     float3 xVec = (float3) { scale.a, scale.c, p10.z - p00.z };
     float3 yVec = (float3) { scale.b, scale.d, p01.z - p00.z };
@@ -66,11 +80,7 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
     // for now only gray scale.
     float brightness = lambertValue(xVec, yVec);
 
-    if(p00.x < 0 && p00.y < 0) {
-        return red(brightness);
-    } else if(p00.y < 0) {
-        return green(brightness);
-    }
+    color.s0 *= brightness;
 
-    return gray(brightness);
+    return rsPackColorTo8888(labToRgb(color));
 }
