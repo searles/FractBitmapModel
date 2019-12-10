@@ -23,36 +23,6 @@ static float lambertValue(float3 xVec, float3 yVec) {
     return dot(normalize(cross(xVec, yVec)), lightVector);
 }
 
-static uchar4 gray(float brightness) {
-    brightness = brightness * 127 + 127;
-
-    if(brightness > 255) brightness = 255;
-
-    uchar value = (uchar) brightness;
-
-    return (uchar4) {value, value, value, 0xff};
-}
-
-static uchar4 red(float brightness) {
-    brightness = brightness * 127 + 127;
-
-    if(brightness > 255) brightness = 255;
-
-    uchar value = (uchar) brightness;
-
-    return (uchar4) {0xff, value, value, 0xff};
-}
-
-static uchar4 green(float brightness) {
-    brightness = brightness * 127 + 127;
-
-    if(brightness > 255) brightness = 255;
-
-    uchar value = (uchar) brightness;
-
-    return (uchar4) {value, 0xff, value, 0xff};
-}
-
 uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
     // gather data
     float3 p00 = bitmapData[x + y * (width + 1)];
@@ -62,18 +32,15 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
     float3 p11 = bitmapData[x + (y + 1) * (width + 1) + 1];
 
     // step 1: obtain color.
-    /*float4 color00 = colorAt(p00.x, p00.y);
+    float4 color00 = colorAt(p00.x, p00.y);
     float4 color10 = colorAt(p10.x, p10.y);
     float4 color01 = colorAt(p01.x, p01.y);
     float4 color11 = colorAt(p11.x, p11.y);
 
-    float4 color = (color00 + color10 + color01 + color11) / 4.f;*/
-
-    float4 color = (float4) { 60.f, 30.f, 0.f, 1.f};
+    float4 color = (color00 + color10 + color01 + color11) / 4.f;
 
     // step 2: obtain 3d shade
 
-    // TODO check whether c/b is confused
     float3 xVec = (float3) { scale.a, scale.c, p10.z - p00.z };
     float3 yVec = (float3) { scale.b, scale.d, p01.z - p00.z };
 

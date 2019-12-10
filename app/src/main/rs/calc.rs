@@ -25,7 +25,11 @@ int height;
 
 static float3 valueAt(double2 p) {
     float z = sin(sqrt((float) (40 * (p.x * p.x + p.y * p.y))));
-    return (float3) {p.x, p.y, z};
+
+    float2 fp = convert_float2(p);
+    fp = fp - floor(fp);
+
+    return (float3) {fp.x, fp.y, z};
 }
 
 float3 RS_KERNEL calculate(float3 in, uint32_t x) {
