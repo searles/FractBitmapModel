@@ -17,11 +17,32 @@
  * To indicate that a point is outdated, it should be set to
  */
 #include "scale.rsh"
+#include "complex.rsh"
 
 int width; // width of bitmap. range of data is from 0 to inclusive width!
 int height;
 
 // ---------------------------------------------------------------------------------------------- //
+
+static float3 mandelbrot(double2 pt) {
+    int32_t maxIterationCount = 1000;
+    float bailoutValue = 86.f; // cut off for native_exp
+    uint32_t i = 0;
+    double2 z = (double2) {0.0, 0.0};
+    float sum = 0.f;
+    while(i < maxIterationCount) {
+        z = csqr(z) + pt;
+        float d = fast_length(convert_float2(z));
+        if(d > bailoutValue) {
+            float value = native_log(sum + 1.f);
+            value = value - floor(value);
+            return (float3) {value, 0.f, value};
+        }
+        sum = sum + native_exp(-d);
+        i++;
+    }
+    return (float3) {0.f, 0.f, 0.f};
+}
 
 static float3 valueAt(double2 p) {
     float z = sin(sqrt((float) (p.x * p.x + p.y * p.y)));
@@ -44,7 +65,7 @@ float3 RS_KERNEL calculate(float3 in, uint32_t x) {
 
     double2 pt = mapCoordinates(x, y);
 
-    float3 value = valueAt(pt);
+    float3 value = mandelbrot(pt);
     return value;
 }
 

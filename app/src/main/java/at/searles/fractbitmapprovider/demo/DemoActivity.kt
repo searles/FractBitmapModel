@@ -78,7 +78,7 @@ class DemoActivity : AppCompatActivity() {
             }
         }
 
-        val memento = bitmapModel.createBitmapMemento(2000,1000)
+        val memento = bitmapModel.createBitmapMemento(500,250)
         bitmapModel.setBitmapMemento(memento)
     }
 
