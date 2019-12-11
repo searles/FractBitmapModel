@@ -2,54 +2,120 @@ package at.searles.fractbitmapprovider
 
 import android.graphics.Bitmap
 import android.renderscript.*
-import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationChange
-import at.searles.fractbitmapprovider.fractalbitmapmodel.ScaleChange
+import at.searles.fractbitmapprovider.fractalbitmapmodel.PostCalculationTask
+import at.searles.fractbitmapprovider.fractalbitmapmodel.RelativeScaleTask
 import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
 import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
-import at.searles.fractbitmapprovider.palette.PaletteWrapper
-import kotlin.math.hypot
+import at.searles.fractbitmapprovider.palette.PaletteUpdater
 
-class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal): CoordinatesBitmapModel() {
+class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, initialBitmapAllocation: BitmapAllocation): LongRunningBitmapModel() {
 
     var listener: CalculationTask.Listener? = null
 
     private val calcScript: ScriptC_calc = ScriptC_calc(rs)
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
 
-    override val bitmap: Bitmap
-        get() = bitmapMemento.bitmap
-
-    var fractal = initialFractal
-
-    val paletteWrapper = PaletteWrapper(rs, bitmapScript).apply {
-        palettes = fractal.palettes
-        this.updatePalettes()
-    }
-
-    lateinit var bitmapMemento: BitmapAllocation
-        private set
-
-    fun registerChange(change: CalculationChange) {
-        if(calculationTask == null) {
-            require(changes.isEmpty())
-            fractal = change.applyChange(fractal)
-            startTask()
-            return
+    var bitmapAllocation: BitmapAllocation = initialBitmapAllocation
+        set(value) {
+            field = value
+            updateBitmapInScripts()
+            updateScaleInScripts()
         }
 
-        changes.add(change)
-        calculationTask!!.cancel(true)
-    }
+    override val bitmap: Bitmap
+        get() = bitmapAllocation.bitmap
 
+    var fractal = initialFractal
+        set(value) {
+            field = value
+            updateScaleInScripts()
+            updatePalettesInScripts()
+        }
 
-    override fun notifyScaleRequested() {
-        registerChange(ScaleChange { normMatrix })
+    var lightVector: Float3 = Float3(1f, 0f, 0f)
+        set(value) {
+            field = value
+            bitmapScript._lightVector = lightVector
+        }
+
+    init {
+        updateBitmapInScripts()
+        updateScaleInScripts()
+        updatePalettesInScripts()
+        bitmapScript._lightVector = lightVector
     }
 
     private var calculationTask: CalculationTask? = null
-    private val changes = ArrayList<CalculationChange>()
+    private val changes = ArrayList<PostCalculationTask>()
 
-    private val taskListener = object: CalculationTask.Listener {
+    override fun notifyScaleRequested() {
+        registerPostCalcTask(RelativeScaleTask())
+    }
+
+    fun setPaletteOffset(index: Int, offsetX: Float, offsetY: Float) {
+        PaletteUpdater(rs, bitmapScript).updateOffsets(index, offsetX, offsetY)
+    }
+
+    fun syncBitmap() {
+        bitmapAllocation.syncBitmap(bitmapScript)
+    }
+
+    fun registerPostCalcTask(task: PostCalculationTask) {
+        if(calculationTask == null) {
+            require(changes.isEmpty())
+            task.execute(this)
+
+            if(task.isParameterChange) {
+                startTask()
+            }
+            return
+        }
+
+        changes.add(task)
+        calculationTask!!.cancel(true)
+    }
+
+    private val taskListener = CalcTaskListener()
+
+    init {
+        startTask()
+    }
+
+    private fun startTask() {
+        require(changes.isEmpty())
+        require(calculationTask == null)
+
+        // after an update is generated, all scales to this point have been committed.
+        notifyStarted()
+
+        calculationTask = CalculationTask(rs, calcScript, bitmapScript, taskListener)
+
+        calculationTask!!.execute(bitmapAllocation)
+    }
+
+    private fun updatePalettesInScripts() {
+        PaletteUpdater(rs, bitmapScript).apply {
+            this.updatePalettes(fractal.palettes)
+        }
+    }
+
+    private fun updateScaleInScripts() {
+        ScaleUpdater.updateScaleInScripts(width, height, fractal.scale, calcScript, bitmapScript)
+    }
+
+    private fun updateBitmapInScripts() {
+        this.bitmapScript.bind_bitmapData(bitmapAllocation.bitmapData)
+
+        this.calcScript._width = bitmapAllocation.width
+        this.calcScript._height = bitmapAllocation.height
+
+        this.bitmapScript._width = bitmapAllocation.width
+        this.bitmapScript._height = bitmapAllocation.height
+
+        // must call updateScaleInScripts afterwards!
+    }
+
+    private inner class CalcTaskListener: CalculationTask.Listener {
         override fun started() {
             listener?.started()
         }
@@ -66,103 +132,21 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal): Co
             listener?.finished()
 
             if(changes.isNotEmpty()) {
-                fractal = changes.fold(fractal) { fractal, change -> change.applyChange(fractal) }
+                val isParameterChange = changes.fold(false) { status, task ->
+                    task.execute(this@RenderScriptBitmapModel)
+                    status or task.isParameterChange
+                }
+
                 changes.clear()
-                startTask()
+
+                if(isParameterChange) {
+                    startTask()
+                }
             }
         }
 
         override fun progress(progress: Float) {
+            listener?.progress(progress)
         }
-    }
-
-    /**
-     * Converts the current scale to image coordinates and
-     * sets it in renderscript. calc must be called afterwards.
-     */
-    private fun updateScaleInScripts() {
-        val centerX = width / 2.0
-        val centerY = height / 2.0
-        val factor = 1.0 / if (centerX < centerY) centerX else centerY
-
-        val scale = fractal.scale
-
-        val scaleInScript = ScriptField_Scale.Item().apply {
-            a = scale.xx * factor
-            b = scale.yx * factor
-            c = scale.xy * factor
-            d = scale.yy * factor
-
-            e = scale.cx - (a * centerX + b * centerY)
-            f = scale.cy - (c * centerX + d * centerY)
-        }
-
-        calcScript._scale = scaleInScript
-
-        bitmapScript._scale = scaleInScript
-
-        val xStepLength = hypot(scaleInScript.a, scaleInScript.c)
-        val yStepLength = hypot(scaleInScript.b, scaleInScript.d)
-
-        bitmapScript._xStepLength = xStepLength
-        bitmapScript._yStepLength = yStepLength
-
-        bitmapScript._aNorm = (scaleInScript.a / xStepLength).toFloat()
-        bitmapScript._bNorm = (scaleInScript.b / yStepLength).toFloat()
-        bitmapScript._cNorm = (scaleInScript.c / xStepLength).toFloat()
-        bitmapScript._dNorm = (scaleInScript.d / yStepLength).toFloat()
-    }
-
-    private fun startTask() {
-        require(changes.isEmpty())
-        require(calculationTask == null)
-
-        // after an update is generated, all scales to this point have been committed.
-        notifyStarted()
-
-        updateScaleInScripts() // fixme this should be somewhere else...
-
-        calculationTask = CalculationTask(calcScript).also {
-            it.listener = taskListener
-        }
-
-        calculationTask!!.execute(bitmapMemento)
-    }
-
-    /**
-     * Update lightVector. syncBitmap must be called afterwards.
-     */
-    private val lightVector: Float3 = Float3(1f, 0f, 0f).also {
-        bitmapScript._lightVector = it
-    }
-
-    fun setLightVector(x: Float, y: Float, z: Float) {
-        lightVector.x = x
-        lightVector.y = y
-        lightVector.z = z
-
-        bitmapScript._lightVector = lightVector
-    }
-
-    /**
-     * Performs the calculation.
-     */
-
-    fun createBitmapMemento(width: Int, height: Int): BitmapAllocation {
-        return BitmapAllocation(rs, bitmapScript, width, height)
-    }
-
-    fun setBitmapMemento(value: BitmapAllocation) {
-        bitmapMemento = value
-        this.bitmapScript.bind_bitmapData(value.bitmapData)
-
-        this.calcScript._width = value.width
-        this.calcScript._height = value.height
-
-        this.bitmapScript._width = value.width
-        this.bitmapScript._height = value.height
-
-        updateScaleInScripts()
-        startTask() //  FIXME this should also be a change.
     }
 }

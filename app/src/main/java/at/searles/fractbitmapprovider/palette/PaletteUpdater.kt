@@ -9,9 +9,30 @@ import at.searles.fractbitmapprovider.ScriptField_paletteSegment
 import at.searles.paletteeditor.Palette
 import java.util.*
 
-class PaletteWrapper(val rs: RenderScript, val script: ScriptC_bitmap) {
+class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_bitmap) {
 
-    lateinit var palettes: List<Palette>
+    fun updateOffsets(index: Int, offsetX: Float, offsetY: Float) {
+        script._palettes.set_offsetX(index, offsetX, false)
+        script._palettes.set_offsetY(index, offsetY, false)
+
+        script._palettes.copyAll()
+    }
+
+    fun updatePalettes(palettes: List<Palette>) {
+        val splineSegments = ArrayList<SplineSegment>()
+
+        val palettesWithSegmentIndex = palettes.map {palette ->
+            val segmentStartIndex = splineSegments.size
+            val segments = createSplineSegments(palette)
+
+            segments.forEach { splineSegments.addAll(it) }
+
+            Pair(palette, segmentStartIndex)
+        }
+
+        setPalettesInScript(palettesWithSegmentIndex)
+        setSegmentsInScript(splineSegments)
+    }
 
     private fun createSplineSegments(palette: Palette): Array<Array<SplineSegment>> {
         val height = palette.height
@@ -53,31 +74,6 @@ class PaletteWrapper(val rs: RenderScript, val script: ScriptC_bitmap) {
         }
     }
 
-    fun updateOffsets() {
-        palettes.forEachIndexed { index, palette ->
-            script._palettes.set_offsetX(index, palette.offsetX, false)
-            script._palettes.set_offsetY(index, palette.offsetY, false)
-        }
-
-        script._palettes.copyAll()
-    }
-
-    fun updatePalettes() {
-        val splineSegments = ArrayList<SplineSegment>()
-
-        val palettesWithSegmentIndex = palettes.map {palette ->
-            val segmentStartIndex = splineSegments.size
-            val segments = createSplineSegments(palette)
-
-            segments.forEach { splineSegments.addAll(it) }
-
-            Pair(palette, segmentStartIndex)
-        }
-
-        setPalettesInScript(palettesWithSegmentIndex)
-        setSegmentsInScript(splineSegments)
-    }
-
     private fun setSegmentsInScript(splineSegments: ArrayList<SplineSegment>) {
         val rsSegments = ScriptField_paletteSegment(rs, splineSegments.size)
         script.bind_segments(rsSegments)
@@ -93,7 +89,7 @@ class PaletteWrapper(val rs: RenderScript, val script: ScriptC_bitmap) {
     }
 
     private fun setPalettesInScript(palettesWithSegmentIndex: List<Pair<Palette, Int>>) {
-        val rsPalettes = ScriptField_palette(rs, palettes.size)
+        val rsPalettes = ScriptField_palette(rs, palettesWithSegmentIndex.size)
         script.bind_palettes(rsPalettes)
 
         palettesWithSegmentIndex.forEachIndexed { index, pair ->

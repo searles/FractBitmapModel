@@ -5,7 +5,7 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 
-class BitmapAllocation(val rs: RenderScript, val bitmapScript: ScriptC_bitmap, val width: Int, val height: Int) {
+class BitmapAllocation(val rs: RenderScript, val width: Int, val height: Int) {
     val bitmapData: Allocation =
         Allocation.createSized(
             rs,
@@ -27,7 +27,7 @@ class BitmapAllocation(val rs: RenderScript, val bitmapScript: ScriptC_bitmap, v
     /**
      * Renders bitmapData into the bitmap using the current parameters.
      */
-    fun syncBitmap() {
+    fun syncBitmap(bitmapScript: ScriptC_bitmap) {
         bitmapScript.forEach_root(rsBitmap)
         rsBitmap.copyTo(bitmap)
     }
