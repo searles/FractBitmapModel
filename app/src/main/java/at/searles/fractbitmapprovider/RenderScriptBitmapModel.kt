@@ -1,18 +1,17 @@
 package at.searles.fractbitmapprovider
 
 import android.graphics.Bitmap
-import android.graphics.Matrix
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.Float3
-import android.renderscript.RenderScript
-import android.util.SparseArray
+import android.renderscript.*
+import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationChange
+import at.searles.fractbitmapprovider.fractalbitmapmodel.ScaleChange
+import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
+import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
 import at.searles.fractbitmapprovider.palette.PaletteWrapper
-import at.searles.paletteeditor.Palette
-import at.searles.paletteeditor.colors.Lab
-import at.searles.paletteeditor.colors.Rgb
+import kotlin.math.hypot
 
-class RenderScriptBitmapModel(val rs: RenderScript): CoordinatesBitmapModel() {
+class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal): CoordinatesBitmapModel() {
+
+    var listener: CalculationTask.Listener? = null
 
     private val calcScript: ScriptC_calc = ScriptC_calc(rs)
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
@@ -20,50 +19,61 @@ class RenderScriptBitmapModel(val rs: RenderScript): CoordinatesBitmapModel() {
     override val bitmap: Bitmap
         get() = bitmapMemento.bitmap
 
-    /**
-     * This matrix is used to transform the shown image.
-     */
-    override val normMatrix: Matrix = Matrix()
+    var fractal = initialFractal
 
     val paletteWrapper = PaletteWrapper(rs, bitmapScript).apply {
-        palettes = listOf(
-            Palette(4, 4, 0f, 0f,
-                SparseArray<SparseArray<Lab>>().also { table ->
-                    table.put(0, SparseArray<Lab>().also { row ->
-                        row.put(0, Rgb(1f, 0f, 0f).toLab())
-                        row.put(2, Rgb(0f, 0f, 0f).toLab())
-                    })
-                    table.put(1, SparseArray<Lab>().also { row ->
-                        row.put(1, Rgb(1f, 1f, 0f).toLab())
-                        row.put(3, Rgb(0f, 0.5f, 0f).toLab())
-                    })
-                    table.put(2, SparseArray<Lab>().also { row ->
-                        row.put(0, Rgb(0f, 0f, 1f).toLab())
-                        row.put(2, Rgb(1f, 1f, 1f).toLab())
-                    })
-                    table.put(3, SparseArray<Lab>().also { row ->
-                        row.put(1, Rgb(1f, 0.5f, 0.5f).toLab())
-                        row.put(3, Rgb(0.5f, 0.5f, 1f).toLab())
-                    })
-                }),
-            Palette(1, 1, 0f, 0f,
-                SparseArray<SparseArray<Lab>>().also { table ->
-                    table.put(0, SparseArray<Lab>().also { row ->
-                        row.put(0, Rgb(1f, 0f, 0f).toLab())
-                    })
-                })
-        )
-
+        palettes = fractal.palettes
         this.updatePalettes()
     }
 
-    lateinit var bitmapMemento: BitmapMemento
+    lateinit var bitmapMemento: BitmapAllocation
         private set
 
+    fun registerChange(change: CalculationChange) {
+        if(calculationTask == null) {
+            require(changes.isEmpty())
+            fractal = change.applyChange(fractal)
+            startTask()
+            return
+        }
+
+        changes.add(change)
+        calculationTask!!.cancel(true)
+    }
+
+
     override fun notifyScaleRequested() {
-        popNormMatrix()
-        updateScaleInScripts()
-        calc()
+        registerChange(ScaleChange { normMatrix })
+    }
+
+    private var calculationTask: CalculationTask? = null
+    private val changes = ArrayList<CalculationChange>()
+
+    private val taskListener = object: CalculationTask.Listener {
+        override fun started() {
+            listener?.started()
+        }
+
+        override fun updated() {
+            notifyUpdated()
+            listener?.updated()
+        }
+
+        override fun finished() {
+            // hide progress bar
+            calculationTask = null
+
+            listener?.finished()
+
+            if(changes.isNotEmpty()) {
+                fractal = changes.fold(fractal) { fractal, change -> change.applyChange(fractal) }
+                changes.clear()
+                startTask()
+            }
+        }
+
+        override fun progress(progress: Float) {
+        }
     }
 
     /**
@@ -75,7 +85,9 @@ class RenderScriptBitmapModel(val rs: RenderScript): CoordinatesBitmapModel() {
         val centerY = height / 2.0
         val factor = 1.0 / if (centerX < centerY) centerX else centerY
 
-        val scale = ScriptField_Scale.Item().apply {
+        val scale = fractal.scale
+
+        val scaleInScript = ScriptField_Scale.Item().apply {
             a = scale.xx * factor
             b = scale.yx * factor
             c = scale.xy * factor
@@ -85,14 +97,44 @@ class RenderScriptBitmapModel(val rs: RenderScript): CoordinatesBitmapModel() {
             f = scale.cy - (c * centerX + d * centerY)
         }
 
-        calcScript._scale = scale
-        bitmapScript._scale = scale
+        calcScript._scale = scaleInScript
+
+        bitmapScript._scale = scaleInScript
+
+        val xStepLength = hypot(scaleInScript.a, scaleInScript.c)
+        val yStepLength = hypot(scaleInScript.b, scaleInScript.d)
+
+        bitmapScript._xStepLength = xStepLength
+        bitmapScript._yStepLength = yStepLength
+
+        bitmapScript._aNorm = (scaleInScript.a / xStepLength).toFloat()
+        bitmapScript._bNorm = (scaleInScript.b / yStepLength).toFloat()
+        bitmapScript._cNorm = (scaleInScript.c / xStepLength).toFloat()
+        bitmapScript._dNorm = (scaleInScript.d / yStepLength).toFloat()
+    }
+
+    private fun startTask() {
+        require(changes.isEmpty())
+        require(calculationTask == null)
+
+        // after an update is generated, all scales to this point have been committed.
+        notifyStarted()
+
+        updateScaleInScripts() // fixme this should be somewhere else...
+
+        calculationTask = CalculationTask(calcScript).also {
+            it.listener = taskListener
+        }
+
+        calculationTask!!.execute(bitmapMemento)
     }
 
     /**
      * Update lightVector. syncBitmap must be called afterwards.
      */
-    private val lightVector: Float3 = Float3(1f, 0f, 0f)
+    private val lightVector: Float3 = Float3(1f, 0f, 0f).also {
+        bitmapScript._lightVector = it
+    }
 
     fun setLightVector(x: Float, y: Float, z: Float) {
         lightVector.x = x
@@ -105,16 +147,12 @@ class RenderScriptBitmapModel(val rs: RenderScript): CoordinatesBitmapModel() {
     /**
      * Performs the calculation.
      */
-    fun calc() {
-        calcScript.forEach_calculate(bitmapMemento.bitmapData, bitmapMemento.bitmapData)
-        bitmapMemento.syncBitmap()
+
+    fun createBitmapMemento(width: Int, height: Int): BitmapAllocation {
+        return BitmapAllocation(rs, bitmapScript, width, height)
     }
 
-    fun createBitmapMemento(width: Int, height: Int): BitmapMemento {
-        return BitmapMemento(width, height)
-    }
-
-    fun setBitmapMemento(value: BitmapMemento) {
+    fun setBitmapMemento(value: BitmapAllocation) {
         bitmapMemento = value
         this.bitmapScript.bind_bitmapData(value.bitmapData)
 
@@ -125,23 +163,6 @@ class RenderScriptBitmapModel(val rs: RenderScript): CoordinatesBitmapModel() {
         this.bitmapScript._height = value.height
 
         updateScaleInScripts()
-    }
-
-    inner class BitmapMemento(val width: Int, val height: Int) {
-        val bitmapData: Allocation = Allocation.createSized(rs, Element.F32_3(rs), (width + 1) * (height + 1))
-        val bitmap: Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        private val rsBitmap: Allocation
-
-        init {
-            rsBitmap = Allocation.createFromBitmap(rs, bitmap)
-        }
-
-        /**
-         * Renders bitmapData into the bitmap using the current parameters.
-         */
-        fun syncBitmap() {
-            bitmapScript.forEach_root(rsBitmap)
-            rsBitmap.copyTo(bitmap)
-        }
+        startTask() //  FIXME this should also be a change.
     }
 }

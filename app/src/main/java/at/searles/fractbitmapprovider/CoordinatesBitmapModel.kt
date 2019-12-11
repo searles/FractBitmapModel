@@ -10,26 +10,35 @@ abstract class CoordinatesBitmapModel: ScalableBitmapModel() {
     /**
      * This matrix contains the image tranformation.
      */
-    override val normMatrix: Matrix = Matrix() // FIXME name!
-
-    var scale = Scale(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-        private set
+    /**
+     * This matrix is used to transform the shown image.
+     */
+    override val normMatrix: Matrix = Matrix()
+    private var nextNormMatrix: Matrix? = null
 
     override fun scale(m: Matrix) {
         require(Looper.getMainLooper().isCurrentThread)
+
         normMatrix.postConcat(m)
+
+        if(nextNormMatrix != null) {
+            nextNormMatrix!!.postConcat(m)
+        }
+
         notifyScaleRequested()
     }
 
     protected abstract fun notifyScaleRequested()
 
-    protected fun popNormMatrix() {
+    fun notifyStarted() {
         require(Looper.getMainLooper().isCurrentThread)
+        nextNormMatrix = Matrix()
+    }
 
-        // use the inverse of the normMatrix
-        val m = Matrix().also { normMatrix.invert(it) }
-
-        scale = scale.createRelative(Scale.fromMatrix(*m.values()))
-        normMatrix.reset()
+    fun notifyUpdated() {
+        if(nextNormMatrix != null) {
+            normMatrix.set(nextNormMatrix)
+            nextNormMatrix = null
+        }
     }
 }

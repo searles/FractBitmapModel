@@ -8,6 +8,7 @@
 #include "scale.rsh"
 #include "palette.rsh"
 #include "lab.rsh"
+#include "light.rsh"
 
 int width;
 int height;
@@ -15,13 +16,6 @@ int height;
 // ---------------------------------------------------------------------------------------------- //
 
 float3 *bitmapData;
-
-float3 lightVector;
-
-static float lambertValue(float3 xVec, float3 yVec) {
-    // lambert's law: cosine of angle between normal vector and light vector.
-    return dot(normalize(cross(xVec, yVec)), lightVector);
-}
 
 uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
     // gather data
@@ -41,13 +35,9 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
 
     // step 2: obtain 3d shade
 
-    float3 xVec = (float3) { scale.a, scale.c, p10.z - p00.z };
-    float3 yVec = (float3) { scale.b, scale.d, p01.z - p00.z };
+    float brightness = lightBrightness(p10.z - p00.z, p01.z - p00.z);
 
-    // for now only gray scale.
-    float brightness = lambertValue(xVec, yVec);
-
-    color.s0 *= brightness;
+    color.s0 *= (brightness + 1.f) / 2.f;
 
     return rsPackColorTo8888(labToRgb(color));
 }
