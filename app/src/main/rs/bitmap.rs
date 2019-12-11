@@ -26,9 +26,9 @@ static uchar4 to8888(float4 color) {
 
 uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
     float3 p00 = bitmapData[x + y * (width + 1)];
-    float3 p10 = bitmapData[x + y * (width + 1) + 1];
-    float3 p01 = bitmapData[x + (y + 1) * (width + 1)];
-    float3 p11 = bitmapData[x + (y + 1) * (width + 1) + 1];
+    float3 p10 = bitmapData[x + y * (width + 1) + stepSize];
+    float3 p01 = bitmapData[x + (y + stepSize) * (width + 1)];
+    float3 p11 = bitmapData[x + (y + stepSize) * (width + 1) + stepSize];
 
     float4 color00 = colorAt(p00.x, p00.y);
     float4 color10 = colorAt(p10.x, p10.y);
@@ -41,7 +41,7 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
         return to8888(color);
     }
 
-    return to8888(adjustLight(color, p10.z - p00.z, p01.z - p00.z));
+    return to8888(adjustLight(color, (p10.z - p00.z) * stepSize, (p01.z - p00.z) * stepSize));
 }
 
 uchar4 RS_KERNEL fastRoot(uint32_t x, uint32_t y) {
@@ -56,10 +56,10 @@ uchar4 RS_KERNEL fastRoot(uint32_t x, uint32_t y) {
         return to8888(color);
     }
 
-    float3 p10 = bitmapData[x + y * (width + 1) + 1];
-    float3 p01 = bitmapData[x + (y + 1) * (width + 1)];
+    float3 p10 = bitmapData[x + y * (width + 1) + stepSize];
+    float3 p01 = bitmapData[x + (y + stepSize) * (width + 1)];
 
-    float4 finalColor = adjustLight(color, p10.z - p00.z, p01.z - p00.z);
+    float4 finalColor = adjustLight(color, (p10.z - p00.z) * stepSize, (p01.z - p00.z) * stepSize);
 
     return to8888(finalColor);
 }

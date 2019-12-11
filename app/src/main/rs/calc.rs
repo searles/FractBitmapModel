@@ -55,12 +55,6 @@ static float3 valueAt(double2 p) {
 }
 
 float3 RS_KERNEL calculate(float3 in, uint32_t x) {
-    /*float3 out = in;
-
-    if(out.x >= 0) {
-        return out;
-    }*/
-
     uint32_t y = x / (width + 1);
     x = x % (width + 1);
 
@@ -70,18 +64,32 @@ float3 RS_KERNEL calculate(float3 in, uint32_t x) {
     return value;
 }
 
-/*
+uint32_t initialStepSize;
+uint32_t stepSize;
+uint32_t tileSize;
 
-TODOs:
+uint32_t tileX0;
+uint32_t tileY0;
 
-Kernel:
-    - Step 1: Does the point already exist?
-    - Step 2: If not, start calculate.
+rs_allocation bitmapData;
 
-Split image in squares of size NxN.
+uchar __attribute__((kernel)) calculate_tile(uint32_t x) { // name x is mandatory
+    uint32_t tileIndex = x;
 
-Step 1: Find smallest i s.t. max(width, height) < N^(2^i)
+    if(initialStepSize != stepSize && tileIndex == 0) {
+        return 0; // ignore.
+    }
 
+    x = (tileIndex % tileSize) * stepSize + tileX0;
+    uint32_t y = (tileIndex / tileSize) * stepSize + tileY0;
 
+    if(x > width || y > height) {
+        return 0;
+    }
 
-*/
+    double2 pt = mapCoordinates(x, y);
+    float3 value = mandelbrot(pt);
+
+    rsSetElementAt_float3(bitmapData, value, y * (width + 1) + x);
+    return 1;
+}

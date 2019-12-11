@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.renderscript.Float3
 import android.renderscript.RenderScript
+import android.util.Log
 import android.util.SparseArray
 import at.searles.commons.math.Scale
 import at.searles.fractbitmapprovider.BitmapAllocation
@@ -36,7 +37,7 @@ class DemoActivity : AppCompatActivity() {
         imageView.scalableBitmapModel = bitmapModel
         handler = Handler()
 
-        startRotation()
+        //startRotation()
     }
 
     private fun initBitmapModel() {
@@ -70,10 +71,12 @@ class DemoActivity : AppCompatActivity() {
 
         val rs = RenderScript.create(this)
 
-        bitmapModel = RenderScriptBitmapModel(rs, fractal, BitmapAllocation(rs, 720,480)).also {
+        bitmapModel = RenderScriptBitmapModel(rs, fractal, BitmapAllocation(rs, 2000,1200)).also {
             it.listener = object: CalculationTask.Listener {
+                var timerStart: Long = 0
                 override fun started() {
                     imageView.invalidate()
+                    timerStart = System.currentTimeMillis()
                 }
 
                 override fun updated() {
@@ -82,6 +85,7 @@ class DemoActivity : AppCompatActivity() {
 
                 override fun finished() {
                     imageView.invalidate()
+                    Log.d("TIMER", "duration: ${System.currentTimeMillis() - timerStart}")
                 }
 
                 override fun progress(progress: Float) {

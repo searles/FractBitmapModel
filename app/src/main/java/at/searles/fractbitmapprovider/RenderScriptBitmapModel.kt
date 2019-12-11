@@ -95,7 +95,7 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
         // after an update is generated, all scales to this point have been committed.
         notifyStarted()
 
-        calculationTask = CalculationTask(rs, calcScript, bitmapScript, taskListener)
+        calculationTask = CalculationTask(rs, calcScript, bitmapScript, interpolateGapsScript, taskListener)
 
         calculationTask!!.execute(bitmapAllocation)
     }
