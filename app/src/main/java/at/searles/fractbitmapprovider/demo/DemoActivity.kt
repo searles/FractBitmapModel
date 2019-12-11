@@ -53,10 +53,10 @@ class DemoActivity : AppCompatActivity() {
                         })
                         table.put(1, SparseArray<Lab>().also { row ->
                             row.put(0, Rgb(1f, 1f, 1f).toLab())
-                            row.put(1, Rgb(1f, 0.5f, 0f).toLab())
+                            row.put(1, Rgb(0f, 0.5f, 0f).toLab())
                             row.put(2, Rgb(0f, 0.25f, 1f).toLab())
-                            row.put(3, Rgb(1f, 1f, 0f).toLab())
-                            row.put(4, Rgb(0.25f, 0f, 1f).toLab())
+                            row.put(3, Rgb(0.5f, 0.12f, 0.05f).toLab())
+                            row.put(4, Rgb(0f, 0f, 0f).toLab())
                         })
                     }),
                 Palette(1, 1, 0f, 0f,
@@ -65,12 +65,12 @@ class DemoActivity : AppCompatActivity() {
                             row.put(0, Rgb(0f, 0f, 0f).toLab())
                         })
                     })
-                    )
+                )
         )
 
         val rs = RenderScript.create(this)
 
-        bitmapModel = RenderScriptBitmapModel(rs, fractal, BitmapAllocation(rs, 2000,1200)).also {
+        bitmapModel = RenderScriptBitmapModel(rs, fractal, BitmapAllocation(rs, 720,480)).also {
             it.listener = object: CalculationTask.Listener {
                 override fun started() {
                     imageView.invalidate()
@@ -96,11 +96,11 @@ class DemoActivity : AppCompatActivity() {
         val task = object: Runnable {
             override fun run() {
                 bitmapModel.lightVector = Float3(0.8f * sin(alpha), 0.8f * cos(alpha), 0.6f)
-                bitmapModel.setPaletteOffset(0, alpha * 0.17f, alpha * 0.31f)
+                bitmapModel.setPaletteOffset(0, alpha * 0.17f, alpha * 0.03f)
                 alpha += 0.05f
                 bitmapModel.fastSyncBitmap(rotationResolution)
                 imageView.invalidate()
-                handler.postDelayed(this, 25)
+                handler.postDelayed(this, 50)
             }
         }
 

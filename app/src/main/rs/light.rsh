@@ -40,3 +40,9 @@ static float getBrightness(double dzx, double dzy) {
     return getPhongRefectionModelValue(xVec, yVec);
 }
 
+static float4 adjustLight(float4 yuv, double dzx, double dzy) {
+    float brightness = getBrightness(dzx, dzy);
+    yuv.s0 = yuv.s0 * brightness;
+    return yuv;
+}
+

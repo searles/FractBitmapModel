@@ -9,9 +9,9 @@ typedef struct palette {
 } palette_t;
 
 typedef struct paletteSegment {
-    rs_matrix4x4 L;
-    rs_matrix4x4 a;
-    rs_matrix4x4 b;
+    rs_matrix4x4 comp0;
+    rs_matrix4x4 comp1;
+    rs_matrix4x4 comp2;
     rs_matrix4x4 alpha;
 } segment_t;
 
@@ -65,9 +65,9 @@ static float4 colorAtNormalized(int layer, float2 pt) {
     uint32_t segmentIndex = p->segmentIndex + (x0 + y0 * p->w);
 
     return (float4) {
-        z(&(segments[segmentIndex].L), pt),
-        z(&(segments[segmentIndex].a), pt),
-        z(&(segments[segmentIndex].b), pt),
+        z(&(segments[segmentIndex].comp0), pt),
+        z(&(segments[segmentIndex].comp1), pt),
+        z(&(segments[segmentIndex].comp2), pt),
         z(&(segments[segmentIndex].alpha), pt)
     };
 }

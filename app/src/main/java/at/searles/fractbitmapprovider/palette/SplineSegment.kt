@@ -2,4 +2,4 @@ package at.searles.fractbitmapprovider.palette
 
 import at.searles.commons.math.Matrix4
 
-data class SplineSegment(val L: Matrix4, val a: Matrix4, val b: Matrix4, val alpha: Matrix4)
+data class SplineSegment(val comp0: Matrix4, val comp1: Matrix4, val comp2: Matrix4, val alpha: Matrix4)

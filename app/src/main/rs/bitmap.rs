@@ -7,7 +7,7 @@
 
 #include "scale.rsh"
 #include "palette.rsh"
-#include "lab.rsh"
+#include "colormodels.rsh"
 #include "light.rsh"
 
 uint32_t width;
@@ -15,17 +15,21 @@ uint32_t height;
 
 uint32_t stepSize; // for the fast kernel.
 
+int useLightEffect;
+
 float3 *bitmapData;
 
-uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
-    // gather data
-    float3 p00 = bitmapData[x + y * (width + 1)];
+static uchar4 to8888(float4 color) {
+    // if color model is changedi it must be updated here and in PaletteUpdater.kt
+    return rsPackColorTo8888(yuvToRgb(color));
+}
 
+uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
+    float3 p00 = bitmapData[x + y * (width + 1)];
     float3 p10 = bitmapData[x + y * (width + 1) + 1];
     float3 p01 = bitmapData[x + (y + 1) * (width + 1)];
     float3 p11 = bitmapData[x + (y + 1) * (width + 1) + 1];
 
-    // step 1: obtain color.
     float4 color00 = colorAt(p00.x, p00.y);
     float4 color10 = colorAt(p10.x, p10.y);
     float4 color01 = colorAt(p01.x, p01.y);
@@ -33,13 +37,11 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
 
     float4 color = (color00 + color10 + color01 + color11) / 4.f;
 
-    // step 2: obtain 3d shade
+    if(useLightEffect == 0) {
+        return to8888(color);
+    }
 
-    float brightness = getBrightness(p10.z - p00.z, p01.z - p00.z);
-
-    color.s0 *= brightness;
-
-    return rsPackColorTo8888(labToRgb(color));
+    return to8888(adjustLight(color, p10.z - p00.z, p01.z - p00.z));
 }
 
 uchar4 RS_KERNEL fastRoot(uint32_t x, uint32_t y) {
@@ -47,18 +49,17 @@ uchar4 RS_KERNEL fastRoot(uint32_t x, uint32_t y) {
         return (uchar4) { 0, 0, 0, 0 };
     }
 
-    // gather data
     float3 p00 = bitmapData[x + y * (width + 1)];
+    float4 color = colorAt(p00.x, p00.y);
+
+    if(useLightEffect == 0) {
+        return to8888(color);
+    }
+
     float3 p10 = bitmapData[x + y * (width + 1) + 1];
     float3 p01 = bitmapData[x + (y + 1) * (width + 1)];
 
-    // step 1: obtain color.
-    float4 color = colorAt(p00.x, p00.y);
+    float4 finalColor = adjustLight(color, p10.z - p00.z, p01.z - p00.z);
 
-    // step 2: obtain 3d shade
-    float brightness = getBrightness(p10.z - p00.z, p01.z - p00.z);
-
-    color.s0 *= brightness;
-
-    return rsPackColorTo8888(labToRgb(color));
+    return to8888(finalColor);
 }

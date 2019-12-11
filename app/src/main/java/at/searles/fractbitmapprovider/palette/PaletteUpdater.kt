@@ -7,8 +7,12 @@ import at.searles.fractbitmapprovider.ScriptC_bitmap
 import at.searles.fractbitmapprovider.ScriptField_palette
 import at.searles.fractbitmapprovider.ScriptField_paletteSegment
 import at.searles.paletteeditor.Palette
+import at.searles.paletteeditor.colors.Lab
 import java.util.*
 
+/**
+ * Inside the palette I use rgb squared for the sake of efficiency.
+ */
 class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_bitmap) {
 
     fun updateOffsets(index: Int, offsetX: Float, offsetY: Float) {
@@ -34,41 +38,48 @@ class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_b
         setSegmentsInScript(splineSegments)
     }
 
+    private fun toComponents(lab: Lab): FloatArray {
+        // XXX If yuv is used, it must be switched here and in bitmap.rs
+        //return floatArrayOf(lab.l, lab.a, lab.b, lab.alpha)
+        val yuv = Yuv(lab.toRgb())
+        return floatArrayOf(yuv.y, yuv.u, yuv.v, yuv.alpha)
+    }
+
     private fun createSplineSegments(palette: Palette): Array<Array<SplineSegment>> {
         val height = palette.height
         val width = palette.width
         val colors = palette.colorTable
 
-        // Create a matrix of all lab-a components
+        // Create a matrix of all color components
 
-        val L = Array(height) { DoubleArray(width) }
-        val a = Array(height) { DoubleArray(width) }
-        val b = Array(height) { DoubleArray(width) }
-        val alpha = Array(height) { DoubleArray(width) }
+        val components = Array(4) {
+            Array(height) {
+                DoubleArray(width)
+            }
+        }
 
         (0 until height).forEach { y ->
             (0 until width).forEach { x ->
                 with(colors[y][x]) {
-                    L[y][x] = this.l.toDouble()
-                    a[y][x] = this.a.toDouble()
-                    b[y][x] = this.b.toDouble()
-                    alpha[y][x] = this.alpha.toDouble()
+                    val color = toComponents(this)
+                    repeat(4) {
+                        components[it][y][x] = color[it].toDouble()
+                    }
                 }
             }
         }
 
-        val LSpline = InterpolationMatrix.create(L)
-        val aSpline = InterpolationMatrix.create(a)
-        val bSpline = InterpolationMatrix.create(b)
-        val alphaSpline = InterpolationMatrix.create(alpha)
+        val splines = Array(4) {
+            InterpolationMatrix.create(components[it])
+        }
 
         return Array(height) {y ->
             Array(width) { x ->
                 SplineSegment(
-                    LSpline[y][x],
-                    aSpline[y][x],
-                    bSpline[y][x],
-                    alphaSpline[y][x]
+                    splines[0][y][x],
+                    splines[1][y][x],
+                    splines[2][y][x],
+                    splines[3][y][x]
                 )
             }
         }
@@ -79,9 +90,9 @@ class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_b
         script.bind_segments(rsSegments)
 
         splineSegments.forEachIndexed { index, splineSegment ->
-            rsSegments.set_L(index, Matrix4f(splineSegment.L.flts()), false)
-            rsSegments.set_a(index, Matrix4f(splineSegment.a.flts()), false)
-            rsSegments.set_b(index, Matrix4f(splineSegment.b.flts()), false)
+            rsSegments.set_comp0(index, Matrix4f(splineSegment.comp0.flts()), false)
+            rsSegments.set_comp1(index, Matrix4f(splineSegment.comp1.flts()), false)
+            rsSegments.set_comp2(index, Matrix4f(splineSegment.comp2.flts()), false)
             rsSegments.set_alpha(index, Matrix4f(splineSegment.alpha.flts()), false)
         }
 

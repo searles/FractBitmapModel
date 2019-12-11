@@ -8,7 +8,6 @@ import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
 import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
 import at.searles.fractbitmapprovider.palette.PaletteUpdater
 import kotlin.math.max
-import kotlin.math.min
 
 class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, initialBitmapAllocation: BitmapAllocation): LongRunningBitmapModel() {
 
@@ -35,22 +34,17 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
             updatePalettesInScripts()
         }
 
-    var lightVector: Float3 = Float3(1f, 0f, 0f)
+    var lightVector: Float3 = Float3(2f/3f, 2f/3f, 1f/3f)
         set(value) {
             field = value
-            bitmapScript._lightVector = lightVector
-            bitmapScript._ambientLight = 0.25f
-            bitmapScript._diffuseLight = 0.75f
-            bitmapScript._specularStrength = 0.5f
-            bitmapScript._viewerVector = Float3(0f, 0f, 1f)
-            bitmapScript._shininess = 2
+            updateLightParametersInScripts()
         }
 
     init {
         updateBitmapInScripts()
         updateScaleInScripts()
         updatePalettesInScripts()
-        bitmapScript._lightVector = lightVector
+        updateLightParametersInScripts()
     }
 
     private var calculationTask: CalculationTask? = null
@@ -128,6 +122,16 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
         this.interpolateGapsScript._width = bitmapAllocation.width.toLong()
         this.interpolateGapsScript._height = bitmapAllocation.height.toLong()
         // must call updateScaleInScripts afterwards!
+    }
+
+    private fun updateLightParametersInScripts() {
+        bitmapScript._lightVector = lightVector
+        bitmapScript._ambientLight = 0.25f // FIXME extract
+        bitmapScript._diffuseLight = 0.75f
+        bitmapScript._specularStrength = 0.5f
+        bitmapScript._viewerVector = Float3(0f, 0f, 1f)
+        bitmapScript._shininess = 4
+        bitmapScript._useLightEffect = 1
     }
 
     private inner class CalcTaskListener: CalculationTask.Listener {

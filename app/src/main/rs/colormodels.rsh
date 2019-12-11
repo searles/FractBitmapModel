@@ -26,3 +26,20 @@ static float4 labToRgb(float4 lab) {
 
     return (float4) {K(r0), K(g0), K(b0), lab.s3};
 }
+
+static float4 rgbToYuv(float4 rgb) {
+    float y = 0.299f * rgb.s0 + 0.587f * rgb.s1 + 0.114f * rgb.s2;
+    float u = -0.14713 * rgb.s0 - 0.28886f * rgb.s1 + 0.436f * rgb.s2;
+    float v = 0.615 * rgb.s0 - 0.51499f * rgb.s1 - 0.10001f * rgb.s2;
+
+    return (float4) {y, u, v, rgb.s3};
+}
+
+static float4 yuvToRgb(float4 yuv) {
+    float r = yuv.s0 + 1.13983f * yuv.s2;
+    float g = yuv.s0 - 0.39465f * yuv.s1 - 0.58060f * yuv.s2;
+    float b = yuv.s0 + 2.03211f * yuv.s1;
+
+    return (float4) {r, g, b, yuv.s3};
+}
+
