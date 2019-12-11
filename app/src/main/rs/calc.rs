@@ -19,8 +19,9 @@
 #include "scale.rsh"
 #include "complex.rsh"
 
-int width; // width of bitmap. range of data is from 0 to inclusive width!
-int height;
+// dimensions of bitmap. range of data is from 0 to inclusive width!
+uint32_t width;
+uint32_t height;
 
 // ---------------------------------------------------------------------------------------------- //
 
@@ -41,7 +42,7 @@ static float3 mandelbrot(double2 pt) {
         sum = sum + native_exp(-d);
         i++;
     }
-    return (float3) {0.f, 0.f, 0.f};
+    return (float3) {1.f, 0.f, 0.f};
 }
 
 static float3 valueAt(double2 p) {

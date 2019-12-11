@@ -7,6 +7,8 @@ import at.searles.fractbitmapprovider.fractalbitmapmodel.RelativeScaleTask
 import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
 import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
 import at.searles.fractbitmapprovider.palette.PaletteUpdater
+import kotlin.math.max
+import kotlin.math.min
 
 class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, initialBitmapAllocation: BitmapAllocation): LongRunningBitmapModel() {
 
@@ -14,6 +16,7 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
 
     private val calcScript: ScriptC_calc = ScriptC_calc(rs)
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
+    private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
 
     var bitmapAllocation: BitmapAllocation = initialBitmapAllocation
         set(value) {
@@ -36,6 +39,11 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
         set(value) {
             field = value
             bitmapScript._lightVector = lightVector
+            bitmapScript._ambientLight = 0.25f
+            bitmapScript._diffuseLight = 0.75f
+            bitmapScript._specularStrength = 0.5f
+            bitmapScript._viewerVector = Float3(0f, 0f, 1f)
+            bitmapScript._shininess = 2
         }
 
     init {
@@ -54,6 +62,11 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
 
     fun setPaletteOffset(index: Int, offsetX: Float, offsetY: Float) {
         PaletteUpdater(rs, bitmapScript).updateOffsets(index, offsetX, offsetY)
+    }
+
+    fun fastSyncBitmap(resolution: Int) {
+        // color cycling should happen at a lower resolution.
+        bitmapAllocation.fastSyncBitmap(max(1, max(width, height) / resolution), bitmapScript, interpolateGapsScript)
     }
 
     fun syncBitmap() {
@@ -106,12 +119,14 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
     private fun updateBitmapInScripts() {
         this.bitmapScript.bind_bitmapData(bitmapAllocation.bitmapData)
 
-        this.calcScript._width = bitmapAllocation.width
-        this.calcScript._height = bitmapAllocation.height
+        this.calcScript._width = bitmapAllocation.width.toLong()
+        this.calcScript._height = bitmapAllocation.height.toLong()
 
-        this.bitmapScript._width = bitmapAllocation.width
-        this.bitmapScript._height = bitmapAllocation.height
+        this.bitmapScript._width = bitmapAllocation.width.toLong()
+        this.bitmapScript._height = bitmapAllocation.height.toLong()
 
+        this.interpolateGapsScript._width = bitmapAllocation.width.toLong()
+        this.interpolateGapsScript._height = bitmapAllocation.height.toLong()
         // must call updateScaleInScripts afterwards!
     }
 

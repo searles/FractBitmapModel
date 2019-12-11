@@ -18,7 +18,7 @@ abstract class LongRunningBitmapModel: ScalableBitmapModel() {
 
     private var isWaitingForPreview: Boolean = false
 
-    override fun scale(relativeImageTransformMatrix: Matrix) {
+    override fun scale(relativeImageTransformMatrix: Matrix) { // FIXME rename in parent.
         require(Looper.getMainLooper().isCurrentThread)
 
         imageTransformMatrix.postConcat(relativeImageTransformMatrix)

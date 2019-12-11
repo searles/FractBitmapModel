@@ -31,4 +31,15 @@ class BitmapAllocation(val rs: RenderScript, val width: Int, val height: Int) {
         bitmapScript.forEach_root(rsBitmap)
         rsBitmap.copyTo(bitmap)
     }
+
+    fun fastSyncBitmap(stepSize: Int, bitmapTiledScript: ScriptC_bitmap, interpolateGapsScript: ScriptC_interpolate_gaps) {
+        interpolateGapsScript._bitmap = rsBitmap
+        bitmapTiledScript._stepSize = stepSize.toLong()
+        interpolateGapsScript._stepSize = stepSize.toLong()
+
+        bitmapTiledScript.forEach_fastRoot(rsBitmap)
+        interpolateGapsScript.forEach_root(rsBitmap)
+
+        rsBitmap.copyTo(bitmap)
+    }
 }

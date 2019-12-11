@@ -36,13 +36,13 @@ class DemoActivity : AppCompatActivity() {
         imageView.scalableBitmapModel = bitmapModel
         handler = Handler()
 
-        //startRotation()
+        startRotation()
     }
 
     private fun initBitmapModel() {
-        val fractal = Fractal(Scale(4.0, 0.0, 0.0, 4.0, 0.0, 0.0),
+        val fractal = Fractal(Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0),
             palettes = listOf(
-                Palette(5, 1, 0f, 0f,
+                Palette(5, 2, 0f, 0f,
                     SparseArray<SparseArray<Lab>>().also { table ->
                         table.put(0, SparseArray<Lab>().also { row ->
                             row.put(0, Rgb(0f, 0f, 0f).toLab())
@@ -51,11 +51,18 @@ class DemoActivity : AppCompatActivity() {
                             row.put(3, Rgb(1f, 1f, 1f).toLab())
                             row.put(4, Rgb(0f, 0f, 1f).toLab())
                         })
+                        table.put(1, SparseArray<Lab>().also { row ->
+                            row.put(0, Rgb(1f, 1f, 1f).toLab())
+                            row.put(1, Rgb(1f, 0.5f, 0f).toLab())
+                            row.put(2, Rgb(0f, 0.25f, 1f).toLab())
+                            row.put(3, Rgb(1f, 1f, 0f).toLab())
+                            row.put(4, Rgb(0.25f, 0f, 1f).toLab())
+                        })
                     }),
                 Palette(1, 1, 0f, 0f,
                     SparseArray<SparseArray<Lab>>().also { table ->
                         table.put(0, SparseArray<Lab>().also { row ->
-                            row.put(0, Rgb(1f, 0f, 0f).toLab())
+                            row.put(0, Rgb(0f, 0f, 0f).toLab())
                         })
                     })
                     )
@@ -63,7 +70,7 @@ class DemoActivity : AppCompatActivity() {
 
         val rs = RenderScript.create(this)
 
-        bitmapModel = RenderScriptBitmapModel(rs, fractal, BitmapAllocation(rs, 600,400)).also {
+        bitmapModel = RenderScriptBitmapModel(rs, fractal, BitmapAllocation(rs, 2000,1200)).also {
             it.listener = object: CalculationTask.Listener {
                 override fun started() {
                     imageView.invalidate()
@@ -89,9 +96,10 @@ class DemoActivity : AppCompatActivity() {
         val task = object: Runnable {
             override fun run() {
                 bitmapModel.lightVector = Float3(0.8f * sin(alpha), 0.8f * cos(alpha), 0.6f)
-                bitmapModel.setPaletteOffset(0, alpha, alpha * 0.31f)
+                bitmapModel.setPaletteOffset(0, alpha * 0.17f, alpha * 0.31f)
                 alpha += 0.05f
-                syncBitmap()
+                bitmapModel.fastSyncBitmap(rotationResolution)
+                imageView.invalidate()
                 handler.postDelayed(this, 25)
             }
         }
@@ -99,8 +107,7 @@ class DemoActivity : AppCompatActivity() {
         handler.postDelayed(task, 25)
     }
 
-    private fun syncBitmap() {
-        bitmapModel.syncBitmap()
-        imageView.invalidate()
+    companion object {
+        val rotationResolution = 720
     }
 }

@@ -10,10 +10,10 @@
 #include "lab.rsh"
 #include "light.rsh"
 
-int width;
-int height;
+uint32_t width;
+uint32_t height;
 
-// ---------------------------------------------------------------------------------------------- //
+uint32_t stepSize; // for the fast kernel.
 
 float3 *bitmapData;
 
@@ -35,9 +35,30 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
 
     // step 2: obtain 3d shade
 
-    float brightness = lightBrightness(p10.z - p00.z, p01.z - p00.z);
+    float brightness = getBrightness(p10.z - p00.z, p01.z - p00.z);
 
-    color.s0 *= (brightness + 1.f) / 2.f;
+    color.s0 *= brightness;
+
+    return rsPackColorTo8888(labToRgb(color));
+}
+
+uchar4 RS_KERNEL fastRoot(uint32_t x, uint32_t y) {
+    if(x % stepSize != 0 || y % stepSize != 0) {
+        return (uchar4) { 0, 0, 0, 0 };
+    }
+
+    // gather data
+    float3 p00 = bitmapData[x + y * (width + 1)];
+    float3 p10 = bitmapData[x + y * (width + 1) + 1];
+    float3 p01 = bitmapData[x + (y + 1) * (width + 1)];
+
+    // step 1: obtain color.
+    float4 color = colorAt(p00.x, p00.y);
+
+    // step 2: obtain 3d shade
+    float brightness = getBrightness(p10.z - p00.z, p01.z - p00.z);
+
+    color.s0 *= brightness;
 
     return rsPackColorTo8888(labToRgb(color));
 }
