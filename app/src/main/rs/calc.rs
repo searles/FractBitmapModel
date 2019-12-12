@@ -64,32 +64,44 @@ float3 RS_KERNEL calculate(float3 in, uint32_t x) {
     return value;
 }
 
-uint32_t initialStepSize;
-uint32_t stepSize;
-uint32_t tileSize;
-
-uint32_t tileX0;
-uint32_t tileY0;
-
 rs_allocation bitmapData;
+uint32_t pixelIndex0;
+int ceilLog2Width;
+int ceilLog2Height;
 
-uchar __attribute__((kernel)) calculate_tile(uint32_t x) { // name x is mandatory
-    uint32_t tileIndex = x;
+static int2 getPixelCoordinates(int index) {
+    int x = 0;
+    int y = 0;
 
-    if(initialStepSize != stepSize && tileIndex == 0) {
-        return 0; // ignore.
+    for(int a = 0; a < ceilLog2Width - min(ceilLog2Width, ceilLog2Height); a++) {
+        x = (x << 1) | ((index >> a) & 1);
     }
 
-    x = (tileIndex % tileSize) * stepSize + tileX0;
-    uint32_t y = (tileIndex / tileSize) * stepSize + tileY0;
+    for(int a = 0; a < ceilLog2Height - min(ceilLog2Width, ceilLog2Height); a++) {
+        y = (y << 1) | ((index >> a) & 1);
+    }
 
-    if(x > width || y > height) {
+    for(int a = abs(ceilLog2Width - ceilLog2Height); a < ceilLog2Width + ceilLog2Height; a += 2) {
+        y = (y << 1) | ((index >> (a + 1)) & 1);
+        x = (x << 1) | ((index >> a) & 1);
+    }
+
+    return (int2) {x, y};
+}
+
+
+uchar __attribute__((kernel)) calculate_part(uint32_t x) { // name x is mandatory
+    uint32_t pixelIndex = pixelIndex0 + x;
+
+    int2 px = getPixelCoordinates(pixelIndex);
+
+    if(px.x > width || px.y > height) {
         return 0;
     }
 
-    double2 pt = mapCoordinates(x, y);
+    double2 pt = mapCoordinates(px.x, px.y);
     float3 value = mandelbrot(pt);
 
-    rsSetElementAt_float3(bitmapData, value, y * (width + 1) + x);
+    rsSetElementAt_float3(bitmapData, value, px.y * (width + 1) + px.x);
     return 1;
 }
