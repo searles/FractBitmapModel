@@ -9,8 +9,8 @@ import android.util.Log
 import android.util.SparseArray
 import at.searles.commons.math.Scale
 import at.searles.fractbitmapprovider.BitmapAllocation
-import at.searles.fractbitmapprovider.RenderScriptBitmapModel
-import at.searles.fractbitmapprovider.ScriptsInstance
+import at.searles.fractbitmapprovider.CalcTaskFactory
+import at.searles.fractbitmapprovider.TaskBitmapModel
 import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
 import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
 import at.searles.fractimageview.ScalableImageView
@@ -26,7 +26,7 @@ class DemoActivity : AppCompatActivity() {
         findViewById<ScalableImageView>(R.id.scalableImageView)
     }
 
-    private lateinit var bitmapModel: RenderScriptBitmapModel
+    private lateinit var bitmapModel: TaskBitmapModel
     lateinit var handler: Handler
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,18 +72,22 @@ class DemoActivity : AppCompatActivity() {
 
         val rs = RenderScript.create(this)
 
-        val scripts = ScriptsInstance(rs)
-        val bitmapAllocation = BitmapAllocation(2000,1200, scripts)
+        val bitmapAllocation = BitmapAllocation(rs, 2000,1200)
+        val calcTaskFactory = CalcTaskFactory(rs, fractal, bitmapAllocation)
 
-        bitmapModel = RenderScriptBitmapModel(fractal, bitmapAllocation, scripts).also {
-            it.listener = object: CalculationTask.Listener {
+        bitmapModel = TaskBitmapModel(calcTaskFactory).apply {
+            listener = object: TaskBitmapModel.Listener {
                 var timerStart: Long = 0
+
                 override fun started() {
                     imageView.invalidate()
                     timerStart = System.currentTimeMillis()
                 }
 
-                override fun updated() {
+                override fun progress(progress: Float) {
+                }
+
+                override fun bitmapUpdated() {
                     imageView.invalidate()
                 }
 
@@ -91,16 +95,13 @@ class DemoActivity : AppCompatActivity() {
                     imageView.invalidate()
                     Log.d("TIMER", "duration: ${System.currentTimeMillis() - timerStart}")
                 }
-
-                override fun progress(progress: Float) {
-                }
             }
         }
     }
 
     var alpha = 0.0f
 
-    fun startRotation() {
+    /*fun startRotation() {
         val task = object: Runnable {
             override fun run() {
                 bitmapModel.lightVector = Float3(0.8f * sin(alpha), 0.8f * cos(alpha), 0.6f)
@@ -113,7 +114,7 @@ class DemoActivity : AppCompatActivity() {
         }
 
         handler.postDelayed(task, 25)
-    }
+    }*/
 
     companion object {
         val rotationResolution = 720

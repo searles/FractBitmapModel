@@ -1,8 +1,8 @@
 package at.searles.fractbitmapprovider.fractalbitmapmodel
 
-import at.searles.fractbitmapprovider.RenderScriptBitmapModel
+import at.searles.fractbitmapprovider.CalcTaskFactory
 
 interface PostCalculationTask {
     val isParameterChange: Boolean
-    fun execute(model: RenderScriptBitmapModel)
+    fun execute(preferences: CalcTaskFactory)
 }

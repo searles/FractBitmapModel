@@ -4,69 +4,53 @@ import android.os.AsyncTask
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
-import at.searles.fractbitmapprovider.BitmapAllocation
-import at.searles.fractbitmapprovider.ScriptC_bitmap
-import at.searles.fractbitmapprovider.ScriptC_calc
-import at.searles.fractbitmapprovider.ScriptC_interpolate_gaps
+import at.searles.fractbitmapprovider.*
 import kotlin.math.abs
-import kotlin.math.max
+import kotlin.math.min
 
-class CalculationTask(private val rs: RenderScript,
-                      private val calcScript: ScriptC_calc,
-                      private val bitmapScript: ScriptC_bitmap,
-                      private val interpolateGapsScript: ScriptC_interpolate_gaps,
-                      private val bitmapAllocation: BitmapAllocation,
-                      private val listener: Listener): AsyncTask<Unit?, Unit?, Unit?>() {
-    var isRunning: Boolean = true
-        private set
+class CalculationTask(private val rs: RenderScript, val width: Int, val height: Int,
+                      private val bitmapData: Allocation, private val calcScript: ScriptC_calc): AsyncTask<Unit?, Unit?, Unit?>() {
+
+    lateinit var listener: Listener
 
     override fun onPreExecute() {
-        notifyStarted()
+        listener.started()
     }
 
     override fun doInBackground(vararg param: Unit?) {
         val part = Allocation.createSized(rs, Element.U8(rs), parallelCalculationsCount)
 
-        calcScript._bitmapData = bitmapAllocation.bitmapData
+        val ceilLog2Width = ceilLog2(width + 1)
+        val ceilLog2Height = ceilLog2(height + 1)
 
-        val ceilLog2Width = ceilLog2(bitmapAllocation.width + 1)
-        val ceilLog2Height = ceilLog2(bitmapAllocation.height + 1)
+        calcScript._bitmapData = bitmapData
 
         calcScript._ceilLog2Width = ceilLog2Width
         calcScript._ceilLog2Height = ceilLog2Height
 
         val count = 1 shl (ceilLog2Width + ceilLog2Height)
 
-        //var pixelDistance = 1 shl max(ceilLog2Width, ceilLog2Width)
-        //bitmapAllocation.pixelDistance = pixelDistance
-
         var index = 0
 
-        while(!isCancelled) {
+        while(index < count) {
             calcScript._pixelIndex0 = index.toLong()
             calcScript.forEach_calculate_part(part)
             rs.finish()
 
             index += parallelCalculationsCount
 
-            notifyProgress(index.toFloat() / count.toFloat())
-
-            if(index >= count) {
-                break
+            val pixelGap = if(index < count) {
+                getPixelGapAfterIndex(index, ceilLog2Width, ceilLog2Height)
+            } else {
+                1
             }
 
-            val nextPixelDistance = getPixelDistanceAfterIndex(index, ceilLog2Width, ceilLog2Height)
+            listener.progress(index.toFloat() / count.toFloat(), pixelGap)
 
-            bitmapAllocation.pixelDistance = nextPixelDistance
-            bitmapAllocation.syncBitmap()
-
-            notifyUpdate()
+            if(isCancelled) {
+                return
+            }
         }
-
-        bitmapAllocation.pixelDistance = 1
-        bitmapAllocation.syncBitmap()
-
-        notifyUpdate()
     }
 
     override fun onCancelled(result: Unit?) {
@@ -74,11 +58,10 @@ class CalculationTask(private val rs: RenderScript,
     }
 
     override fun onPostExecute(result: Unit?) {
-        isRunning = false
-        notifyFinished()
+        listener.finished()
     }
 
-    private fun getPixelDistanceAfterIndex(index: Int, ceilLog2Width: Int, ceilLog2Height: Int): Int {
+    private fun getPixelGapAfterIndex(index: Int, ceilLog2Width: Int, ceilLog2Height: Int): Int {
         val pair = getPixelCoordinates(index + 1, ceilLog2Width, ceilLog2Height)
 
         var x = pair.first
@@ -125,27 +108,13 @@ class CalculationTask(private val rs: RenderScript,
         return -1
     }
 
-    private fun notifyStarted() {
-        listener.started()
-    }
-
-    private fun notifyUpdate() {
-        listener.updated()
-    }
-
-    private fun notifyFinished() {
-        listener.finished()
-    }
-
-    private fun notifyProgress(progress: Float) {
-        listener.progress(progress)
-    }
-
     interface Listener {
         fun started()
-        fun updated()
+        /**
+         * This method is called at least once, even if the task is cancelled.
+         */
+        fun progress(progress: Float, pixelGap: Int)
         fun finished()
-        fun progress(progress: Float)
     }
 
     companion object {
