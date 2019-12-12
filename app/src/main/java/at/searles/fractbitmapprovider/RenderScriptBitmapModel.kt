@@ -9,13 +9,14 @@ import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
 import at.searles.fractbitmapprovider.palette.PaletteUpdater
 import kotlin.math.max
 
-class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, initialBitmapAllocation: BitmapAllocation): LongRunningBitmapModel() {
+class RenderScriptBitmapModel(initialFractal: Fractal, initialBitmapAllocation: BitmapAllocation, scripts: ScriptsInstance): LongRunningBitmapModel() {
 
     var listener: CalculationTask.Listener? = null
 
-    private val calcScript: ScriptC_calc = ScriptC_calc(rs)
-    private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
-    private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
+    private val rs: RenderScript = scripts.rs
+    private val calcScript: ScriptC_calc = scripts.calcScript
+    private val bitmapScript: ScriptC_bitmap = scripts.bitmapScript
+    private val interpolateGapsScript = scripts.interpolateGapsScript
 
     var bitmapAllocation: BitmapAllocation = initialBitmapAllocation
         set(value) {
@@ -60,11 +61,11 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
 
     fun fastSyncBitmap(resolution: Int) {
         // color cycling should happen at a lower resolution.
-        bitmapAllocation.fastSyncBitmap(max(1, max(width, height) / resolution), bitmapScript, interpolateGapsScript)
+        bitmapAllocation.fastSyncBitmap(max(1, max(width, height) / resolution))
     }
 
     fun syncBitmap() {
-        bitmapAllocation.syncBitmap(bitmapScript)
+        bitmapAllocation.syncBitmap()
     }
 
     fun registerPostCalcTask(task: PostCalculationTask) {
@@ -125,10 +126,10 @@ class RenderScriptBitmapModel(val rs: RenderScript, initialFractal: Fractal, ini
 
     private fun updateLightParametersInScripts() {
         bitmapScript._lightVector = lightVector
-        bitmapScript._ambientLight = 0.25f // FIXME extract
-        bitmapScript._diffuseLight = 0.75f
-        bitmapScript._specularStrength = 0.5f
-        bitmapScript._viewerVector = Float3(0f, 0f, 1f)
+        bitmapScript._ambientLight = 0.1f // FIXME extract
+        bitmapScript._diffuseLight = 1f
+        bitmapScript._specularStrength = 1f
+        bitmapScript._viewerVector = Float3(1f / 3f, 2f / 3f, 2f / 3f)
         bitmapScript._shininess = 4
         bitmapScript._useLightEffect = 1
     }

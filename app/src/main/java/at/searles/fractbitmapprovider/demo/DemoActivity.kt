@@ -10,6 +10,7 @@ import android.util.SparseArray
 import at.searles.commons.math.Scale
 import at.searles.fractbitmapprovider.BitmapAllocation
 import at.searles.fractbitmapprovider.RenderScriptBitmapModel
+import at.searles.fractbitmapprovider.ScriptsInstance
 import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
 import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
 import at.searles.fractimageview.ScalableImageView
@@ -71,7 +72,10 @@ class DemoActivity : AppCompatActivity() {
 
         val rs = RenderScript.create(this)
 
-        bitmapModel = RenderScriptBitmapModel(rs, fractal, BitmapAllocation(rs, 2000,1200)).also {
+        val scripts = ScriptsInstance(rs)
+        val bitmapAllocation = BitmapAllocation(2000,1200, scripts)
+
+        bitmapModel = RenderScriptBitmapModel(fractal, bitmapAllocation, scripts).also {
             it.listener = object: CalculationTask.Listener {
                 var timerStart: Long = 0
                 override fun started() {

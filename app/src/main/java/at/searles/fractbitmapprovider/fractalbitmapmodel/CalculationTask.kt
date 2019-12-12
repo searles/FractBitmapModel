@@ -9,6 +9,7 @@ import at.searles.fractbitmapprovider.ScriptC_bitmap
 import at.searles.fractbitmapprovider.ScriptC_calc
 import at.searles.fractbitmapprovider.ScriptC_interpolate_gaps
 import kotlin.math.abs
+import kotlin.math.max
 
 class CalculationTask(private val rs: RenderScript,
                       private val calcScript: ScriptC_calc,
@@ -28,39 +29,43 @@ class CalculationTask(private val rs: RenderScript,
 
         calcScript._bitmapData = bitmapAllocation.bitmapData
 
-        val n = ceilLog2(bitmapAllocation.width + 1)
-        val m = ceilLog2(bitmapAllocation.height + 1)
+        val ceilLog2Width = ceilLog2(bitmapAllocation.width + 1)
+        val ceilLog2Height = ceilLog2(bitmapAllocation.height + 1)
 
-        calcScript._ceilLog2Width = n
-        calcScript._ceilLog2Height = m
+        calcScript._ceilLog2Width = ceilLog2Width
+        calcScript._ceilLog2Height = ceilLog2Height
 
-        val count = (1 shl (n + m))
+        val count = 1 shl (ceilLog2Width + ceilLog2Height)
 
-        var pixelDistance = -1
+        //var pixelDistance = 1 shl max(ceilLog2Width, ceilLog2Width)
+        //bitmapAllocation.pixelDistance = pixelDistance
 
-        for(index in 0 until count step parallelCalculationsCount) {
-            if(index > 0) {
-                notifyProgress(index.toFloat() / count.toFloat())
-                val nextPixelDistance = getPixelDistanceAfterIndex(index, n, m)
-                if(pixelDistance != nextPixelDistance) {
-                    pixelDistance = nextPixelDistance
+        var index = 0
 
-                    bitmapAllocation.fastSyncBitmap(pixelDistance, bitmapScript, interpolateGapsScript)
-                    notifyUpdate()
-                }
-            }
-
-            if(isCancelled) {
-                return
-            }
-
+        while(!isCancelled) {
             calcScript._pixelIndex0 = index.toLong()
             calcScript.forEach_calculate_part(part)
             rs.finish()
+
+            index += parallelCalculationsCount
+
+            notifyProgress(index.toFloat() / count.toFloat())
+
+            if(index >= count) {
+                break
+            }
+
+            val nextPixelDistance = getPixelDistanceAfterIndex(index, ceilLog2Width, ceilLog2Height)
+
+            bitmapAllocation.pixelDistance = nextPixelDistance
+            bitmapAllocation.syncBitmap()
+
+            notifyUpdate()
         }
 
+        bitmapAllocation.pixelDistance = 1
+        bitmapAllocation.syncBitmap()
 
-        bitmapAllocation.syncBitmap(bitmapScript)
         notifyUpdate()
     }
 
@@ -73,8 +78,8 @@ class CalculationTask(private val rs: RenderScript,
         notifyFinished()
     }
 
-    private fun getPixelDistanceAfterIndex(index: Int, n: Int, m: Int): Int {
-        val pair = getPixelCoordinates(index + 1, n, m)
+    private fun getPixelDistanceAfterIndex(index: Int, ceilLog2Width: Int, ceilLog2Height: Int): Int {
+        val pair = getPixelCoordinates(index + 1, ceilLog2Width, ceilLog2Height)
 
         var x = pair.first
         var y = pair.second
@@ -144,6 +149,6 @@ class CalculationTask(private val rs: RenderScript,
     }
 
     companion object {
-        const val parallelCalculationsCount = 10240
+        const val parallelCalculationsCount = 8192
     }
 }
