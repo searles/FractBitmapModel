@@ -1,14 +1,15 @@
-package at.searles.fractbitmapprovider.fractalbitmapmodel
+package at.searles.fractbitmapmodel
 
 import android.os.AsyncTask
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
-import at.searles.fractbitmapprovider.*
+import at.searles.fractbitmapmodel.ScriptC_calc
 import kotlin.math.abs
 
 class CalculationTask(private val rs: RenderScript, val width: Int, val height: Int,
-                      private val bitmapData: Allocation, private val calcScript: ScriptC_calc): AsyncTask<Unit?, Int, Unit?>() {
+                      private val bitmapData: Allocation, private val calcScript: ScriptC_calc
+): AsyncTask<Unit?, Int, Unit?>() {
 
     lateinit var listener: Listener
 
@@ -17,7 +18,9 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
     }
 
     override fun doInBackground(vararg param: Unit?) {
-        val part = Allocation.createSized(rs, Element.U8(rs), parallelCalculationsCount)
+        val part = Allocation.createSized(rs, Element.U8(rs),
+            parallelCalculationsCount
+        )
 
         val ceilLog2Width = ceilLog2(width + 1)
         val ceilLog2Height = ceilLog2(height + 1)

@@ -1,9 +1,12 @@
-package at.searles.fractbitmapprovider
+package at.searles.fractbitmapmodel
 
 import at.searles.commons.math.Scale
+import at.searles.fractbitmapmodel.ScriptC_bitmap
+import at.searles.fractbitmapmodel.ScriptC_calc
+import at.searles.fractbitmapmodel.ScriptField_Scale
 import kotlin.math.hypot
 
-object ScaleUpdater {
+internal object ScaleUpdater {
     fun updateScaleInScripts(width: Int, height: Int, scale: Scale, calcScript: ScriptC_calc, bitmapScript: ScriptC_bitmap) {
         val centerX = width / 2.0
         val centerY = height / 2.0

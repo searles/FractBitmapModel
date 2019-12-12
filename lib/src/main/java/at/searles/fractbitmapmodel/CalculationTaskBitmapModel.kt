@@ -1,10 +1,9 @@
-package at.searles.fractbitmapprovider
+package at.searles.fractbitmapmodel
 
 import android.graphics.Matrix
 import android.os.Looper
-import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
-import at.searles.fractbitmapprovider.fractalbitmapmodel.PostCalculationTask
-import at.searles.fractbitmapprovider.fractalbitmapmodel.RelativeScaleTask
+import at.searles.fractbitmapmodel.tasks.PostCalculationTask
+import at.searles.fractbitmapmodel.tasks.RelativeScaleTask
 import at.searles.fractimageview.ScalableBitmapModel
 
 /**
@@ -12,11 +11,11 @@ import at.searles.fractimageview.ScalableBitmapModel
  * are not able to provide an instant review. For this cases a second relative scale matrix
  * is maintained inside and used after a first preview is available.
  */
-class TaskBitmapModel(private val calcTaskFactory: CalcTaskFactory): CalculationTask.Listener, ScalableBitmapModel() {
+class CalculationTaskBitmapModel(private val calculationTaskFactory: CalculationTaskFactory): CalculationTask.Listener, ScalableBitmapModel() {
 
     override val bitmapTransformMatrix = Matrix()
 
-    override val bitmap get() = calcTaskFactory.bitmap
+    override val bitmap get() = calculationTaskFactory.bitmap
 
     var listener: Listener? = null
 
@@ -53,14 +52,14 @@ class TaskBitmapModel(private val calcTaskFactory: CalcTaskFactory): Calculation
             bitmapTransformMatrix.set(nextBitmapTransformMatrix)
             isWaitingForPreview = false
 
-            calcTaskFactory.pixelGap = pixelGap
-            calcTaskFactory.syncBitmap()
+            calculationTaskFactory.pixelGap = pixelGap
+            calculationTaskFactory.syncBitmap()
 
             lastPixelGap = pixelGap
             listener?.bitmapUpdated()
         } else if(lastPixelGap != pixelGap) {
-            calcTaskFactory.pixelGap = pixelGap
-            calcTaskFactory.syncBitmap()
+            calculationTaskFactory.pixelGap = pixelGap
+            calculationTaskFactory.syncBitmap()
 
             lastPixelGap = pixelGap
             listener?.bitmapUpdated()
@@ -76,7 +75,7 @@ class TaskBitmapModel(private val calcTaskFactory: CalcTaskFactory): Calculation
 
         if(postCalculationTasks.isNotEmpty()) {
             val isParameterChange = postCalculationTasks.fold(false) { status, task ->
-                task.execute(calcTaskFactory)
+                task.execute(calculationTaskFactory)
                 status or task.isParameterChange
             }
 
@@ -99,7 +98,7 @@ class TaskBitmapModel(private val calcTaskFactory: CalcTaskFactory): Calculation
         }
 
         require(postCalculationTasks.isEmpty())
-        task.execute(calcTaskFactory)
+        task.execute(calculationTaskFactory)
 
         if(task.isParameterChange) {
             startTask()
@@ -121,8 +120,8 @@ class TaskBitmapModel(private val calcTaskFactory: CalcTaskFactory): Calculation
         // before the first preview is generated, we must use the old imageTransformMatrix.
         nextBitmapTransformMatrix.set(null)
 
-        calculationTask = calcTaskFactory.createCalculationTask().apply {
-            listener = this@TaskBitmapModel
+        calculationTask = calculationTaskFactory.createCalculationTask().apply {
+            listener = this@CalculationTaskBitmapModel
             execute()
         }
     }

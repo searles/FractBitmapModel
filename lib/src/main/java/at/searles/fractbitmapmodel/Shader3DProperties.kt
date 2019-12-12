@@ -1,4 +1,4 @@
-package at.searles.fractbitmapprovider
+package at.searles.fractbitmapmodel
 
 import android.renderscript.Float3
 import kotlin.math.cos

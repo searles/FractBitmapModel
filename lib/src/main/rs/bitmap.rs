@@ -3,7 +3,7 @@
  */
 
 #pragma version(1)
-#pragma rs java_package_name(at.searles.fractbitmapprovider)
+#pragma rs java_package_name(at.searles.fractbitmapmodel)
 
 #include "scale.rsh"
 #include "palette.rsh"

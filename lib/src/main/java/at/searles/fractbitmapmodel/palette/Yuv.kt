@@ -1,4 +1,4 @@
-package at.searles.fractbitmapprovider.palette
+package at.searles.fractbitmapmodel.palette
 
 import at.searles.paletteeditor.colors.Rgb
 

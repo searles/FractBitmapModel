@@ -1,13 +1,12 @@
-package at.searles.fractbitmapprovider.fractalbitmapmodel
+package at.searles.fractbitmapmodel.tasks
 
 import android.graphics.Matrix
-import at.searles.fractbitmapprovider.CalcTaskFactory
-import at.searles.fractbitmapprovider.TaskBitmapModel
+import at.searles.fractbitmapmodel.CalculationTaskFactory
 
 class RelativeScaleTask(private val relativeMatrix: Matrix): PostCalculationTask {
     override val isParameterChange: Boolean = true
 
-    override fun execute(preferences: CalcTaskFactory) {
+    override fun execute(preferences: CalculationTaskFactory) {
         val scaledFractal = preferences.fractal.createScaled(relativeMatrix)
         preferences.fractal = scaledFractal
     }

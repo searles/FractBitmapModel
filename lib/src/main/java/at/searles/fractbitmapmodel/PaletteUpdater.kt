@@ -1,11 +1,11 @@
-package at.searles.fractbitmapprovider.palette
+package at.searles.fractbitmapmodel
 
 import android.renderscript.Matrix4f
 import android.renderscript.RenderScript
 import at.searles.commons.math.InterpolationMatrix
-import at.searles.fractbitmapprovider.ScriptC_bitmap
-import at.searles.fractbitmapprovider.ScriptField_palette
-import at.searles.fractbitmapprovider.ScriptField_paletteSegment
+import at.searles.fractbitmapmodel.ScriptField_palette
+import at.searles.fractbitmapmodel.palette.SplineSegment
+import at.searles.fractbitmapmodel.palette.Yuv
 import at.searles.paletteeditor.Palette
 import at.searles.paletteeditor.colors.Lab
 import java.util.*

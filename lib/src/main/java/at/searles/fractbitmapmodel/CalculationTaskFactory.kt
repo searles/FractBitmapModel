@@ -1,13 +1,14 @@
-package at.searles.fractbitmapprovider
+package at.searles.fractbitmapmodel
 
 import android.graphics.Bitmap
 import android.renderscript.*
-import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
-import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
-import at.searles.fractbitmapprovider.palette.PaletteUpdater
+import at.searles.fractbitmapmodel.ScriptC_bitmap
+import at.searles.fractbitmapmodel.ScriptC_calc
+import at.searles.fractbitmapmodel.ScriptC_interpolate_gaps
+import at.searles.fractbitmapmodel.tasks.BitmapModelParameters
 import kotlin.math.max
 
-class CalcTaskFactory(val rs: RenderScript, initialFractal: Fractal, initialBitmapAllocation: BitmapAllocation) {
+class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters: BitmapModelParameters, initialBitmapAllocation: BitmapAllocation) {
 
     private val calcScript: ScriptC_calc = ScriptC_calc(rs)
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
@@ -23,12 +24,13 @@ class CalcTaskFactory(val rs: RenderScript, initialFractal: Fractal, initialBitm
     val width get() = bitmapAllocation.width
     val height get() = bitmapAllocation.height
 
-    var pixelGap: Int = 1
+    var minPixelGap: Int = 1 // use this to ensure a higher resolution.
+    var pixelGap: Int = 0
 
     val bitmap: Bitmap
         get() = bitmapAllocation.bitmap
 
-    var fractal = initialFractal
+    var fractal = initialBitmapModelParameters
         set(value) {
             field = value
             updateScaleInScripts()
@@ -49,17 +51,24 @@ class CalcTaskFactory(val rs: RenderScript, initialFractal: Fractal, initialBitm
     }
 
     fun createCalculationTask(): CalculationTask {
-        return CalculationTask(rs, width, height, bitmapAllocation.bitmapData, calcScript)
+        return CalculationTask(
+            rs,
+            width,
+            height,
+            bitmapAllocation.bitmapData,
+            calcScript
+        )
     }
 
     fun setPaletteOffset(index: Int, offsetX: Float, offsetY: Float) {
-        PaletteUpdater(rs, bitmapScript).updateOffsets(index, offsetX, offsetY)
+        PaletteUpdater(rs, bitmapScript)
+            .updateOffsets(index, offsetX, offsetY)
     }
 
     /**
      * Renders bitmapData into the bitmap using the current parameters.
      */
-    fun syncBitmap(minPixelGap: Int = pixelGap) {
+    fun syncBitmap() {
         val currentPixelGap = max(minPixelGap, pixelGap)
 
         if(currentPixelGap == 1) {

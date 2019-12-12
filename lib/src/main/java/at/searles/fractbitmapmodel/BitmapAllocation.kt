@@ -1,4 +1,4 @@
-package at.searles.fractbitmapprovider
+package at.searles.fractbitmapmodel
 
 import android.graphics.Bitmap
 import android.renderscript.Allocation

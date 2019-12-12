@@ -3,21 +3,18 @@ package at.searles.fractbitmapprovider.demo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.renderscript.Float3
 import android.renderscript.RenderScript
 import android.util.Log
 import android.util.SparseArray
 import at.searles.commons.math.Scale
-import at.searles.fractbitmapprovider.BitmapAllocation
-import at.searles.fractbitmapprovider.CalcTaskFactory
-import at.searles.fractbitmapprovider.TaskBitmapModel
-import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
-import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
+import at.searles.fractbitmapmodel.BitmapAllocation
+import at.searles.fractbitmapmodel.CalculationTaskFactory
+import at.searles.fractbitmapmodel.CalculationTaskBitmapModel
+import at.searles.fractbitmapmodel.tasks.BitmapModelParameters
 import at.searles.fractimageview.ScalableImageView
 import at.searles.paletteeditor.Palette
 import at.searles.paletteeditor.colors.Lab
 import at.searles.paletteeditor.colors.Rgb
-import kotlin.math.cos
 import kotlin.math.sin
 
 class DemoActivity : AppCompatActivity() {
@@ -26,8 +23,8 @@ class DemoActivity : AppCompatActivity() {
         findViewById<ScalableImageView>(R.id.scalableImageView)
     }
 
-    private lateinit var calcTaskFactory: CalcTaskFactory
-    private lateinit var bitmapModel: TaskBitmapModel
+    private lateinit var calculationTaskFactory: CalculationTaskFactory
+    private lateinit var bitmapModel: CalculationTaskBitmapModel
 
     lateinit var handler: Handler
 
@@ -44,7 +41,7 @@ class DemoActivity : AppCompatActivity() {
     }
 
     private fun initBitmapModel() {
-        val fractal = Fractal(Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0),
+        val fractal = BitmapModelParameters(Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0),
             palettes = listOf(
                 Palette(5, 2, 0f, 0f,
                     SparseArray<SparseArray<Lab>>().also { table ->
@@ -76,10 +73,10 @@ class DemoActivity : AppCompatActivity() {
 
         val bitmapAllocation = BitmapAllocation(rs, 2000,1200)
 
-        calcTaskFactory = CalcTaskFactory(rs, fractal, bitmapAllocation)
+        calculationTaskFactory = CalculationTaskFactory(rs, fractal, bitmapAllocation)
 
-        bitmapModel = TaskBitmapModel(calcTaskFactory).apply {
-            listener = object: TaskBitmapModel.Listener {
+        bitmapModel = CalculationTaskBitmapModel(calculationTaskFactory).apply {
+            listener = object: CalculationTaskBitmapModel.Listener {
                 var timerStart: Long = 0
 
                 override fun started() {
@@ -105,16 +102,18 @@ class DemoActivity : AppCompatActivity() {
     var alpha = 0.0f
 
     fun startRotation() {
+        calculationTaskFactory.minPixelGap = animationPixelGap
+
         val task = object: Runnable {
             override fun run() {
-                val shader = calcTaskFactory.shader3DProperties
-                shader.setLightVector(0.5f, alpha)
+                val shader = calculationTaskFactory.shader3DProperties
+                shader.setLightVector(sin(0.782f * alpha), alpha)
 
-                calcTaskFactory.shader3DProperties = shader
-                calcTaskFactory.setPaletteOffset(0, alpha * 0.17f, alpha * 0.03f)
+                calculationTaskFactory.shader3DProperties = shader
+                calculationTaskFactory.setPaletteOffset(0, alpha * 0.17f, alpha * 0.03f)
 
                 alpha += 0.05f
-                calcTaskFactory.syncBitmap(animationPixelGap)
+                calculationTaskFactory.syncBitmap()
                 imageView.invalidate()
                 handler.postDelayed(this, 40)
             }

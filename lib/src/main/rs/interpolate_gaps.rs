@@ -4,7 +4,7 @@
  */
 
 #pragma version(1)
-#pragma rs java_package_name(at.searles.fractbitmapprovider)
+#pragma rs java_package_name(at.searles.fractbitmapmodel)
 
 uint32_t width;
 uint32_t height;

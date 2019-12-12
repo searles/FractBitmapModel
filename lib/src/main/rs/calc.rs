@@ -1,5 +1,5 @@
 #pragma version(1)
-#pragma rs java_package_name(at.searles.fractbitmapprovider)
+#pragma rs java_package_name(at.searles.fractbitmapmodel)
 #pragma rs_fp_relaxed
 
 /*
