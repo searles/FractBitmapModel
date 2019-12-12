@@ -1,5 +1,5 @@
 /*
- * In bitmap, pixels with coordinates i * (stepSize, stepSize) are used to interpolate all other
+ * In bitmap, pixels with coordinates i * (pixelGap, pixelGap) are used to interpolate all other
  * values in between.
  */
 
@@ -8,7 +8,7 @@
 
 uint32_t width;
 uint32_t height;
-uint32_t stepSize;
+uint32_t pixelGap;
 
 rs_allocation bitmap;
 
@@ -27,13 +27,13 @@ static uchar4 fromRgbSqr(float4 toRgbaSqr) {
 }
 
 uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
-    uint32_t x0 = (x / stepSize) * stepSize;
-    uint32_t x1 = x0 + stepSize;
-    uint32_t y0 = (y / stepSize) * stepSize;
-    uint32_t y1 = y0 + stepSize;
+    uint32_t x0 = (x / pixelGap) * pixelGap;
+    uint32_t x1 = x0 + pixelGap;
+    uint32_t y0 = (y / pixelGap) * pixelGap;
+    uint32_t y1 = y0 + pixelGap;
 
-    float xRatio = (float) (x - x0) / (float) stepSize;
-    float yRatio = (float) (y - y0) / (float) stepSize;
+    float xRatio = (float) (x - x0) / (float) pixelGap;
+    float yRatio = (float) (y - y0) / (float) pixelGap;
 
     if(x1 < width && y1 < height) {
         return fromRgbSqr(

@@ -5,12 +5,13 @@ import android.renderscript.*
 import at.searles.fractbitmapprovider.fractalbitmapmodel.CalculationTask
 import at.searles.fractbitmapprovider.fractalbitmapmodel.Fractal
 import at.searles.fractbitmapprovider.palette.PaletteUpdater
+import kotlin.math.max
 
 class CalcTaskFactory(val rs: RenderScript, initialFractal: Fractal, initialBitmapAllocation: BitmapAllocation) {
 
-    val calcScript: ScriptC_calc = ScriptC_calc(rs)
-    val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
-    val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
+    private val calcScript: ScriptC_calc = ScriptC_calc(rs)
+    private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
+    private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
 
     var bitmapAllocation: BitmapAllocation = initialBitmapAllocation
         set(value) {
@@ -22,6 +23,8 @@ class CalcTaskFactory(val rs: RenderScript, initialFractal: Fractal, initialBitm
     val width get() = bitmapAllocation.width
     val height get() = bitmapAllocation.height
 
+    var pixelGap: Int = 1
+
     val bitmap: Bitmap
         get() = bitmapAllocation.bitmap
 
@@ -32,7 +35,7 @@ class CalcTaskFactory(val rs: RenderScript, initialFractal: Fractal, initialBitm
             updatePalettesInScripts()
         }
 
-    var lightVector: Float3 = Float3(2f/3f, 2f/3f, 1f/3f)
+    var shader3DProperties = Shader3DProperties()
         set(value) {
             field = value
             updateLightParametersInScripts()
@@ -56,20 +59,22 @@ class CalcTaskFactory(val rs: RenderScript, initialFractal: Fractal, initialBitm
     /**
      * Renders bitmapData into the bitmap using the current parameters.
      */
-    fun syncBitmap() {
-        bitmapScript.forEach_root(bitmapAllocation.rsBitmap)
-        bitmapAllocation.syncBitmap()
-    }
+    fun syncBitmap(minPixelGap: Int = pixelGap) {
+        val currentPixelGap = max(minPixelGap, pixelGap)
 
-    fun fastSyncBitmap(pixelGap: Int) {
-        interpolateGapsScript._bitmap = bitmapAllocation.rsBitmap
-        bitmapScript._stepSize = pixelGap.toLong()
-        interpolateGapsScript._stepSize = pixelGap.toLong()
+        if(currentPixelGap == 1) {
+            bitmapScript.forEach_root(bitmapAllocation.rsBitmap)
+            bitmapAllocation.syncBitmap()
+        } else {
+            interpolateGapsScript._bitmap = bitmapAllocation.rsBitmap
+            bitmapScript._pixelGap = currentPixelGap.toLong()
+            interpolateGapsScript._pixelGap = currentPixelGap.toLong()
 
-        bitmapScript.forEach_fastRoot(bitmapAllocation.rsBitmap)
-        interpolateGapsScript.forEach_root(bitmapAllocation.rsBitmap)
+            bitmapScript.forEach_fastRoot(bitmapAllocation.rsBitmap)
+            interpolateGapsScript.forEach_root(bitmapAllocation.rsBitmap)
 
-        bitmapAllocation.syncBitmap()
+            bitmapAllocation.syncBitmap()
+        }
     }
 
     private fun updatePalettesInScripts() {
@@ -97,12 +102,11 @@ class CalcTaskFactory(val rs: RenderScript, initialFractal: Fractal, initialBitm
     }
 
     private fun updateLightParametersInScripts() {
-        bitmapScript._lightVector = lightVector
-        bitmapScript._ambientLight = 0.1f // FIXME extract
-        bitmapScript._diffuseLight = 1f
-        bitmapScript._specularStrength = 1f
-        bitmapScript._viewerVector = Float3(1f / 3f, 2f / 3f, 2f / 3f)
-        bitmapScript._shininess = 4
-        bitmapScript._useLightEffect = 1
+        bitmapScript._useLightEffect = if(shader3DProperties.useLightEffect) 1 else 0
+        bitmapScript._lightVector = shader3DProperties.lightVector
+        bitmapScript._ambientReflection = shader3DProperties.ambientReflection
+        bitmapScript._diffuseReflection = shader3DProperties.diffuseReflection
+        bitmapScript._specularReflection = shader3DProperties.specularReflection
+        bitmapScript._shininess = shader3DProperties.shininess.toLong()
     }
 }

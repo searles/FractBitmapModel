@@ -26,7 +26,9 @@ class DemoActivity : AppCompatActivity() {
         findViewById<ScalableImageView>(R.id.scalableImageView)
     }
 
+    private lateinit var calcTaskFactory: CalcTaskFactory
     private lateinit var bitmapModel: TaskBitmapModel
+
     lateinit var handler: Handler
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +40,7 @@ class DemoActivity : AppCompatActivity() {
         imageView.scalableBitmapModel = bitmapModel
         handler = Handler()
 
-        //startRotation()
+        startRotation()
     }
 
     private fun initBitmapModel() {
@@ -73,7 +75,8 @@ class DemoActivity : AppCompatActivity() {
         val rs = RenderScript.create(this)
 
         val bitmapAllocation = BitmapAllocation(rs, 2000,1200)
-        val calcTaskFactory = CalcTaskFactory(rs, fractal, bitmapAllocation)
+
+        calcTaskFactory = CalcTaskFactory(rs, fractal, bitmapAllocation)
 
         bitmapModel = TaskBitmapModel(calcTaskFactory).apply {
             listener = object: TaskBitmapModel.Listener {
@@ -101,22 +104,26 @@ class DemoActivity : AppCompatActivity() {
 
     var alpha = 0.0f
 
-    /*fun startRotation() {
+    fun startRotation() {
         val task = object: Runnable {
             override fun run() {
-                bitmapModel.lightVector = Float3(0.8f * sin(alpha), 0.8f * cos(alpha), 0.6f)
-                bitmapModel.setPaletteOffset(0, alpha * 0.17f, alpha * 0.03f)
+                val shader = calcTaskFactory.shader3DProperties
+                shader.setLightVector(0.5f, alpha)
+
+                calcTaskFactory.shader3DProperties = shader
+                calcTaskFactory.setPaletteOffset(0, alpha * 0.17f, alpha * 0.03f)
+
                 alpha += 0.05f
-                bitmapModel.fastSyncBitmap(rotationResolution)
+                calcTaskFactory.syncBitmap(animationPixelGap)
                 imageView.invalidate()
-                handler.postDelayed(this, 50)
+                handler.postDelayed(this, 40)
             }
         }
 
-        handler.postDelayed(task, 25)
-    }*/
+        handler.postDelayed(task, 40)
+    }
 
     companion object {
-        val rotationResolution = 720
+        val animationPixelGap = 4
     }
 }

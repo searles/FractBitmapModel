@@ -1,12 +1,10 @@
 // parameters:
 float3 lightVector;
-float ambientLight;
-float diffuseLight;
+float ambientReflection;
+float diffuseReflection;
 
-float specularStrength;
+float specularReflection;
 uint32_t shininess;
-float3 viewerVector;
-
 
 // factors set internally for more accuracy in deeper zooms:
 double xStepLength;
@@ -26,9 +24,9 @@ static float getPhongRefectionModelValue(float3 xVec, float3 yVec) {
     float cosineAlpha = dot(normalVector, lightVector);
 
     float3 reflectionDirection = 2 * cosineAlpha * normalVector - lightVector;
-    float specularFactor = max(0.f, dot(reflectionDirection, viewerVector));
+    float specularFactor = max(0.f, reflectionDirection.z); // viewer direction = {0,0,1}
 
-    float brightness = ambientLight + diffuseLight * (cosineAlpha * cosineAlpha + 2.f * cosineAlpha + 1.f) / 4.f + pown(specularFactor * specularStrength, shininess);
+    float brightness = ambientReflection + diffuseReflection * cosineAlpha + pown(specularFactor * specularReflection, shininess);
 
     return brightness;
 }

@@ -6,10 +6,9 @@ import android.renderscript.Element
 import android.renderscript.RenderScript
 import at.searles.fractbitmapprovider.*
 import kotlin.math.abs
-import kotlin.math.min
 
 class CalculationTask(private val rs: RenderScript, val width: Int, val height: Int,
-                      private val bitmapData: Allocation, private val calcScript: ScriptC_calc): AsyncTask<Unit?, Unit?, Unit?>() {
+                      private val bitmapData: Allocation, private val calcScript: ScriptC_calc): AsyncTask<Unit?, Int, Unit?>() {
 
     lateinit var listener: Listener
 
@@ -45,12 +44,20 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
                 1
             }
 
-            listener.progress(index.toFloat() / count.toFloat(), pixelGap)
+            publishProgress(index, count, pixelGap)
 
             if(isCancelled) {
                 return
             }
         }
+    }
+
+    override fun onProgressUpdate(vararg values: Int?) {
+        val index = values[0]!!
+        val count = values[1]!!
+        val pixelGap = values[2]!!
+
+        listener.progress(index.toFloat() / count.toFloat(), pixelGap)
     }
 
     override fun onCancelled(result: Unit?) {

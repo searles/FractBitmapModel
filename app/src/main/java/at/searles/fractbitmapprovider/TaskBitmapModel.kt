@@ -53,16 +53,14 @@ class TaskBitmapModel(private val calcTaskFactory: CalcTaskFactory): Calculation
             bitmapTransformMatrix.set(nextBitmapTransformMatrix)
             isWaitingForPreview = false
 
-            calcTaskFactory.fastSyncBitmap(pixelGap)
+            calcTaskFactory.pixelGap = pixelGap
+            calcTaskFactory.syncBitmap()
 
             lastPixelGap = pixelGap
             listener?.bitmapUpdated()
         } else if(lastPixelGap != pixelGap) {
-            if(pixelGap == 1) {
-                calcTaskFactory.syncBitmap()
-            } else {
-                calcTaskFactory.fastSyncBitmap(pixelGap)
-            }
+            calcTaskFactory.pixelGap = pixelGap
+            calcTaskFactory.syncBitmap()
 
             lastPixelGap = pixelGap
             listener?.bitmapUpdated()
