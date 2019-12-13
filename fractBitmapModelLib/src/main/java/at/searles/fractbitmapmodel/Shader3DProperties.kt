@@ -16,7 +16,7 @@ class Shader3DProperties {
         lightVector = Float3(
             sin(polarAngle) * sin(azimuthAngle),
             sin(polarAngle) * cos(azimuthAngle),
-            cos(polarAngle)
+            -cos(polarAngle)
         )
     }
 }

@@ -107,7 +107,7 @@ class DemoActivity : AppCompatActivity() {
         val task = object: Runnable {
             override fun run() {
                 val shader = calculationTaskFactory.shader3DProperties
-                shader.setLightVector(sin(0.782f * alpha), alpha)
+                shader.setLightVector(sin(0.782f * alpha) * 1.5f, alpha)
 
                 calculationTaskFactory.shader3DProperties = shader
                 calculationTaskFactory.setPaletteOffset(0, alpha * 0.17f, alpha * 0.03f)
