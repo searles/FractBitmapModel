@@ -2,13 +2,13 @@ package at.searles.fractbitmapmodel
 
 import android.os.AsyncTask
 import android.renderscript.Allocation
-import android.renderscript.Element
 import android.renderscript.RenderScript
-import at.searles.fractbitmapmodel.ScriptC_calc
 import kotlin.math.abs
 
 class CalculationTask(private val rs: RenderScript, val width: Int, val height: Int,
-                      private val bitmapData: Allocation, private val calcScript: ScriptC_calc
+                      private val bitmapData: Allocation,
+                      private val calcScript: ScriptC_calc,
+                      private val part: Allocation
 ): AsyncTask<Unit?, Int, Unit?>() {
 
     lateinit var listener: Listener
@@ -18,14 +18,8 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
     }
 
     override fun doInBackground(vararg param: Unit?) {
-        val part = Allocation.createSized(rs, Element.U8(rs),
-            parallelCalculationsCount
-        )
-
         val ceilLog2Width = ceilLog2(width + 1)
         val ceilLog2Height = ceilLog2(height + 1)
-
-        calcScript._bitmapData = bitmapData
 
         calcScript._ceilLog2Width = ceilLog2Width
         calcScript._ceilLog2Height = ceilLog2Height
@@ -37,9 +31,10 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
         while(index < count) {
             calcScript._pixelIndex0 = index.toLong()
             calcScript.forEach_calculate_part(part)
+            calcScript.forEach_copy_part(part, part)
             rs.finish()
 
-            index += parallelCalculationsCount
+            index += CalculationTaskFactory.parallelCalculationsCount
 
             val pixelGap = if(index < count) {
                 getPixelGapAfterIndex(index, ceilLog2Width, ceilLog2Height)
@@ -127,7 +122,4 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
         fun finished()
     }
 
-    companion object {
-        const val parallelCalculationsCount = 8192
-    }
 }

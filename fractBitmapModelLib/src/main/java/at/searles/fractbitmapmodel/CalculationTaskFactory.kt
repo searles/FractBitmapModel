@@ -2,9 +2,6 @@ package at.searles.fractbitmapmodel
 
 import android.graphics.Bitmap
 import android.renderscript.*
-import at.searles.fractbitmapmodel.ScriptC_bitmap
-import at.searles.fractbitmapmodel.ScriptC_calc
-import at.searles.fractbitmapmodel.ScriptC_interpolate_gaps
 import at.searles.fractbitmapmodel.tasks.BitmapModelParameters
 import kotlin.math.max
 
@@ -20,6 +17,10 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
             updateBitmapInScripts()
             updateScaleInScripts()
         }
+
+    private val part = Allocation.createSized(rs, Element.F32_3(rs),
+        parallelCalculationsCount
+    )
 
     val width get() = bitmapAllocation.width
     val height get() = bitmapAllocation.height
@@ -56,7 +57,8 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
             width,
             height,
             bitmapAllocation.bitmapData,
-            calcScript
+            calcScript,
+            part
         )
     }
 
@@ -98,6 +100,7 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
 
     private fun updateBitmapInScripts() {
         this.bitmapScript.bind_bitmapData(bitmapAllocation.bitmapData)
+        this.calcScript._bitmapData = bitmapAllocation.bitmapData
 
         this.calcScript._width = bitmapAllocation.width.toLong()
         this.calcScript._height = bitmapAllocation.height.toLong()
@@ -117,5 +120,9 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
         bitmapScript._diffuseReflection = shader3DProperties.diffuseReflection
         bitmapScript._specularReflection = shader3DProperties.specularReflection
         bitmapScript._shininess = shader3DProperties.shininess.toLong()
+    }
+
+    companion object {
+        const val parallelCalculationsCount = 8192
     }
 }

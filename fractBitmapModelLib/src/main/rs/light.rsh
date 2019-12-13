@@ -21,7 +21,7 @@ static float3 getNormalVectorOf(float3 xVec, float3 yVec) {
 
 static float getPhongRefectionModelValue(float3 xVec, float3 yVec) {
     float3 normalVector = getNormalVectorOf(xVec, yVec);
-    float cosineAlpha = dot(normalVector, lightVector);
+    float cosineAlpha = max(0.f, dot(normalVector, lightVector));
 
     float3 reflectionDirection = 2 * cosineAlpha * normalVector - lightVector;
     float specularFactor = max(0.f, reflectionDirection.z); // viewer direction = {0,0,1}
