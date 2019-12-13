@@ -1,2 +1,2 @@
-include ':app', ':lib'
+include ':app', ':fractBitmapModelLib'
 rootProject.name='FractBitmapProvider'
