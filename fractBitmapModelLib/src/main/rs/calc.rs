@@ -17,9 +17,9 @@
  * To indicate that a point is outdated, it should be set to
  */
 #include "scale.rsh"
-#include "complex.rsh"
 #include "part.rsh"
 #include "vm.rsh"
+#include "mandelbrot.rsh"
 
 // ---------------------------------------------------------------------------------------------- //
 
@@ -28,13 +28,14 @@ float3 RS_KERNEL calculate(float3 in, uint32_t x) {
     x = x % (width + 1);
 
     double2 pt = mapCoordinates(x, y);
-    float3 value = valueAt(pt);
+    float3 value = mandelbrotValueAt(pt);
 
     return value;
 }
 
 float3 __attribute__((kernel)) calculate_part(uint32_t x) { // name x is mandatory
-    uint32_t pixelIndex = pixelIndex0 + x;
+
+    uint32_t pixelIndex = pixelIndex0 + x; // TODO do not exceed last index!
 
     int2 px = getPixelCoordinates(pixelIndex);
 

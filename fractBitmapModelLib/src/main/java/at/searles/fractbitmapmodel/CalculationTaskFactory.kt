@@ -3,7 +3,9 @@ package at.searles.fractbitmapmodel
 import android.graphics.Bitmap
 import android.renderscript.*
 import at.searles.fractbitmapmodel.tasks.BitmapModelParameters
+import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.sin
 
 class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters: BitmapModelParameters, initialBitmapAllocation: BitmapAllocation) {
 
@@ -17,6 +19,8 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
             updateBitmapInScripts()
             updateScaleInScripts()
         }
+
+    var codeAllocation: Allocation = Allocation.createSized(rs, Element.I32(rs), 1)
 
     private val part = Allocation.createSized(rs, Element.F32_3(rs),
         parallelCalculationsCount
@@ -34,18 +38,15 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     var fractal = initialBitmapModelParameters
         set(value) {
             field = value
+            updateVmCode()
             updateScaleInScripts()
             updatePalettesInScripts()
-        }
-
-    var shader3DProperties = Shader3DProperties()
-        set(value) {
-            field = value
             updateLightParametersInScripts()
         }
 
     init {
         updateBitmapInScripts()
+        updateVmCode()
         updateScaleInScripts()
         updatePalettesInScripts()
         updateLightParametersInScripts()
@@ -99,27 +100,51 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     }
 
     private fun updateBitmapInScripts() {
-        this.bitmapScript.bind_bitmapData(bitmapAllocation.bitmapData)
-        this.calcScript._bitmapData = bitmapAllocation.bitmapData
+        with(bitmapAllocation) {
+            bitmapScript.bind_bitmapData(bitmapData)
+            calcScript._bitmapData = bitmapData
 
-        this.calcScript._width = bitmapAllocation.width.toLong()
-        this.calcScript._height = bitmapAllocation.height.toLong()
+            calcScript._width = width.toLong()
+            calcScript._height = height.toLong()
 
-        this.bitmapScript._width = bitmapAllocation.width.toLong()
-        this.bitmapScript._height = bitmapAllocation.height.toLong()
+            bitmapScript._width = width.toLong()
+            bitmapScript._height = height.toLong()
 
-        this.interpolateGapsScript._width = bitmapAllocation.width.toLong()
-        this.interpolateGapsScript._height = bitmapAllocation.height.toLong()
-        // must call updateScaleInScripts afterwards!
+            interpolateGapsScript._width = width.toLong()
+            interpolateGapsScript._height = height.toLong()
+            // must call updateScaleInScripts afterwards!
+        }
     }
 
     private fun updateLightParametersInScripts() {
-        bitmapScript._useLightEffect = if(shader3DProperties.useLightEffect) 1 else 0
-        bitmapScript._lightVector = shader3DProperties.lightVector
-        bitmapScript._ambientReflection = shader3DProperties.ambientReflection
-        bitmapScript._diffuseReflection = shader3DProperties.diffuseReflection
-        bitmapScript._specularReflection = shader3DProperties.specularReflection
-        bitmapScript._shininess = shader3DProperties.shininess.toLong()
+        with(fractal) {
+            bitmapScript._useLightEffect = if (shader3DProperties.useLightEffect) 1 else 0
+            bitmapScript._lightVector = shader3DProperties.lightVector
+            bitmapScript._ambientReflection = shader3DProperties.ambientReflection
+            bitmapScript._diffuseReflection = shader3DProperties.diffuseReflection
+            bitmapScript._specularReflection = shader3DProperties.specularReflection
+            bitmapScript._shininess = shader3DProperties.shininess.toLong()
+        }
+    }
+
+    private fun updateVmCode() {
+        val vmCode = fractal.compilerInstance.vmCode
+
+        codeAllocation.destroy()
+        codeAllocation = Allocation.createSized(rs, Element.I32(rs), vmCode.size)
+
+        codeAllocation.copyFrom(vmCode.toIntArray())
+
+        calcScript.bind_code(codeAllocation)
+        calcScript._codeSize = vmCode.size.toLong()
+    }
+
+    fun setLightVector(polarAngle: Float, azimuthAngle: Float) {
+        bitmapScript._lightVector = Float3(
+            sin(polarAngle) * sin(azimuthAngle),
+            sin(polarAngle) * cos(azimuthAngle),
+            -cos(polarAngle)
+        )
     }
 
     companion object {

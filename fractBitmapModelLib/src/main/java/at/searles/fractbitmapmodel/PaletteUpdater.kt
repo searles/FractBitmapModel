@@ -86,6 +86,7 @@ class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_b
     }
 
     private fun setSegmentsInScript(splineSegments: ArrayList<SplineSegment>) {
+        // TODO: I guess I must destroy the old one...
         val rsSegments = ScriptField_paletteSegment(rs, splineSegments.size)
         script.bind_segments(rsSegments)
 
