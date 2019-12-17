@@ -1,9 +1,6 @@
 #include "complex.rsh"
 
 static float3 createResult(int layer, double2 value, double height) {
-    //rsDebug("setting layer", layer);
-    //rsDebug("setting value", value);
-    //rsDebug("setting height", height);
     float2 fValue = convert_float2(value);
 
     fValue = fValue - floor(fValue);
@@ -20,20 +17,12 @@ uint32_t codeSize;
 
 static float3 valueAt(double2 pt) {
 	uint32_t pc = 0;
-	
+
 	int data[256];
-	
+
 	float3 result;
 
-	//rsDebug("codeSize=", codeSize);
-
-    for(int i = 0; i < codeSize; ++i) {
-        //rsDebug("code[]", code[i]);
-    }
-
 	while(pc < codeSize) {
-	    //rsDebug("pc=", pc);
-	    //rsDebug("op=", code[pc]);
 		switch(code[pc]) {
             // === Add ===
             // Add: [*Int, *Int]
@@ -161,77 +150,82 @@ static float3 valueAt(double2 pt) {
             case 54: if(++data[code[pc + 1]] < code[pc + 2]) pc = code[pc + 3]; else pc = code[pc + 4];break;
             // Next: [*Int, *Int]
             case 55: if(++data[code[pc + 1]] < data[code[pc + 2]]) pc = code[pc + 3]; else pc = code[pc + 4];break;
+            // === Cons ===
+            // Cons: [Real, *Real]
+            case 56: (*((double2*) (&data[code[pc + 4]]))) = (double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))}; pc += 5; break;
+            // Cons: [*Real, Real]
+            case 57: (*((double2*) (&data[code[pc + 4]]))) = (double2) {(*((double*) (&data[code[pc + 1]]))), (*((double*) (&code[pc + 2])))}; pc += 5; break;
+            // Cons: [*Real, *Real]
+            case 58: (*((double2*) (&data[code[pc + 3]]))) = (double2) {(*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))}; pc += 4; break;
             // === RealPart ===
             // RealPart: [*Cplx]
-            case 56: (*((double*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))).x; pc += 3; break;
+            case 59: (*((double*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))).x; pc += 3; break;
             // === ImaginaryPart ===
             // ImaginaryPart: [*Cplx]
-            case 57: (*((double*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))).y; pc += 3; break;
+            case 60: (*((double*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))).y; pc += 3; break;
             // === Point ===
             // Point: []
-            case 58: (*((double2*) (&data[code[pc + 1]]))) = pt; pc += 2; break;
+            case 61: (*((double2*) (&data[code[pc + 1]]))) = pt; pc += 2; break;
             // === SetResult ===
             // SetResult: [*Int, *Cplx, *Real]
-            case 59: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
+            case 62: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
             // SetResult: [Int, *Cplx, *Real]
-            case 60: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
+            case 63: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
             // SetResult: [*Int, Cplx, *Real]
-            case 61: result = createResult(data[code[pc + 1]], (*((double2*) (&code[pc + 2]))), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
+            case 64: result = createResult(data[code[pc + 1]], (*((double2*) (&code[pc + 2]))), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
             // SetResult: [Int, Cplx, *Real]
-            case 62: result = createResult(code[pc + 1], (*((double2*) (&code[pc + 2]))), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
+            case 65: result = createResult(code[pc + 1], (*((double2*) (&code[pc + 2]))), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
             // SetResult: [*Int, *Cplx, Real]
-            case 63: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
+            case 66: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
             // SetResult: [Int, *Cplx, Real]
-            case 64: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
+            case 67: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
             // SetResult: [*Int, Cplx, Real]
-            case 65: result = createResult(data[code[pc + 1]], (*((double2*) (&code[pc + 2]))), (*((double*) (&code[pc + 6])))); pc += 8; break;
+            case 68: result = createResult(data[code[pc + 1]], (*((double2*) (&code[pc + 2]))), (*((double*) (&code[pc + 6])))); pc += 8; break;
             // SetResult: [Int, Cplx, Real]
-            case 66: result = createResult(code[pc + 1], (*((double2*) (&code[pc + 2]))), (*((double*) (&code[pc + 6])))); pc += 8; break;
+            case 69: result = createResult(code[pc + 1], (*((double2*) (&code[pc + 2]))), (*((double*) (&code[pc + 6])))); pc += 8; break;
             // === Sqrt ===
             // Sqrt: [*Real]
-            case 67: (*((double*) (&data[code[pc + 2]]))) = sqrt((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 70: (*((double*) (&data[code[pc + 2]]))) = sqrt((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Sqrt: [*Cplx]
-            case 68: (*((double2*) (&data[code[pc + 2]]))) = sqrt((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 71: (*((double2*) (&data[code[pc + 2]]))) = sqrt((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Exp ===
             // Exp: [*Real]
-            case 69: (*((double*) (&data[code[pc + 2]]))) = exp((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 72: (*((double*) (&data[code[pc + 2]]))) = exp((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Exp: [*Cplx]
-            case 70: (*((double2*) (&data[code[pc + 2]]))) = exp((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 73: (*((double2*) (&data[code[pc + 2]]))) = exp((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Log ===
             // Log: [*Real]
-            case 71: (*((double*) (&data[code[pc + 2]]))) = log((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 74: (*((double*) (&data[code[pc + 2]]))) = log((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Log: [*Cplx]
-            case 72: (*((double2*) (&data[code[pc + 2]]))) = log((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 75: (*((double2*) (&data[code[pc + 2]]))) = log((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Sin ===
             // Sin: [*Real]
-            case 73: (*((double*) (&data[code[pc + 2]]))) = sin((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 76: (*((double*) (&data[code[pc + 2]]))) = sin((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Sin: [*Cplx]
-            case 74: (*((double2*) (&data[code[pc + 2]]))) = sin((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 77: (*((double2*) (&data[code[pc + 2]]))) = sin((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Cos ===
             // Cos: [*Real]
-            case 75: (*((double*) (&data[code[pc + 2]]))) = cos((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 78: (*((double*) (&data[code[pc + 2]]))) = cos((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Cos: [*Cplx]
-            case 76: (*((double2*) (&data[code[pc + 2]]))) = cos((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 79: (*((double2*) (&data[code[pc + 2]]))) = cos((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Sinh ===
             // Sinh: [*Real]
-            case 77: (*((double*) (&data[code[pc + 2]]))) = sinh((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 80: (*((double*) (&data[code[pc + 2]]))) = sinh((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Sinh: [*Cplx]
-            case 78: (*((double2*) (&data[code[pc + 2]]))) = sinh((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 81: (*((double2*) (&data[code[pc + 2]]))) = sinh((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Cosh ===
             // Cosh: [*Real]
-            case 79: (*((double*) (&data[code[pc + 2]]))) = cosh((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 82: (*((double*) (&data[code[pc + 2]]))) = cosh((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Cosh: [*Cplx]
-            case 80: (*((double2*) (&data[code[pc + 2]]))) = cosh((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 83: (*((double2*) (&data[code[pc + 2]]))) = cosh((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Rad ===
             // Rad: [*Cplx]
-            case 81: (*((double*) (&data[code[pc + 2]]))) = rad((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 84: (*((double*) (&data[code[pc + 2]]))) = rad((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Arc ===
             // Arc: [*Cplx]
-            case 82: (*((double*) (&data[code[pc + 2]]))) = arc((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 85: (*((double*) (&data[code[pc + 2]]))) = arc((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
 		}
 	}
-
-	//rsDebug("result=", result);
 	
 	return result;
 }

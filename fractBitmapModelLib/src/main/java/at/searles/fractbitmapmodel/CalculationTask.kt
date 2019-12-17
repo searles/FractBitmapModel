@@ -25,6 +25,7 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
         calcScript._ceilLog2Height = ceilLog2Height
 
         val count = 1 shl (ceilLog2Width + ceilLog2Height)
+        calcScript._count = count
 
         var index = 0
 

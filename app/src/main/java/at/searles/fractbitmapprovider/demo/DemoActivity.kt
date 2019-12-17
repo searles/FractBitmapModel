@@ -64,7 +64,7 @@ class DemoActivity : AppCompatActivity() {
             Palette(1, 1, 0f, 0f,
                 SparseArray<SparseArray<Lab>>().also { table ->
                     table.put(0, SparseArray<Lab>().also { row ->
-                        row.put(0, Rgb(1f, 0f, 0f).toLab())
+                        row.put(0, Rgb(0f, 0f, 0f).toLab())
                     })
                 })
         )
@@ -72,7 +72,7 @@ class DemoActivity : AppCompatActivity() {
         val shaderProperties = Shader3DProperties()
 
         val compilerInstance = CompilerInstance(
-            "setResult(0, point, 0.2);",
+            "setResult(0, sin rad point, sin rad point);",
             emptyMap()
         ).apply {
             compile()

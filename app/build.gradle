@@ -36,7 +36,7 @@ dependencies {
     implementation 'com.github.searles:paletteeditor:0.1.1'
     implementation 'com.github.searles:scalableimageview:0.0.4'
     implementation 'com.github.searles.utils:math:0.3.0'
-    implementation 'com.github.searles:fractlang:0.0.9'
+    implementation 'com.github.searles:fractlang:0.1.0'
     implementation 'com.github.searles:parsing:2.0.0'
     implementation project(':fractBitmapModelLib')
     testImplementation 'junit:junit:4.12'

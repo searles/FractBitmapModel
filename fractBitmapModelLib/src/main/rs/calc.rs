@@ -33,9 +33,15 @@ float3 RS_KERNEL calculate(float3 in, uint32_t x) {
     return value;
 }
 
+int count; // number of pixels to be drawn in total.
+
 float3 __attribute__((kernel)) calculate_part(uint32_t x) { // name x is mandatory
 
-    uint32_t pixelIndex = pixelIndex0 + x; // TODO do not exceed last index!
+    uint32_t pixelIndex = pixelIndex0 + x;
+
+    if(pixelIndex >= count) {
+        return 0;
+    }
 
     int2 px = getPixelCoordinates(pixelIndex);
 
@@ -53,6 +59,10 @@ rs_allocation bitmapData;
 
 float3 __attribute__((kernel)) copy_part(float3 inValue, uint32_t x) { // name x is mandatory
     uint32_t pixelIndex = pixelIndex0 + x;
+
+    if(pixelIndex >= count) {
+        return 0;
+    }
 
     int2 px = getPixelCoordinates(pixelIndex);
 
