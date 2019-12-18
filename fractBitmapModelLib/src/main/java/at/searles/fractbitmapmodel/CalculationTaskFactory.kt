@@ -2,6 +2,7 @@ package at.searles.fractbitmapmodel
 
 import android.graphics.Bitmap
 import android.renderscript.*
+import android.util.Log
 import at.searles.fractbitmapmodel.tasks.BitmapModelParameters
 import kotlin.math.cos
 import kotlin.math.max
@@ -12,6 +13,8 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     private val calcScript: ScriptC_calc = ScriptC_calc(rs)
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
     private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
+
+    var listener: Listener? = null
 
     var bitmapAllocation: BitmapAllocation = initialBitmapAllocation
         set(value) {
@@ -76,17 +79,16 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
 
         if(currentPixelGap == 1) {
             bitmapScript.forEach_root(bitmapAllocation.rsBitmap)
-            bitmapAllocation.syncBitmap()
         } else {
-            interpolateGapsScript._bitmap = bitmapAllocation.rsBitmap
             bitmapScript._pixelGap = currentPixelGap.toLong()
             interpolateGapsScript._pixelGap = currentPixelGap.toLong()
 
             bitmapScript.forEach_fastRoot(bitmapAllocation.rsBitmap)
             interpolateGapsScript.forEach_root(bitmapAllocation.rsBitmap)
-
-            bitmapAllocation.syncBitmap()
         }
+
+        bitmapAllocation.syncBitmap()
+        listener?.bitmapSynced()
     }
 
     private fun updatePalettesInScripts() {
@@ -112,6 +114,9 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
 
             interpolateGapsScript._width = width.toLong()
             interpolateGapsScript._height = height.toLong()
+
+            interpolateGapsScript._bitmap = rsBitmap
+
             // must call updateScaleInScripts afterwards!
         }
     }
@@ -145,6 +150,10 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
             sin(polarAngle) * cos(azimuthAngle),
             -cos(polarAngle)
         )
+    }
+
+    interface Listener {
+        fun bitmapSynced()
     }
 
     companion object {

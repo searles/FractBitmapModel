@@ -36,7 +36,6 @@ float3 RS_KERNEL calculate(float3 in, uint32_t x) {
 int count; // number of pixels to be drawn in total.
 
 float3 __attribute__((kernel)) calculate_part(uint32_t x) { // name x is mandatory
-
     uint32_t pixelIndex = pixelIndex0 + x;
 
     if(pixelIndex >= count) {
