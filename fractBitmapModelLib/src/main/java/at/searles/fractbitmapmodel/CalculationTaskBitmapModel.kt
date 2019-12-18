@@ -69,6 +69,8 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
         isTaskRunning = false
         calculationTask = null
 
+        listener?.finished()
+
         if(postCalculationTasks.isNotEmpty()) {
             val isParameterChange = postCalculationTasks.fold(false) { status, task ->
                 task.execute(calculationTaskFactory)
