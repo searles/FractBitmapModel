@@ -85,7 +85,10 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
         }
     }
 
-    private fun addPostCalcTask(task: PostCalculationTask) {
+    /**
+     * Use this method to add edit tasks apart from scale.
+     */
+    fun addPostCalcTask(task: PostCalculationTask) {
         require(Looper.getMainLooper().isCurrentThread)
 
         if(isTaskRunning) {
