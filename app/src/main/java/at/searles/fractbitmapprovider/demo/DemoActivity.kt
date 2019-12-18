@@ -63,17 +63,12 @@ class DemoActivity : AppCompatActivity() {
 
         val shaderProperties = Shader3DProperties()
 
-        val compilerInstance = CompilerInstance(
-            program,
-            emptyMap()
-        ).apply {
-            compile()
-        }
-
-        val fractal = BitmapModelParameters(Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0),
+        val fractal = BitmapModelParameters(
+            Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0),
             palettes,
             shaderProperties,
-            compilerInstance
+            program,
+            emptyMap()
         )
 
         val rs = RenderScript.create(this)

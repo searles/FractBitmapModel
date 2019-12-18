@@ -7,7 +7,7 @@ class RelativeScaleTask(private val relativeMatrix: Matrix): PostCalculationTask
     override val isParameterChange: Boolean = true
 
     override fun execute(preferences: CalculationTaskFactory) {
-        val scaledFractal = preferences.fractal.createScaled(relativeMatrix)
-        preferences.fractal = scaledFractal
+        val scaledFractal = preferences.bitmapModelParameters.createWithRelativeScale(relativeMatrix)
+        preferences.bitmapModelParameters = scaledFractal
     }
 }

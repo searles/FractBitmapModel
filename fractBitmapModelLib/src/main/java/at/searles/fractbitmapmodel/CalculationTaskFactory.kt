@@ -2,9 +2,7 @@ package at.searles.fractbitmapmodel
 
 import android.graphics.Bitmap
 import android.renderscript.*
-import android.util.Log
 import at.searles.fractbitmapmodel.tasks.BitmapModelParameters
-import at.searles.paletteeditor.Palette
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
@@ -41,7 +39,7 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     val bitmap: Bitmap
         get() = bitmapAllocation.bitmap
 
-    var fractal = initialBitmapModelParameters
+    var bitmapModelParameters = initialBitmapModelParameters
         set(value) {
             field = value
             updateVmCode()
@@ -58,7 +56,7 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
         updateLightParametersInScripts()
     }
 
-    fun createCalculationTask(): CalculationTask {
+    internal fun createCalculationTask(): CalculationTask {
         return CalculationTask(
             rs,
             width,
@@ -94,11 +92,11 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     }
 
     private fun updatePalettesInScripts() {
-        paletteUpdater.updatePalettes(fractal.palettes)
+        paletteUpdater.updatePalettes(bitmapModelParameters.palettes)
     }
 
     private fun updateScaleInScripts() {
-        ScaleUpdater.updateScaleInScripts(width, height, fractal.scale, calcScript, bitmapScript)
+        ScaleUpdater.updateScaleInScripts(width, height, bitmapModelParameters.scale, calcScript, bitmapScript)
     }
 
     private fun updateBitmapInScripts() {
@@ -122,7 +120,7 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     }
 
     private fun updateLightParametersInScripts() {
-        with(fractal) {
+        with(bitmapModelParameters) {
             bitmapScript._useLightEffect = if (shader3DProperties.useLightEffect) 1 else 0
             bitmapScript._lightVector = shader3DProperties.lightVector
             bitmapScript._ambientReflection = shader3DProperties.ambientReflection
@@ -133,7 +131,7 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     }
 
     private fun updateVmCode() {
-        val vmCode = fractal.compilerInstance.vmCode
+        val vmCode = bitmapModelParameters.vmCode
 
         codeAllocation.destroy()
         codeAllocation = Allocation.createSized(rs, Element.I32(rs), vmCode.size)
