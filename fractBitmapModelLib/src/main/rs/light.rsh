@@ -26,7 +26,7 @@ static float getPhongRefectionModelValue(float3 xVec, float3 yVec) {
     float3 reflectionDirection = 2 * cosineAlpha * normalVector - lightVector;
     float specularFactor = max(0.f, reflectionDirection.z); // viewer direction = {0,0,1}
 
-    float brightness = ambientReflection + diffuseReflection * cosineAlpha;// + pown(specularFactor * specularReflection, shininess);
+    float brightness = ambientReflection + diffuseReflection * cosineAlpha + pown(specularFactor * specularReflection, shininess);
 
     return brightness;
 }

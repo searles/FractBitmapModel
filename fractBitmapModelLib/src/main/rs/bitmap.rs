@@ -60,7 +60,7 @@ uchar4 RS_KERNEL fastRoot(uint32_t x, uint32_t y) {
     float3 p10 = bitmapData[x + y * (width + 1) + pixelGap];
     float3 p01 = bitmapData[x + (y + pixelGap) * (width + 1)];
 
-    float4 finalColor = adjustLight(color, (p10.z - p00.z), (p01.z - p00.z));
+    float4 finalColor = adjustLight(color, (p10.z - p00.z) / pixelGap, (p01.z - p00.z) / pixelGap);
 
     return to8888(finalColor);
 }

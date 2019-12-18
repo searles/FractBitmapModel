@@ -31,7 +31,7 @@ class DemoActivity : AppCompatActivity() {
 
         imageView.scalableBitmapModel = bitmapModel
 
-        AnimationTask(calculationTaskFactory).start()
+        //AnimationTask(calculationTaskFactory).start()
     }
 
     private fun initBitmapModel() {
