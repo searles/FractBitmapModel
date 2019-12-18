@@ -6,7 +6,6 @@ import android.renderscript.RenderScript
 import kotlin.math.abs
 
 class CalculationTask(private val rs: RenderScript, val width: Int, val height: Int,
-                      private val bitmapData: Allocation,
                       private val calcScript: ScriptC_calc,
                       private val part: Allocation
 ): AsyncTask<Unit?, Int, Unit?>() {
@@ -35,7 +34,7 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
             calcScript.forEach_copy_part(part, part)
             rs.finish()
 
-            index += CalculationTaskFactory.parallelCalculationsCount
+            index += CalcController.parallelCalculationsCount
 
             val pixelGap = if(index < count) {
                 getPixelGapAfterIndex(index, ceilLog2Width, ceilLog2Height)

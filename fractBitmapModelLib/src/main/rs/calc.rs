@@ -54,7 +54,7 @@ float3 __attribute__((kernel)) calculate_part(uint32_t x) { // name x is mandato
     return value;
 }
 
-rs_allocation bitmapData;
+rs_allocation calcData;
 
 float3 __attribute__((kernel)) copy_part(float3 inValue, uint32_t x) { // name x is mandatory
     uint32_t pixelIndex = pixelIndex0 + x;
@@ -66,7 +66,7 @@ float3 __attribute__((kernel)) copy_part(float3 inValue, uint32_t x) { // name x
     int2 px = getPixelCoordinates(pixelIndex);
 
     if(px.x <= width && px.y <= height) {
-        rsSetElementAt_float3(bitmapData, inValue, px.y * (width + 1) + px.x);
+        rsSetElementAt_float3(calcData, inValue, px.y * (width + 1) + px.x);
     }
 
     return 0;

@@ -7,8 +7,7 @@ import android.util.Log
 import android.util.SparseArray
 import at.searles.commons.math.Scale
 import at.searles.fractbitmapmodel.*
-import at.searles.fractlang.CompilerInstance
-import at.searles.fractbitmapmodel.tasks.BitmapModelParameters
+import at.searles.fractbitmapmodel.BitmapProperties
 import at.searles.fractimageview.ScalableImageView
 import at.searles.paletteeditor.Palette
 import at.searles.paletteeditor.colors.Lab
@@ -20,8 +19,8 @@ class DemoActivity : AppCompatActivity() {
         findViewById<ScalableImageView>(R.id.scalableImageView)
     }
 
-    private lateinit var calculationTaskFactory: CalculationTaskFactory
-    private lateinit var bitmapModel: CalculationTaskBitmapModel
+    private lateinit var controller: CalcController
+    private lateinit var bitmapModel: CalcBitmapModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,30 +60,33 @@ class DemoActivity : AppCompatActivity() {
                 })
         )
 
-        val shaderProperties = Shader3DProperties()
+        val shaderProperties = ShaderProperties()
 
-        val fractal = BitmapModelParameters(
+        val calcProperties = CalcProperties(
             Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0),
-            palettes,
-            shaderProperties,
             program,
             emptyMap()
+        )
+
+        val bitmapProperties = BitmapProperties(
+            palettes,
+            shaderProperties
         )
 
         val rs = RenderScript.create(this)
 
         val bitmapAllocation = BitmapAllocation(rs, 1000,600)
 
-        calculationTaskFactory = CalculationTaskFactory(rs, fractal, bitmapAllocation)
+        controller = CalcController(rs, calcProperties, bitmapProperties, bitmapAllocation)
 
-        calculationTaskFactory.listener = object: CalculationTaskFactory.Listener {
-            override fun bitmapSynced() {
+        controller.bitmapSync.listener = object: BitmapSync.Listener {
+            override fun bitmapUpdated() {
                 imageView.invalidate()
             }
         }
 
-        bitmapModel = CalculationTaskBitmapModel(calculationTaskFactory).apply {
-            listener = object: CalculationTaskBitmapModel.Listener {
+        bitmapModel = CalcBitmapModel(controller).apply {
+            listener = object: CalcBitmapModel.Listener {
                 var timerStart: Long = 0
 
                 override fun started() {

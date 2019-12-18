@@ -5,9 +5,12 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 
+/**
+ * Class representing a bitmap and associated data structures.
+ */
 class BitmapAllocation(rs: RenderScript, val width: Int, val height: Int) {
 
-    val bitmapData: Allocation =
+    val calcData: Allocation =
         Allocation.createSized(
             rs,
             Element.F32_3(rs),
@@ -21,9 +24,9 @@ class BitmapAllocation(rs: RenderScript, val width: Int, val height: Int) {
             Bitmap.Config.ARGB_8888
         )
 
-    val rsBitmap = Allocation.createFromBitmap(rs, bitmap)
+    val rsBitmap: Allocation = Allocation.createFromBitmap(rs, bitmap)
 
-    fun syncBitmap() {
+    fun sync() {
         rsBitmap.copyTo(bitmap)
     }
 }

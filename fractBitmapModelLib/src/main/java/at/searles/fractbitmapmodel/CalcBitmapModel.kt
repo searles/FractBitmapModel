@@ -2,8 +2,8 @@ package at.searles.fractbitmapmodel
 
 import android.graphics.Matrix
 import android.os.Looper
-import at.searles.fractbitmapmodel.tasks.PostCalculationTask
-import at.searles.fractbitmapmodel.tasks.RelativeScaleTask
+import at.searles.fractbitmapmodel.tasks.PostCalcChange
+import at.searles.fractbitmapmodel.tasks.RelativeScaleChange
 import at.searles.fractimageview.ScalableBitmapModel
 
 /**
@@ -11,11 +11,10 @@ import at.searles.fractimageview.ScalableBitmapModel
  * are not able to provide an instant review. For this cases a second relative scale matrix
  * is maintained inside and used after a first preview is available.
  */
-class CalculationTaskBitmapModel(private val calculationTaskFactory: CalculationTaskFactory): CalculationTask.Listener, ScalableBitmapModel() {
-
+class CalcBitmapModel(private val controller: CalcController): CalculationTask.Listener, ScalableBitmapModel() {
     override val bitmapTransformMatrix = Matrix()
 
-    override val bitmap get() = calculationTaskFactory.bitmap
+    override val bitmap get() = controller.bitmap
 
     var listener: Listener? = null
 
@@ -25,7 +24,9 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
 
     private var isTaskRunning: Boolean = false
     private var calculationTask: CalculationTask? = null
-    private val postCalculationTasks = ArrayList<PostCalculationTask>()
+
+    private val postCalcChanges = ArrayList<PostCalcChange>()
+
 
     override fun scale(relativeMatrix: Matrix) {
         require(Looper.getMainLooper().isCurrentThread)
@@ -33,7 +34,7 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
         bitmapTransformMatrix.postConcat(relativeMatrix)
         nextBitmapTransformMatrix.postConcat(relativeMatrix)
 
-        addPostCalcTask(RelativeScaleTask(relativeMatrix))
+        addPostCalcChange(RelativeScaleChange(relativeMatrix))
     }
 
     override fun started() {
@@ -48,14 +49,14 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
             bitmapTransformMatrix.set(nextBitmapTransformMatrix)
             isWaitingForPreview = false
 
-            calculationTaskFactory.pixelGap = pixelGap
-            calculationTaskFactory.syncBitmap()
+            controller.bitmapSync.pixelGap = pixelGap
+            controller.updateBitmap()
 
             lastPixelGap = pixelGap
             listener?.bitmapUpdated()
         } else if(lastPixelGap != pixelGap) {
-            calculationTaskFactory.pixelGap = pixelGap
-            calculationTaskFactory.syncBitmap()
+            controller.bitmapSync.pixelGap = pixelGap
+            controller.updateBitmap()
 
             lastPixelGap = pixelGap
             listener?.bitmapUpdated()
@@ -65,53 +66,42 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
     }
 
     override fun finished() {
-        // hide progress bar
         isTaskRunning = false
         calculationTask = null
 
         listener?.finished()
 
-        if(postCalculationTasks.isNotEmpty()) {
-            val isParameterChange = postCalculationTasks.fold(false) { status, task ->
-                task.execute(calculationTaskFactory)
-                status or task.isParameterChange
-            }
-
-            postCalculationTasks.clear()
-
-            if(isParameterChange) {
-                startTask()
-            }
+        if(postCalcChanges.isNotEmpty()) {
+            postCalcChanges.forEach { it.accept(controller) }
+            postCalcChanges.clear()
+            startTask()
         }
     }
 
     /**
      * Use this method to add edit tasks apart from scale.
      */
-    fun addPostCalcTask(task: PostCalculationTask) {
+    fun addPostCalcChange(change: PostCalcChange) {
         require(Looper.getMainLooper().isCurrentThread)
 
         if(isTaskRunning) {
-            // TODO allow tasks that do not cancel the calculation, eg save image.
-            postCalculationTasks.add(task)
+            require(calculationTask != null)
+            postCalcChanges.add(change)
             calculationTask!!.cancel(true)
             return
         }
 
-        require(postCalculationTasks.isEmpty())
-        task.execute(calculationTaskFactory)
+        require(postCalcChanges.isEmpty())
+        change.accept(controller)
 
-        if(task.isParameterChange) {
-            startTask()
-        }
-
+        startTask()
         return
     }
 
     fun startTask() {
         require(Looper.getMainLooper().isCurrentThread)
 
-        require(postCalculationTasks.isEmpty())
+        require(postCalcChanges.isEmpty())
         require(!isTaskRunning)
         require(calculationTask == null)
 
@@ -121,8 +111,8 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
         // before the first preview is generated, we must use the old imageTransformMatrix.
         nextBitmapTransformMatrix.set(null)
 
-        calculationTask = calculationTaskFactory.createCalculationTask().apply {
-            listener = this@CalculationTaskBitmapModel
+        calculationTask = controller.createCalculationTask().apply {
+            listener = this@CalcBitmapModel
             execute()
         }
     }
