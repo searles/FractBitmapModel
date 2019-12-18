@@ -11,16 +11,12 @@ import at.searles.paletteeditor.colors.Lab
 import java.util.*
 
 /**
- * Inside the palette I use rgb squared for the sake of efficiency.
+ * Inside the palette I use yuv squared for the sake of efficiency.
  */
 class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_bitmap) {
 
-    fun updateOffsets(index: Int, offsetX: Float, offsetY: Float) {
-        script._palettes.set_offsetX(index, offsetX, false)
-        script._palettes.set_offsetY(index, offsetY, false)
-
-        script._palettes.copyAll()
-    }
+    private lateinit var rsSegments: ScriptField_paletteSegment
+    private lateinit var rsPalettes: ScriptField_palette
 
     fun updatePalettes(palettes: List<Palette>) {
         val splineSegments = ArrayList<SplineSegment>()
@@ -37,6 +33,49 @@ class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_b
         setPalettesInScript(palettesWithSegmentIndex)
         setSegmentsInScript(splineSegments)
     }
+
+    fun updateOffsets(index: Int, offsetX: Float, offsetY: Float) {
+        script._palettes.set_offsetX(index, offsetX, false)
+        script._palettes.set_offsetY(index, offsetY, false)
+
+        script._palettes.copyAll()
+    }
+
+    private fun setSegmentsInScript(splineSegments: ArrayList<SplineSegment>) {
+        rsSegments = ScriptField_paletteSegment(rs, splineSegments.size)
+        script.bind_segments(rsSegments)
+
+        splineSegments.forEachIndexed { index, splineSegment ->
+            rsSegments.set_comp0(index, Matrix4f(splineSegment.comp0.flts()), false)
+            rsSegments.set_comp1(index, Matrix4f(splineSegment.comp1.flts()), false)
+            rsSegments.set_comp2(index, Matrix4f(splineSegment.comp2.flts()), false)
+            rsSegments.set_alpha(index, Matrix4f(splineSegment.alpha.flts()), false)
+        }
+
+        script._segments.copyAll()
+    }
+
+    private fun setPalettesInScript(palettesWithSegmentIndex: List<Pair<Palette, Int>>) {
+        rsPalettes = ScriptField_palette(rs, palettesWithSegmentIndex.size)
+        script.bind_palettes(rsPalettes)
+
+        palettesWithSegmentIndex.forEachIndexed { index, pair ->
+            val palette = pair.first
+            val segmentIndex = pair.second
+
+            rsPalettes.set_w(index, palette.width.toLong(), false)
+            rsPalettes.set_h(index, palette.height.toLong(), false)
+
+            rsPalettes.set_offsetX(index, palette.offsetX, false)
+            rsPalettes.set_offsetY(index, palette.offsetY, false)
+
+            rsPalettes.set_segmentIndex(index, segmentIndex.toLong(), false)
+        }
+
+        script._palettes.copyAll()
+    }
+
+
 
     private fun toComponents(lab: Lab): FloatArray {
         // XXX If yuv is used, it must be switched here and in bitmap.rs
@@ -84,40 +123,4 @@ class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_b
             }
         }
     }
-
-    private fun setSegmentsInScript(splineSegments: ArrayList<SplineSegment>) {
-        // TODO: I guess I must destroy the old one...
-        val rsSegments = ScriptField_paletteSegment(rs, splineSegments.size)
-        script.bind_segments(rsSegments)
-
-        splineSegments.forEachIndexed { index, splineSegment ->
-            rsSegments.set_comp0(index, Matrix4f(splineSegment.comp0.flts()), false)
-            rsSegments.set_comp1(index, Matrix4f(splineSegment.comp1.flts()), false)
-            rsSegments.set_comp2(index, Matrix4f(splineSegment.comp2.flts()), false)
-            rsSegments.set_alpha(index, Matrix4f(splineSegment.alpha.flts()), false)
-        }
-
-        script._segments.copyAll()
-    }
-
-    private fun setPalettesInScript(palettesWithSegmentIndex: List<Pair<Palette, Int>>) {
-        val rsPalettes = ScriptField_palette(rs, palettesWithSegmentIndex.size)
-        script.bind_palettes(rsPalettes)
-
-        palettesWithSegmentIndex.forEachIndexed { index, pair ->
-            val palette = pair.first
-            val segmentIndex = pair.second
-
-            rsPalettes.set_w(index, palette.width.toLong(), false)
-            rsPalettes.set_h(index, palette.height.toLong(), false)
-
-            rsPalettes.set_offsetX(index, palette.offsetX, false)
-            rsPalettes.set_offsetY(index, palette.offsetY, false)
-
-            rsPalettes.set_segmentIndex(index, segmentIndex.toLong(), false)
-        }
-
-        script._palettes.copyAll()
-    }
-
 }

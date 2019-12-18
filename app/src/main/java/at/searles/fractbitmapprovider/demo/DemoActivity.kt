@@ -113,6 +113,7 @@ class DemoActivity : AppCompatActivity() {
     }
 
     companion object {
+        //val program = "setResult(0, cos (arc point + 2), sin rad point);"
         val program =
             "val z0 = 0:0;\n" +
                     "var c = point;\n" +
@@ -135,7 +136,7 @@ class DemoActivity : AppCompatActivity() {
                     "\t\tsetResult(0, logN, logN);\n" +
                     "\t\tfalse\n" +
                     "\t} else if(not next(maxIterationCount, n)) {\n" +
-                    "\t\tsetResult(0, arc z / tau, log radZ);\n" +
+                    "\t\tsetResult(1, 0, log radZ);\n" +
                     "\t\tfalse\n" +
                     "\t} else {\n" +
                     "\t\ttrue\n" +

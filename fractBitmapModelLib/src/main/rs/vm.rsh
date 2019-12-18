@@ -23,6 +23,7 @@ static float3 valueAt(double2 pt) {
 	float3 result;
 
 	while(pc < codeSize) {
+
 		switch(code[pc]) {
             // === Add ===
             // Add: [*Int, *Int]
@@ -141,7 +142,8 @@ static float3 valueAt(double2 pt) {
             // Assign: [*Cplx, *Cplx]
             case 52: (*((double2*) (&data[code[pc + 1]]))) = (*((double2*) (&data[code[pc + 2]]))); pc += 3; break;
             // Assign: [*Cplx, Cplx]
-            case 53: (*((double2*) (&data[code[pc + 1]]))) = (*((double2*) (&code[pc + 2]))); pc += 6; break;
+            case 53:
+                (*((double2*) (&data[code[pc + 1]]))) = (double2) {*((double* ) (&code[pc + 2])), *((double* ) (&code[pc + 4]))}; pc += 6; break;
             // === Jump ===
             // Jump: [Int]
             case 54: pc = code[pc + 1]; break;

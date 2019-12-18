@@ -13,8 +13,6 @@ class BitmapModelParameters(
     val shader3DProperties: Shader3DProperties,
     val compilerInstance: CompilerInstance) {
 
-    // TODO light should be here too.
-
     val vmCode = compilerInstance.vmCode
 
     fun createScaled(m: Matrix): BitmapModelParameters {

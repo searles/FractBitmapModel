@@ -28,7 +28,7 @@ float3 RS_KERNEL calculate(float3 in, uint32_t x) {
     x = x % (width + 1);
 
     double2 pt = mapCoordinates(x, y);
-    float3 value = mandelbrotValueAt(pt);
+    float3 value = valueAt(pt);
 
     return value;
 }

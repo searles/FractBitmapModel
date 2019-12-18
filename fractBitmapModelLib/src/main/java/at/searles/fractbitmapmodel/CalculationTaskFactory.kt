@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.renderscript.*
 import android.util.Log
 import at.searles.fractbitmapmodel.tasks.BitmapModelParameters
+import at.searles.paletteeditor.Palette
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
@@ -13,6 +14,8 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     private val calcScript: ScriptC_calc = ScriptC_calc(rs)
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
     private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
+
+    private val paletteUpdater = PaletteUpdater(rs, bitmapScript)
 
     var listener: Listener? = null
 
@@ -67,8 +70,7 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     }
 
     fun setPaletteOffset(index: Int, offsetX: Float, offsetY: Float) {
-        PaletteUpdater(rs, bitmapScript)
-            .updateOffsets(index, offsetX, offsetY)
+        paletteUpdater.updateOffsets(index, offsetX, offsetY)
     }
 
     /**
@@ -92,9 +94,7 @@ class CalculationTaskFactory(val rs: RenderScript, initialBitmapModelParameters:
     }
 
     private fun updatePalettesInScripts() {
-        PaletteUpdater(rs, bitmapScript).apply {
-            this.updatePalettes(fractal.palettes)
-        }
+        paletteUpdater.updatePalettes(fractal.palettes)
     }
 
     private fun updateScaleInScripts() {
