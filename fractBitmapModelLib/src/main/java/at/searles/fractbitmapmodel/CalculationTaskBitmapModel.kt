@@ -43,10 +43,6 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
 
     private var lastPixelGap = -1
 
-    init {
-        startTask()
-    }
-
     override fun progress(progress: Float, pixelGap: Int) {
         if(isWaitingForPreview) {
             bitmapTransformMatrix.set(nextBitmapTransformMatrix)
@@ -107,7 +103,7 @@ class CalculationTaskBitmapModel(private val calculationTaskFactory: Calculation
         return
     }
 
-    private fun startTask() {
+    fun startTask() {
         require(Looper.getMainLooper().isCurrentThread)
 
         require(postCalculationTasks.isEmpty())

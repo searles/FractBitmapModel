@@ -110,6 +110,8 @@ class DemoActivity : AppCompatActivity() {
                 }
             }
         }
+
+        bitmapModel.startTask()
     }
 
     companion object {
