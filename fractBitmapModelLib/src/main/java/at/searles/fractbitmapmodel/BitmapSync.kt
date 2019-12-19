@@ -4,7 +4,7 @@ import android.renderscript.RenderScript
 import kotlin.math.hypot
 import kotlin.math.max
 
-class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, val initBitmapAllocation: BitmapAllocation) {
+class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, initBitmapAllocation: BitmapAllocation) {
 
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
     private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
