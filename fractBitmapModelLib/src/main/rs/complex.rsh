@@ -16,11 +16,15 @@ static double2 crecip(double2 a) {
     return (double2){ a.x / r, -a.y / r };
 }
 
+static double dabs(double a) {
+    if(a < 0) return -a;
+    return a;
+}
+
 static double2 cabs(double2 a) {
-    double2 b = a;
-    if(b.x < 0) b.x = -b.x;
-    if(b.y < 0) b.y = -b.y;
-    return b;
+    if(a.x < 0) a.x = -a.x;
+    if(a.y < 0) a.y = -a.y;
+    return a;
 }
 
 static int __attribute__((overloadable)) pow(int base, int exp) {
@@ -178,5 +182,17 @@ static double2 __attribute__((overloadable)) sqrt(double2 f) {
 	double2 ret = { sqrt((r + f.x) / 2), sqrt((r - f.x) / 2) };
 	if(f.y < 0) ret.y = -ret.y;
 	return ret;
+}
+
+static double2 __attribute__((overloadable)) conj(double2 f) {
+	return (double2) {f.x, -f.y};
+}
+
+static double2 __attribute__((overloadable)) rabs(double2 f) {
+	return (double2) {dabs(f.x), f.y};
+}
+
+static double2 __attribute__((overloadable)) iabs(double2 f) {
+	return (double2) {f.x, dabs(f.y)};
 }
 

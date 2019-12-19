@@ -9,6 +9,7 @@ import at.searles.commons.math.Scale
 import at.searles.fractbitmapmodel.*
 import at.searles.fractbitmapmodel.BitmapProperties
 import at.searles.fractimageview.ScalableImageView
+import at.searles.fractlang.FractlangProgram
 import at.searles.paletteeditor.Palette
 import at.searles.paletteeditor.colors.Lab
 import at.searles.paletteeditor.colors.Rgb
@@ -34,42 +35,39 @@ class DemoActivity : AppCompatActivity() {
     }
 
     private fun initBitmapModel() {
-        val palettes = listOf(
-            Palette(5, 2, 0f, 0f,
-                SparseArray<SparseArray<Lab>>().also { table ->
-                    table.put(0, SparseArray<Lab>().also { row ->
-                        row.put(1, Rgb(0f, 0f, 0f).toLab())
-                        row.put(2, Rgb(1f, 0f, 0f).toLab())
-                        row.put(3, Rgb(1f, 1f, 0f).toLab())
-                        row.put(4, Rgb(1f, 1f, 1f).toLab())
-                        row.put(0, Rgb(0f, 0f, 1f).toLab())
-                    })
-                    table.put(1, SparseArray<Lab>().also { row ->
-                        row.put(0, Rgb(1f, 1f, 1f).toLab())
-                        row.put(1, Rgb(0f, 0.5f, 0f).toLab())
-                        row.put(2, Rgb(0f, 0.25f, 1f).toLab())
-                        row.put(3, Rgb(0.5f, 0.12f, 0.05f).toLab())
-                        row.put(4, Rgb(0f, 0f, 0f).toLab())
-                    })
-                }),
-            Palette(1, 1, 0f, 0f,
-                SparseArray<SparseArray<Lab>>().also { table ->
-                    table.put(0, SparseArray<Lab>().also { row ->
-                        row.put(0, Rgb(0f, 0f, 0f).toLab())
-                    })
-                })
-        )
-
         val shaderProperties = ShaderProperties()
 
+        val fractlangProgram = FractlangProgram(program, emptyMap())
+
+        val initialScale =
+                CalcProperties.getScale(fractlangProgram.scale) ?:
+                Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0)
+
+        val defaultPalettes = listOf(
+            Palette(1, 1, 0f, 0f,
+            SparseArray<SparseArray<Lab>>().also { table ->
+                table.put(0, SparseArray<Lab>().also { row ->
+                    row.put(0, Rgb(0f, 0f, 0f).toLab())
+                })
+            })
+        )
+
+        val initialPalettes =
+                CalcProperties.getPalettes(fractlangProgram.palettes).let {
+                    if(it.isEmpty()) {
+                        defaultPalettes
+                    } else {
+                        it
+                    }
+                }
+
         val calcProperties = CalcProperties(
-            Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0),
-            program,
-            emptyMap()
+            initialScale,
+            fractlangProgram
         )
 
         val bitmapProperties = BitmapProperties(
-            palettes,
+            initialPalettes,
             shaderProperties
         )
 

@@ -3,6 +3,7 @@ package at.searles.fractbitmapmodel
 import android.os.Looper
 import android.renderscript.*
 import at.searles.commons.math.Scale
+import at.searles.paletteeditor.Palette
 
 class CalcController(val rs: RenderScript,
                      firstCalcProperties: CalcProperties,
@@ -71,7 +72,7 @@ class CalcController(val rs: RenderScript,
         codeAllocation.destroy()
         codeAllocation = Allocation.createSized(rs, Element.I32(rs), vmCode.size)
 
-        codeAllocation.copyFrom(vmCode.toIntArray())
+        codeAllocation.copyFrom(vmCode)
 
         calcScript.bind_code(codeAllocation)
         calcScript._codeSize = vmCode.size.toLong()
@@ -80,6 +81,10 @@ class CalcController(val rs: RenderScript,
     fun updateBitmap() {
         require(Looper.getMainLooper().isCurrentThread)
         bitmapSync.updateBitmap()
+    }
+
+    fun updateDefaultBitmapProperties(scale: Scale?, palettes: List<Palette>) {
+        // TODO!
     }
 
     companion object {

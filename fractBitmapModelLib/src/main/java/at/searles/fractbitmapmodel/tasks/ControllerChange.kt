@@ -2,6 +2,6 @@ package at.searles.fractbitmapmodel.tasks
 
 import at.searles.fractbitmapmodel.CalcController
 
-interface PostCalcChange {
+interface ControllerChange {
     fun accept(controller: CalcController)
 }

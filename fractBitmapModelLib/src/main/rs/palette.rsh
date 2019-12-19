@@ -15,6 +15,7 @@ typedef struct paletteSegment {
     rs_matrix4x4 alpha;
 } segment_t;
 
+uint32_t palettesCount;
 palette_t *palettes;
 segment_t *segments;
 
@@ -50,6 +51,12 @@ static uint32_t pmod(float x, uint32_t divisor) {
  * precondition: 0 <= x < 1; 0 <= y < 1
  */
 static float4 colorAtNormalized(int layer, float2 pt) {
+    layer = layer % palettesCount;
+
+    if(layer < 0) {
+        layer = layer + palettesCount;
+    }
+
     struct palette *p = &(palettes[layer]);
 
     pt.x = (pt.x + p->offsetX) * p->w;

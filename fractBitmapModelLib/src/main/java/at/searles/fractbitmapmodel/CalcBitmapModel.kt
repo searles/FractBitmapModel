@@ -2,7 +2,8 @@ package at.searles.fractbitmapmodel
 
 import android.graphics.Matrix
 import android.os.Looper
-import at.searles.fractbitmapmodel.tasks.PostCalcChange
+import at.searles.fractbitmapmodel.tasks.CalcChange
+import at.searles.fractbitmapmodel.tasks.ControllerChange
 import at.searles.fractbitmapmodel.tasks.RelativeScaleChange
 import at.searles.fractimageview.ScalableBitmapModel
 
@@ -25,7 +26,10 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
     private var isTaskRunning: Boolean = false
     private var calculationTask: CalculationTask? = null
 
-    private val postCalcChanges = ArrayList<PostCalcChange>()
+    private val postCalcChanges = ArrayList<ControllerChange>()
+
+    var nextCalcProperties: CalcProperties? = null
+        private set
 
 
     override fun scale(relativeMatrix: Matrix) {
@@ -34,7 +38,7 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
         bitmapTransformMatrix.postConcat(relativeMatrix)
         nextBitmapTransformMatrix.postConcat(relativeMatrix)
 
-        addPostCalcChange(RelativeScaleChange(relativeMatrix))
+        addCalcChange(RelativeScaleChange(relativeMatrix))
     }
 
     override fun started() {
@@ -71,17 +75,49 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
 
         listener?.finished()
 
+        var mustStartTask = false
+
+        if(nextCalcProperties != null) {
+            controller.calcProperties = nextCalcProperties!!
+            nextCalcProperties = null
+
+            mustStartTask = true
+        }
+
         if(postCalcChanges.isNotEmpty()) {
             postCalcChanges.forEach { it.accept(controller) }
             postCalcChanges.clear()
+
+            mustStartTask = true
+        }
+
+        if(mustStartTask) {
             startTask()
         }
     }
 
+    fun addCalcChange(change: CalcChange) {
+        if(isTaskRunning) {
+            nextCalcProperties = if(nextCalcProperties == null) {
+                change.accept(controller.calcProperties)
+            } else {
+                change.accept(nextCalcProperties!!)
+            }
+
+            calculationTask!!.cancel(true)
+            return
+        }
+
+        require(nextCalcProperties == null)
+        controller.calcProperties = change.accept(controller.calcProperties)
+        startTask()
+    }
+
     /**
-     * Use this method to add edit tasks apart from scale.
+     * Use this method to add edit tasks like change bitmap or
+     * save after calculation has finished.
      */
-    fun addPostCalcChange(change: PostCalcChange) {
+    fun addPostCalcChange(change: ControllerChange) {
         require(Looper.getMainLooper().isCurrentThread)
 
         if(isTaskRunning) {
@@ -95,7 +131,6 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
         change.accept(controller)
 
         startTask()
-        return
     }
 
     fun startTask() {

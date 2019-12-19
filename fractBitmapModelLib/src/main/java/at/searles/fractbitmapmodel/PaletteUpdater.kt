@@ -30,6 +30,8 @@ class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_b
             Pair(palette, segmentStartIndex)
         }
 
+        script._palettesCount = palettes.size.toLong()
+
         setPalettesInScript(palettesWithSegmentIndex)
         setSegmentsInScript(splineSegments)
     }
