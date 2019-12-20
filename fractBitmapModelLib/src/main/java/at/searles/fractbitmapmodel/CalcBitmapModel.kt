@@ -117,7 +117,7 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
      * Use this method to add edit tasks like change bitmap or
      * save after calculation has finished.
      */
-    fun addPostCalcChange(change: ControllerChange) {
+    fun addControllerChange(change: ControllerChange) {
         require(Looper.getMainLooper().isCurrentThread)
 
         if(isTaskRunning) {
