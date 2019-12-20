@@ -34,8 +34,8 @@ class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, i
         paletteUpdater.updateOffsets(index, offsetX, offsetY)
     }
 
-    fun setLightVector(polarAngle: Float, azimuthAngle: Float) {
-        bitmapScript._lightVector = ShaderProperties.toVector(polarAngle, azimuthAngle)
+    fun setLightVector(polarAngle: Double, azimuthAngle: Double) {
+        bitmapScript._lightVector = ShaderProperties.getLightVector(polarAngle, azimuthAngle)
     }
 
     fun setScaleInScripts(scaleInScript: ScriptField_Scale.Item) {

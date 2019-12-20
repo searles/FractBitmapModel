@@ -13,7 +13,7 @@ class AnimationTask(private val controller: CalcController) {
     private val bitmapSync = controller.bitmapSync
 
     private fun step() {
-        bitmapSync.setLightVector(sin(0.782f * alpha) * 1.5f, alpha)
+        bitmapSync.setLightVector(sin(0.782 * alpha) * 1.5, alpha.toDouble())
         bitmapSync.setPaletteOffset(0, alpha * 0.17f, alpha * 0.03f)
         alpha += 0.05f
         controller.updateBitmap()

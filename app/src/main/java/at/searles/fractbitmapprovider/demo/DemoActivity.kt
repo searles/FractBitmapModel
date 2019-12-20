@@ -39,27 +39,8 @@ class DemoActivity : AppCompatActivity() {
 
         val fractlangProgram = FractlangProgram(program, emptyMap())
 
-        val initialScale =
-                CalcProperties.getScale(fractlangProgram.scale) ?:
-                Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0)
-
-        val defaultPalettes = listOf(
-            Palette(1, 1, 0f, 0f,
-            SparseArray<SparseArray<Lab>>().also { table ->
-                table.put(0, SparseArray<Lab>().also { row ->
-                    row.put(0, Rgb(0f, 0f, 0f).toLab())
-                })
-            })
-        )
-
-        val initialPalettes =
-                CalcProperties.getPalettes(fractlangProgram.palettes).let {
-                    if(it.isEmpty()) {
-                        defaultPalettes
-                    } else {
-                        it
-                    }
-                }
+        val initialScale = CalcProperties.getScale(fractlangProgram.scale)
+        val initialPalettes = CalcProperties.getPalettes(fractlangProgram.palettes)
 
         val calcProperties = CalcProperties(
             initialScale,

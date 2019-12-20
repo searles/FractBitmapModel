@@ -10,11 +10,14 @@ import at.searles.fractlang.PaletteData
 import at.searles.paletteeditor.Palette
 import at.searles.paletteeditor.colors.Lab
 import at.searles.paletteeditor.colors.Rgb
+import org.json.JSONArray
+import org.json.JSONObject
 
 class CalcProperties (
-    val scale: Scale,
-    val fractlangProgram: FractlangProgram
+    scale: Scale?,
+    private val fractlangProgram: FractlangProgram
 ) {
+    val scale: Scale = scale ?: defaultScale // kotlin, I am impressed.
     val sourceCode = fractlangProgram.sourceCode
     val parameters = fractlangProgram.activeParameters
     val vmCode = fractlangProgram.vmCode
@@ -71,7 +74,46 @@ class CalcProperties (
         )
     }
 
+    fun createJson(): JSONObject {
+        val parametersObj = JSONObject()
+        parameters.forEach { (key, value) -> parametersObj.put(key, value) }
+
+        val obj = JSONObject()
+        obj.put(sourceCodeKey, sourceCode)
+        obj.put(parametersKey, parameters)
+
+        val scaleArray = JSONArray()
+
+        // order consistent with constructor in Scale
+        scaleArray.put(scale.xx).put(scale.xy).put(scale.yx).put(scale.yy).put(scale.cx).put(scale.cy)
+        obj.put(scaleKey, scaleArray)
+
+        return obj
+    }
+
     companion object {
+        private fun fromJson(obj: JSONObject): CalcProperties {
+            val parametersObj = obj.getJSONObject(parametersKey)
+
+            val parameters = HashMap<String, String>()
+            parametersObj.keys().forEach { key -> parameters[key] = parametersObj.getString(key) }
+
+            val scaleArray = obj.getJSONArray(scaleKey)
+            val scale = Scale(
+                scaleArray.getDouble(0),
+                scaleArray.getDouble(1),
+                scaleArray.getDouble(2),
+                scaleArray.getDouble(3),
+                scaleArray.getDouble(4),
+                scaleArray.getDouble(5))
+
+            val sourceCode = obj.getString(sourceCodeKey)
+
+            val fractlangProgram = FractlangProgram(sourceCode, parameters)
+
+            return CalcProperties(scale, fractlangProgram)
+        }
+
         fun getScale(doubleArray: DoubleArray?): Scale? = doubleArray ?.let { toScale(it) }
         fun getPalettes(paletteDataList: List<PaletteData>): List<Palette> = paletteDataList.map { toPalette(it) }
 
@@ -93,5 +135,12 @@ class CalcProperties (
 
         private fun toScale(array: DoubleArray): Scale {
             return Scale(array[0], array[1], array[2], array[3], array[4], array[5])
-        }    }
+        }
+
+        const val sourceCodeKey = "sourceCode"
+        const val parametersKey = "parameters"
+        const val scaleKey = "scale"
+
+        val defaultScale = Scale(2.0, 0.0, 0.0, 2.0, 0.0, 0.0)
+    }
 }
