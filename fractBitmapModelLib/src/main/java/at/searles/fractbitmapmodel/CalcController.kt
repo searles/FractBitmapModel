@@ -14,6 +14,12 @@ class CalcController(val rs: RenderScript,
 
     val bitmapSync = BitmapSync(rs, firstBitmapProperties, firstBitmapAllocation)
 
+    var bitmapProperties
+        get() = bitmapSync.bitmapProperties
+        set(value) {
+            bitmapSync.bitmapProperties = value
+        }
+
     var bitmapAllocation: BitmapAllocation = firstBitmapAllocation
         set(value) {
             require(Looper.getMainLooper().isCurrentThread)

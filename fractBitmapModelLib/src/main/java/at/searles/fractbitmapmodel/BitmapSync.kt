@@ -23,6 +23,11 @@ class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, i
     var listener: Listener? = null
 
     var bitmapProperties: BitmapProperties = initBitmapProperties
+        set(value) {
+            field = value
+            setPalettesInScripts()
+            setLightParametersInScripts()
+        }
 
     init {
         setPalettesInScripts()
