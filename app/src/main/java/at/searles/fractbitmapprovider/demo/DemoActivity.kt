@@ -1,18 +1,12 @@
 package at.searles.fractbitmapprovider.demo
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.renderscript.RenderScript
 import android.util.Log
-import android.util.SparseArray
-import at.searles.commons.math.Scale
+import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
-import at.searles.fractbitmapmodel.BitmapProperties
 import at.searles.fractimageview.ScalableImageView
 import at.searles.fractlang.FractlangProgram
-import at.searles.paletteeditor.Palette
-import at.searles.paletteeditor.colors.Lab
-import at.searles.paletteeditor.colors.Rgb
 
 class DemoActivity : AppCompatActivity() {
 
@@ -92,7 +86,7 @@ class DemoActivity : AppCompatActivity() {
 
     companion object {
         //val program = "setResult(0, cos (arc point + 2), sin rad point);"
-        val program =
+        const val program =
             "val z0 = 0:0;\n" +
                     "var c = point;\n" +
                     "var n = 0;\n" +

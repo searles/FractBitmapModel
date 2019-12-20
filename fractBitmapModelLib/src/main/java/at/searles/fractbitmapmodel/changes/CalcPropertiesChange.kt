@@ -1,4 +1,4 @@
-package at.searles.fractbitmapmodel.tasks
+package at.searles.fractbitmapmodel.changes
 
 import at.searles.fractbitmapmodel.CalcProperties
 

@@ -2,7 +2,7 @@ package at.searles.fractbitmapmodel
 
 import android.graphics.Matrix
 import android.os.Looper
-import at.searles.fractbitmapmodel.tasks.*
+import at.searles.fractbitmapmodel.changes.*
 import at.searles.fractimageview.ScalableBitmapModel
 
 /**
@@ -26,9 +26,7 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
 
     private val postCalcChanges = ArrayList<ControllerChange>()
 
-    var nextCalcProperties: CalcProperties? = null
-        private set
-
+    private var nextCalcProperties: CalcProperties? = null
 
     override fun scale(relativeMatrix: Matrix) {
         require(Looper.getMainLooper().isCurrentThread)

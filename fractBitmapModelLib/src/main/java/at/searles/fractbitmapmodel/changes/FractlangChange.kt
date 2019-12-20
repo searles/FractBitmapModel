@@ -1,4 +1,4 @@
-package at.searles.fractbitmapmodel.tasks
+package at.searles.fractbitmapmodel.changes
 
 import at.searles.fractbitmapmodel.CalcController
 import at.searles.fractbitmapmodel.CalcProperties
@@ -10,9 +10,7 @@ import at.searles.fractlang.FractlangProgram
  * are either the existing ones or empty ones.
  * All other parameters, eg palette or scale, are kept.
  */
-class SourceCodeChange(newSourceCode: String, newParameters: Map<String, String>): CalcPropertiesChange, ControllerChange {
-
-    private val fractlangProgram = FractlangProgram(newSourceCode, newParameters)
+class FractlangChange(private val fractlangProgram: FractlangProgram): CalcPropertiesChange, ControllerChange {
 
     override fun accept(calcProperties: CalcProperties): CalcProperties {
         return calcProperties.createWithNewSourceCode(fractlangProgram)

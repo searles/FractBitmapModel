@@ -1,4 +1,4 @@
-package at.searles.fractbitmapmodel.tasks
+package at.searles.fractbitmapmodel.changes
 
 import at.searles.fractbitmapmodel.BitmapProperties
 import at.searles.fractbitmapmodel.CalcController
@@ -9,9 +9,8 @@ import at.searles.fractlang.FractlangProgram
  * Use this one to load a demo. Existing settings are dropped apart from
  * shader properties.
  */
-class SourceCodeWithResetChange(newSourceCode: String, newParameters: Map<String, String>): CalcPropertiesChange, ControllerChange {
+class FractlangWithDefaultsChange(private val fractlangProgram: FractlangProgram): CalcPropertiesChange, ControllerChange {
 
-    private val fractlangProgram = FractlangProgram(newSourceCode, newParameters)
     private val newCalcProperties: CalcProperties
 
     init {

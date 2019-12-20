@@ -1,9 +1,10 @@
 package at.searles.fractbitmapmodel
 
 import android.os.Looper
-import android.renderscript.*
+import android.renderscript.Allocation
+import android.renderscript.Element
+import android.renderscript.RenderScript
 import at.searles.commons.math.Scale
-import at.searles.paletteeditor.Palette
 
 class CalcController(val rs: RenderScript,
                      firstCalcProperties: CalcProperties,

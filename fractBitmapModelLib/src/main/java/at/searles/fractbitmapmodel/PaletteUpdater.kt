@@ -3,7 +3,6 @@ package at.searles.fractbitmapmodel
 import android.renderscript.Matrix4f
 import android.renderscript.RenderScript
 import at.searles.commons.math.InterpolationMatrix
-import at.searles.fractbitmapmodel.ScriptField_palette
 import at.searles.fractbitmapmodel.palette.SplineSegment
 import at.searles.fractbitmapmodel.palette.Yuv
 import at.searles.paletteeditor.Palette
