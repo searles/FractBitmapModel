@@ -92,7 +92,7 @@ class CalcProperties (
     }
 
     companion object {
-        private fun fromJson(obj: JSONObject): CalcProperties {
+        fun fromJson(obj: JSONObject): CalcProperties {
             val parametersObj = obj.getJSONObject(parametersKey)
 
             val parameters = HashMap<String, String>()
