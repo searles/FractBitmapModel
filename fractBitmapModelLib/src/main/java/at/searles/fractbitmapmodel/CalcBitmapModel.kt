@@ -2,9 +2,7 @@ package at.searles.fractbitmapmodel
 
 import android.graphics.Matrix
 import android.os.Looper
-import at.searles.fractbitmapmodel.tasks.CalcChange
-import at.searles.fractbitmapmodel.tasks.ControllerChange
-import at.searles.fractbitmapmodel.tasks.RelativeScaleChange
+import at.searles.fractbitmapmodel.tasks.*
 import at.searles.fractimageview.ScalableBitmapModel
 
 /**
@@ -38,7 +36,7 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
         bitmapTransformMatrix.postConcat(relativeMatrix)
         nextBitmapTransformMatrix.postConcat(relativeMatrix)
 
-        addCalcChange(RelativeScaleChange(relativeMatrix))
+        addChange(RelativeScaleChange(relativeMatrix))
     }
 
     override fun started() {
@@ -96,12 +94,20 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
         }
     }
 
-    fun addCalcChange(change: CalcChange) {
+    fun addChange(change: Change) {
         if(isTaskRunning) {
-            nextCalcProperties = if(nextCalcProperties == null) {
-                change.accept(controller.calcProperties)
-            } else {
-                change.accept(nextCalcProperties!!)
+            require(calculationTask != null)
+
+            if(change is CalcPropertiesChange) {
+                nextCalcProperties = if (nextCalcProperties == null) {
+                    change.accept(controller.calcProperties)
+                } else {
+                    change.accept(nextCalcProperties!!)
+                }
+            }
+
+            if(change is ControllerChange) {
+                postCalcChanges.add(change)
             }
 
             calculationTask!!.cancel(true)
@@ -109,26 +115,14 @@ class CalcBitmapModel(private val controller: CalcController): CalculationTask.L
         }
 
         require(nextCalcProperties == null)
-        controller.calcProperties = change.accept(controller.calcProperties)
-        startTask()
-    }
 
-    /**
-     * Use this method to add edit tasks like change bitmap or
-     * save after calculation has finished.
-     */
-    fun addControllerChange(change: ControllerChange) {
-        require(Looper.getMainLooper().isCurrentThread)
-
-        if(isTaskRunning) {
-            require(calculationTask != null)
-            postCalcChanges.add(change)
-            calculationTask!!.cancel(true)
-            return
+        if(change is CalcPropertiesChange) {
+            controller.calcProperties = change.accept(controller.calcProperties)
         }
 
-        require(postCalcChanges.isEmpty())
-        change.accept(controller)
+        if(change is ControllerChange) {
+            change.accept(controller)
+        }
 
         startTask()
     }

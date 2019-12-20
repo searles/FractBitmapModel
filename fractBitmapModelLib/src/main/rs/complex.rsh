@@ -106,7 +106,6 @@ static double2 __attribute__((overloadable)) exp(double2 f) {
 static double2 __attribute__((overloadable)) pow(double2 base, double power) {
 	if(base.x == 0 && base.y == 0) return (double2) {0, 0};
 
-    // FIXME
 	// base^power = exp(log base * power) =
 	// = exp ((log rad base + i arc base) * power)
 	// = exp (power * log rad base + i power arc base)
@@ -115,13 +114,13 @@ static double2 __attribute__((overloadable)) pow(double2 base, double power) {
 	double r = pow(rad(base), power);
 	double pa = power * arc(base);
 
+    // TODO: s = sincos(pa, c)
 	double c = cos(pa); double s = sin(pa);
 
 	return (double2) {r * c, r * s};
 }
 
 static double2 __attribute__((overloadable)) pow(double2 base, double2 power) {
-    // FIXME
 	// base^power = exp(log base * power) =
 	// = exp ((log rad base + i ab) * power)
 	// = exp ((log rb + i arc base) * power)

@@ -1,15 +1,18 @@
 package at.searles.fractbitmapmodel.tasks
 
-import android.util.SparseArray
-import androidx.core.util.set
-import at.searles.commons.math.Scale
 import at.searles.fractbitmapmodel.CalcController
 import at.searles.fractbitmapmodel.CalcProperties
 import at.searles.fractlang.FractlangProgram
 
-class SourceCodeChange(val sourceCode: String, val parameters: Map<String, String>): CalcChange, ControllerChange {
+/**
+ * Use this one if the source code and/or parameters change
+ * but everything else remains the same. Parameters
+ * are either the existing ones or empty ones.
+ * All other parameters, eg palette or scale, are kept.
+ */
+class SourceCodeChange(newSourceCode: String, newParameters: Map<String, String>): CalcPropertiesChange, ControllerChange {
 
-    private val fractlangProgram = FractlangProgram(sourceCode, parameters)
+    private val fractlangProgram = FractlangProgram(newSourceCode, newParameters)
 
     override fun accept(calcProperties: CalcProperties): CalcProperties {
         return calcProperties.createWithNewSourceCode(fractlangProgram)
@@ -18,6 +21,8 @@ class SourceCodeChange(val sourceCode: String, val parameters: Map<String, Strin
     override fun accept(controller: CalcController) {
         val scale = CalcProperties.getScale(fractlangProgram.scale)
         val palettes = CalcProperties.getPalettes(fractlangProgram.palettes)
-        controller.updateDefaultBitmapProperties(scale, palettes)
+
+        // TODO: Change scale or palette if they are default in the controller.
+        controller.updateDefaultPropertiesFromSource()
     }
 }

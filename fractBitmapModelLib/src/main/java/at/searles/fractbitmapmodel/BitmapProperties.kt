@@ -13,10 +13,6 @@ class BitmapProperties (
 ) {
     val palettes = if(palettes.isEmpty()) defaultPalettes else palettes
 
-    // TODO: Number of palettes and initial palette from compiler instance
-    // TODO: Initial scale from compilerInstance.
-    // TODO: Initial shaderProperties from compilerInstance
-
     fun createJson(): JSONObject {
         val palettesArray = JSONArray()
         palettes.forEach { palettesArray.put(it.createJson()) }

@@ -30,10 +30,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.1.0'
-    implementation 'com.github.searles:paletteeditor:720d73669d37132f72602de6b0ba608ce3591bbc'
+    implementation 'com.github.searles:paletteeditor:0.1.4'
     implementation 'com.github.searles:scalableimageview:0.0.4'
     implementation 'com.github.searles.utils:math:0.3.0'
-    implementation 'com.github.searles:fractlang:ce41d027870b9f9b89a359964ca2894d0a8df44b'
+    implementation 'com.github.searles:fractlang:0.3.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

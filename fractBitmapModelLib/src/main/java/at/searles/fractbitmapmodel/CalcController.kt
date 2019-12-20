@@ -89,8 +89,12 @@ class CalcController(val rs: RenderScript,
         bitmapSync.updateBitmap()
     }
 
-    fun updateDefaultBitmapProperties(scale: Scale?, palettes: List<Palette>) {
-        // TODO!
+    /**
+     * If the source code changed, then there might be a new default palette
+     * or a new default scale.
+     */
+    fun updateDefaultPropertiesFromSource() {
+        // TODO in the beginning not yet interesting.
     }
 
     companion object {
