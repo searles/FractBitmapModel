@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
 import at.searles.fractimageview.ScalableImageView
 
-class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModelFragment.Listener {
+class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModelFragment.Listener, FractBitmapModel.Listener {
 
     private val imageView: ScalableImageView by lazy {
         findViewById<ScalableImageView>(R.id.scalableImageView)
@@ -78,5 +78,9 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
 
     override fun finished() {
         Log.d("DemoActivity", "finished")
+    }
+
+    override fun propertiesChanged(src: FractBitmapModel) {
+        // ignore.
     }
 }
