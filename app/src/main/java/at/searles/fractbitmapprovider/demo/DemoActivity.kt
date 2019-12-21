@@ -4,17 +4,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import at.searles.fractbitmapmodel.*
 import at.searles.fractimageview.ScalableImageView
 
-class DemoActivity : AppCompatActivity(), BitmapController.Listener, CalcBitmapModel.Listener, BitmapModelFragment.Listener {
+class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModel.Listener, FractBitmapModelFragment.Listener {
 
     private val imageView: ScalableImageView by lazy {
         findViewById<ScalableImageView>(R.id.scalableImageView)
     }
 
-    private lateinit var bitmapModelFragment: BitmapModelFragment
+    private lateinit var bitmapModelFragment: FractBitmapModelFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +34,10 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, CalcBitmapM
 
     private fun initBitmapModelFragment() {
         val fragment =
-            supportFragmentManager.findFragmentByTag(bitmapModelFragmentTag) as BitmapModelFragment?
+            supportFragmentManager.findFragmentByTag(bitmapModelFragmentTag) as FractBitmapModelFragment?
 
         bitmapModelFragment = fragment ?:
-                BitmapModelFragment.createInstance(program).also {
+                FractBitmapModelFragment.createInstance(program).also {
                     supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
 

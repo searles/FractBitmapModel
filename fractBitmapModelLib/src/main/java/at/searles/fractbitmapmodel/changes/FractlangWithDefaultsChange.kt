@@ -1,8 +1,6 @@
 package at.searles.fractbitmapmodel.changes
 
-import at.searles.fractbitmapmodel.BitmapProperties
-import at.searles.fractbitmapmodel.CalcBitmapModel
-import at.searles.fractbitmapmodel.CalcController
+import at.searles.fractbitmapmodel.FractBitmapModel
 import at.searles.fractbitmapmodel.CalcProperties
 import at.searles.fractlang.FractlangProgram
 
@@ -23,7 +21,7 @@ class FractlangWithDefaultsChange(private val fractlangProgram: FractlangProgram
         return newCalcProperties
     }
 
-    override fun accept(model: CalcBitmapModel) {
+    override fun accept(model: FractBitmapModel) {
         val palettes = CalcProperties.getPalettes(fractlangProgram.palettes)
         model.setPalettes(palettes)
     }

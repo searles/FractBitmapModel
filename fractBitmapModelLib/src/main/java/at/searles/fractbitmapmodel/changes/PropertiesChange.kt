@@ -1,8 +1,7 @@
 package at.searles.fractbitmapmodel.changes
 
 import at.searles.fractbitmapmodel.BitmapProperties
-import at.searles.fractbitmapmodel.CalcBitmapModel
-import at.searles.fractbitmapmodel.CalcController
+import at.searles.fractbitmapmodel.FractBitmapModel
 import at.searles.fractbitmapmodel.CalcProperties
 
 /**
@@ -15,7 +14,7 @@ class PropertiesChange(private val newCalcProperties: CalcProperties, private va
         return newCalcProperties
     }
 
-    override fun accept(model: CalcBitmapModel) {
+    override fun accept(model: FractBitmapModel) {
         model.setBitmapProperties(newBitmapProperties)
     }
 }

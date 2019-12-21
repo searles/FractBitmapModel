@@ -12,11 +12,11 @@ import at.searles.fractbitmapmodel.changes.Change
 import at.searles.fractlang.FractlangProgram
 import at.searles.paletteeditor.Palette
 
-class BitmapModelFragment : Fragment() {
+class FractBitmapModelFragment : Fragment() {
 
     private lateinit var rs: RenderScript
 
-    lateinit var bitmapModel: CalcBitmapModel
+    lateinit var bitmapModel: FractBitmapModel
         private set
 
     val bitmap: Bitmap?
@@ -27,7 +27,7 @@ class BitmapModelFragment : Fragment() {
 
     var initListener: Listener? = null
 
-    var listener: CalcBitmapModel.Listener?
+    var listener: FractBitmapModel.Listener?
         get() {
             return bitmapModel.listener
         }
@@ -76,7 +76,7 @@ class BitmapModelFragment : Fragment() {
 
                 val bitmapAllocation = BitmapAllocation(rs, 1000,600)
 
-                bitmapModel = CalcBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
+                bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
             }
 
             override fun onPostExecute(result: Unit?) {
@@ -96,12 +96,12 @@ class BitmapModelFragment : Fragment() {
     companion object {
         val sourceCodeKey = "sourceCode"
 
-        fun createInstance(sourceCode: String): BitmapModelFragment {
+        fun createInstance(sourceCode: String): FractBitmapModelFragment {
             val bundle = Bundle().apply {
                 putString(sourceCodeKey, sourceCode)
             }
 
-            return BitmapModelFragment().apply {
+            return FractBitmapModelFragment().apply {
                 arguments = bundle
             }
         }

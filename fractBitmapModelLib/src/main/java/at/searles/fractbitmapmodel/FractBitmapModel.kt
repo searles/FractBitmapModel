@@ -12,7 +12,7 @@ import at.searles.paletteeditor.Palette
  * are not able to provide an instant review. For this cases a second relative scale matrix
  * is maintained inside and used after a first preview is available.
  */
-class CalcBitmapModel(
+class FractBitmapModel(
     val rs: RenderScript,
     initialBitmapAllocation: BitmapAllocation,
     initialCalcProperties: CalcProperties,
@@ -161,7 +161,7 @@ class CalcBitmapModel(
         nextBitmapTransformMatrix.set(null)
 
         calcTask = calcController.createCalculationTask(bitmapAllocation).apply {
-            listener = this@CalcBitmapModel
+            listener = this@FractBitmapModel
             execute()
         }
     }
