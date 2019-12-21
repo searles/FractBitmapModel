@@ -8,41 +8,14 @@ import android.renderscript.RenderScript
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import at.searles.fractbitmapmodel.changes.BitmapAllocationChange
-import at.searles.fractbitmapmodel.changes.Change
 import at.searles.fractlang.FractlangProgram
-import at.searles.paletteeditor.Palette
-import org.json.JSONObject
 
-class FractBitmapModelFragment : Fragment(), FractBitmapModel.Listener {
+class FractBitmapModelFragment : Fragment() {
 
     private lateinit var rs: RenderScript
 
     lateinit var bitmapModel: FractBitmapModel
         private set
-
-    val bitmap: Bitmap?
-        get() = if(isInitializing) null else bitmapModel.bitmap
-
-    val scale
-        get() = bitmapModel.scale
-
-    val sourceCode
-        get() = bitmapModel.sourceCode
-
-    val parameters
-        get() = bitmapModel.parameters
-
-    var palettes
-        get() = bitmapModel.palettes
-        set(value) {
-            bitmapModel.palettes = value
-        }
-
-    var shaderProperties
-        get() = bitmapModel.shaderProperties
-        set(value) {
-            bitmapModel.shaderProperties = value
-        }
 
     var isInitializing: Boolean = true
         private set
@@ -64,21 +37,6 @@ class FractBitmapModelFragment : Fragment(), FractBitmapModel.Listener {
         }
     }
 
-    /**
-     * Applies new bitmap properties
-     */
-    fun updateBitmap() {
-        bitmapModel.updateBitmap()
-    }
-
-    fun addChange(change: Change) {
-        bitmapModel.addChange(change)
-    }
-
-    fun createJson(): JSONObject {
-        return bitmapModel.createJson()
-    }
-
     private fun asyncInitialize() {
         // This should be fast enough to not raise problems wrt leaks.
         @SuppressLint("StaticFieldLeak")
@@ -95,9 +53,7 @@ class FractBitmapModelFragment : Fragment(), FractBitmapModel.Listener {
 
                 val bitmapAllocation = BitmapAllocation(rs, 1000,600)
 
-                bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties).apply {
-                    listener = this@FractBitmapModelFragment
-                }
+                bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
             }
 
             override fun onPostExecute(result: Unit?) {
@@ -110,24 +66,8 @@ class FractBitmapModelFragment : Fragment(), FractBitmapModel.Listener {
         task.execute()
     }
 
-    interface Listener: FractBitmapModel.Listener {
+    interface Listener {
         fun initializationFinished()
-    }
-
-    override fun started() {
-        listener?.started()
-    }
-
-    override fun setProgress(progress: Float) {
-        listener?.setProgress(progress)
-    }
-
-    override fun bitmapUpdated() {
-        listener?.bitmapUpdated()
-    }
-
-    override fun finished() {
-        listener?.finished()
     }
 
     companion object {

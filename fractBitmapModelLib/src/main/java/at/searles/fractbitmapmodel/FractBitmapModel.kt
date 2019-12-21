@@ -19,7 +19,6 @@ class FractBitmapModel(
     initialCalcProperties: CalcProperties,
     initialBitmapProperties: BitmapProperties): CalcTask.Listener, ScalableBitmapModel() {
 
-    // TODO: Or should I use the ones from nextCalcProperties?
     val sourceCode: String
         get() = calcController.sourceCode
 
@@ -33,12 +32,14 @@ class FractBitmapModel(
         get() = bitmapController.palettes
         set(value) {
             bitmapController.palettes = value
+            listener?.propertiesChanged(this)
         }
 
     var shaderProperties: ShaderProperties
         get() = bitmapController.shaderProperties
         set(value) {
             bitmapController.shaderProperties = value
+            listener?.propertiesChanged(this)
         }
 
     var bitmapAllocation = initialBitmapAllocation
@@ -80,6 +81,10 @@ class FractBitmapModel(
         addChange(RelativeScaleChange(relativeMatrix))
     }
 
+    fun updateBitmap() {
+        bitmapController.updateBitmap()
+    }
+
     override fun started() {
         require(nextBitmapTransformMatrix.isIdentity)
         listener?.started()
@@ -109,23 +114,24 @@ class FractBitmapModel(
 
         listener?.finished()
 
-        var mustStartTask = false
+        var propertiesChanged = false
 
         if(nextCalcProperties != null) {
             setCalcProperties(nextCalcProperties!!)
             nextCalcProperties = null
 
-            mustStartTask = true
+            propertiesChanged = true
         }
 
         if(postCalcChanges.isNotEmpty()) {
             postCalcChanges.forEach { it.accept(this) }
             postCalcChanges.clear()
 
-            mustStartTask = true
+            propertiesChanged = true
         }
 
-        if(mustStartTask) {
+        if(propertiesChanged) {
+            listener?.propertiesChanged(this)
             startTask()
         }
     }
@@ -160,11 +166,9 @@ class FractBitmapModel(
             change.accept(this)
         }
 
-        startTask()
-    }
+        listener?.propertiesChanged(this)
 
-    fun updateBitmap() {
-        bitmapController.updateBitmap()
+        startTask()
     }
 
     private fun setCalcProperties(newCalcProperties: CalcProperties) {
@@ -217,7 +221,7 @@ class FractBitmapModel(
         fun setProgress(progress: Float)
         fun bitmapUpdated()
         fun finished()
+
+        fun propertiesChanged(src: FractBitmapModel)
     }
-
-
 }
