@@ -6,6 +6,7 @@ import android.renderscript.RenderScript
 import at.searles.fractbitmapmodel.changes.*
 import at.searles.fractimageview.ScalableBitmapModel
 import at.searles.paletteeditor.Palette
+import org.json.JSONObject
 
 /**
  * Represents bitmap models that depend on potentially long running tasks and therefore
@@ -17,6 +18,28 @@ class FractBitmapModel(
     initialBitmapAllocation: BitmapAllocation,
     initialCalcProperties: CalcProperties,
     initialBitmapProperties: BitmapProperties): CalcTask.Listener, ScalableBitmapModel() {
+
+    // TODO: Or should I use the ones from nextCalcProperties?
+    val sourceCode: String
+        get() = calcController.sourceCode
+
+    val parameters
+        get() = calcController.parameters
+
+    val scale
+        get() = calcController.scale
+
+    var palettes: List<Palette>
+        get() = bitmapController.palettes
+        set(value) {
+            bitmapController.palettes = value
+        }
+
+    var shaderProperties: ShaderProperties
+        get() = bitmapController.shaderProperties
+        set(value) {
+            bitmapController.shaderProperties = value
+        }
 
     var bitmapAllocation = initialBitmapAllocation
         set(value) {
@@ -46,7 +69,6 @@ class FractBitmapModel(
     private var calcTask: CalcTask? = null
 
     private val postCalcChanges = ArrayList<BitmapModelChange>()
-
     private var nextCalcProperties: CalcProperties? = null
 
     override fun scale(relativeMatrix: Matrix) {
@@ -65,7 +87,7 @@ class FractBitmapModel(
 
     private var lastPixelGap = -1
 
-    override fun progress(progress: Float) {
+    override fun setProgress(progress: Float) {
         if(isWaitingForPreview) {
             bitmapTransformMatrix.set(nextBitmapTransformMatrix)
             isWaitingForPreview = false
@@ -78,7 +100,7 @@ class FractBitmapModel(
             listener?.bitmapUpdated()
         }
 
-        listener?.progress(progress)
+        listener?.setProgress(progress)
     }
 
     override fun finished() {
@@ -178,17 +200,17 @@ class FractBitmapModel(
         bitmapController.bitmapProperties = newBitmapProperties
     }
 
-    fun setPalettes(palettes: List<Palette>) {
-        bitmapController.setPalettes(palettes)
-    }
+    fun createJson(): JSONObject {
+        val obj = JSONObject()
+        calcController.calcProperties.createJson(obj)
+        bitmapController.bitmapProperties.createJson(obj)
 
-    fun setPalette(index: Int, palette: Palette) {
-        bitmapController.setPalette(index, palette)
+        return obj
     }
 
     interface Listener {
         fun started()
-        fun progress(progress: Float)
+        fun setProgress(progress: Float)
         fun bitmapUpdated()
         fun finished()
     }

@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
 import at.searles.fractimageview.ScalableImageView
 
-class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModel.Listener, FractBitmapModelFragment.Listener {
+class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModelFragment.Listener {
 
     private val imageView: ScalableImageView by lazy {
         findViewById<ScalableImageView>(R.id.scalableImageView)
@@ -41,7 +41,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
                     supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
 
-        bitmapModelFragment.initListener = this
+        bitmapModelFragment.listener = this
     }
 
     override fun initializationFinished() {
@@ -52,14 +52,12 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         imageView.scalableBitmapModel = bitmapModelFragment.bitmapModel
         imageView.visibility = View.VISIBLE
         imageView.invalidate()
-
-        bitmapModelFragment.listener = this
     }
 
     companion object {
         const val bitmapModelFragmentTag = "bitmapModelFragment"
         
-        val program =
+        const val program =
             "extern addend: \"Addend\" = \"0.1\";" +
             "setResult(0, cos (arc point), sin rad point);" +
             "declareScale(5,0,0,5,0,0);" +
@@ -70,7 +68,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         Log.d("DemoActivity", "started")
     }
 
-    override fun progress(progress: Float) {
+    override fun setProgress(progress: Float) {
         Log.d("DemoActivity", "progress: $progress")
     }
 

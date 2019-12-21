@@ -18,6 +18,12 @@ import android.renderscript.RenderScript
 class CalcController(val rs: RenderScript,
                      initCalcProperties: CalcProperties) {
 
+    val sourceCode: String
+        get() = calcProperties.sourceCode
+
+    val parameters: Map<String, String>
+        get() = calcProperties.parameters
+
     private val calcScript: ScriptC_calc = ScriptC_calc(rs)
 
     val scale

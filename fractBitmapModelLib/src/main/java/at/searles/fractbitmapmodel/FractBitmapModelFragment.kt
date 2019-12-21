@@ -11,8 +11,9 @@ import at.searles.fractbitmapmodel.changes.BitmapAllocationChange
 import at.searles.fractbitmapmodel.changes.Change
 import at.searles.fractlang.FractlangProgram
 import at.searles.paletteeditor.Palette
+import org.json.JSONObject
 
-class FractBitmapModelFragment : Fragment() {
+class FractBitmapModelFragment : Fragment(), FractBitmapModel.Listener {
 
     private lateinit var rs: RenderScript
 
@@ -22,19 +23,25 @@ class FractBitmapModelFragment : Fragment() {
     val bitmap: Bitmap?
         get() = if(isInitializing) null else bitmapModel.bitmap
 
+    val scale
+        get() = bitmapModel.scale
+
+    val sourceCode
+        get() = bitmapModel.sourceCode
+
+    val parameters
+        get() = bitmapModel.parameters
+
+    val palettes
+        get() = bitmapModel.palettes
+
+    val shaderProperties
+        get() = bitmapModel.shaderProperties
+
     var isInitializing: Boolean = true
         private set
 
-    var initListener: Listener? = null
-
-    var listener: FractBitmapModel.Listener?
-        get() {
-            return bitmapModel.listener
-        }
-
-        set(value) {
-            bitmapModel.listener = value
-        }
+    var listener: Listener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,12 +58,12 @@ class FractBitmapModelFragment : Fragment() {
         }
     }
 
-    fun setPalette(index: Int, palette: Palette) {
-        bitmapModel.setPalette(index, palette)
-    }
-
     fun addChange(change: Change) {
         bitmapModel.addChange(change)
+    }
+
+    fun createJson(): JSONObject {
+        return bitmapModel.createJson()
     }
 
     private fun asyncInitialize() {
@@ -70,18 +77,19 @@ class FractBitmapModelFragment : Fragment() {
 
                 rs = RenderScript.create(context)
 
-                // TODO maybe there is a better place...
                 val calcProperties = CalcProperties(CalcProperties.getScale(program.scale), program)
                 val bitmapProperties = BitmapProperties(CalcProperties.getPalettes(program.palettes), ShaderProperties())
 
                 val bitmapAllocation = BitmapAllocation(rs, 1000,600)
 
-                bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
+                bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties).apply {
+                    listener = this@FractBitmapModelFragment
+                }
             }
 
             override fun onPostExecute(result: Unit?) {
                 isInitializing = false
-                initListener?.initializationFinished()
+                listener?.initializationFinished()
                 bitmapModel.startTask()
             }
         }
@@ -89,12 +97,28 @@ class FractBitmapModelFragment : Fragment() {
         task.execute()
     }
 
-    interface Listener {
+    interface Listener: FractBitmapModel.Listener {
         fun initializationFinished()
     }
 
+    override fun started() {
+        listener?.started()
+    }
+
+    override fun setProgress(progress: Float) {
+        listener?.setProgress(progress)
+    }
+
+    override fun bitmapUpdated() {
+        listener?.bitmapUpdated()
+    }
+
+    override fun finished() {
+        listener?.finished()
+    }
+
     companion object {
-        val sourceCodeKey = "sourceCode"
+        const val sourceCodeKey = "sourceCode"
 
         fun createInstance(sourceCode: String): FractBitmapModelFragment {
             val bundle = Bundle().apply {

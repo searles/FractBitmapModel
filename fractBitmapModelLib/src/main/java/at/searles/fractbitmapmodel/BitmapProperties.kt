@@ -17,13 +17,11 @@ class BitmapProperties (
 ) {
     val palettes = if(palettes.isEmpty()) defaultPalettes else palettes
 
-    fun createJson(): JSONObject {
+    fun createJson(obj: JSONObject): JSONObject {
         val palettesArray = JSONArray()
         palettes.forEach { palettesArray.put(it.createJson()) }
 
-        val obj = JSONObject()
         obj.put(palettesKey, palettesArray)
-
         obj.put(shaderPropertiesKey, shaderProperties.createJson())
 
         return obj

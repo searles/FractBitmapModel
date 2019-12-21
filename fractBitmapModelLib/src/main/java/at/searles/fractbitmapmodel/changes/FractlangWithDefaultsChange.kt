@@ -23,6 +23,6 @@ class FractlangWithDefaultsChange(private val fractlangProgram: FractlangProgram
 
     override fun accept(model: FractBitmapModel) {
         val palettes = CalcProperties.getPalettes(fractlangProgram.palettes)
-        model.setPalettes(palettes)
+        model.palettes = palettes
     }
 }

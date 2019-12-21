@@ -62,7 +62,7 @@ class CalcTask(private val rs: RenderScript,
         val index = values[0]!!
         val count = values[1]!!
 
-        listener.progress(index.toFloat() / count.toFloat())
+        listener.setProgress(index.toFloat() / count.toFloat())
     }
 
     override fun onCancelled(result: Unit?) {
@@ -125,7 +125,7 @@ class CalcTask(private val rs: RenderScript,
         /**
          * This method is called at least once, even if the task is cancelled.
          */
-        fun progress(progress: Float)
+        fun setProgress(progress: Float)
         fun finished()
     }
 

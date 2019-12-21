@@ -21,28 +21,27 @@ class BitmapController(val rs: RenderScript, initBitmapProperties: BitmapPropert
         set(value) {
             field = value
             setPalettesInScripts()
-            setLightParametersInScripts()
+            setShaderPropertiesInScripts()
         }
 
     init {
         setPalettesInScripts()
-        setLightParametersInScripts()
+        setShaderPropertiesInScripts()
     }
 
-    fun setPaletteOffset(index: Int, offsetX: Float, offsetY: Float) {
-        // TODO these are used for color cycling. Also update in bitmap properties.
-        paletteUpdater.updateOffsets(index, offsetX, offsetY)
-    }
+    var shaderProperties
+        get() = bitmapProperties.shaderProperties
+        set(value) {
+            bitmapProperties = BitmapProperties(palettes, value)
+            setShaderPropertiesInScripts()
+        }
 
-    fun setLightVector(polarAngle: Double, azimuthAngle: Double) {
-        // TODO also.
-        bitmapScript._lightVector = ShaderProperties.getLightVector(polarAngle, azimuthAngle)
-    }
-
-    fun setPalettes(palettes: List<Palette>) {
-        bitmapProperties = BitmapProperties(palettes, bitmapProperties.shaderProperties)
-        setPalettesInScripts()
-    }
+    var palettes: List<Palette>
+        get() = bitmapProperties.palettes
+        set(value) {
+            bitmapProperties = BitmapProperties(value, shaderProperties)
+            setPalettesInScripts()
+        }
 
     fun bindToBitmapAllocation(bitmapAllocation: BitmapAllocation) {
         this.bitmapAllocation = bitmapAllocation
@@ -99,7 +98,7 @@ class BitmapController(val rs: RenderScript, initBitmapProperties: BitmapPropert
         paletteUpdater.updatePalettes(bitmapProperties.palettes)
     }
 
-    private fun setLightParametersInScripts() {
+    private fun setShaderPropertiesInScripts() {
         with(bitmapProperties) {
             bitmapScript._useLightEffect = if (shaderProperties.useLightEffect) 1 else 0
             bitmapScript._lightVector = shaderProperties.lightVector
@@ -108,12 +107,6 @@ class BitmapController(val rs: RenderScript, initBitmapProperties: BitmapPropert
             bitmapScript._specularReflection = shaderProperties.specularReflection
             bitmapScript._shininess = shaderProperties.shininess.toLong()
         }
-    }
-
-    fun setPalette(index: Int, palette: Palette) {
-        bitmapProperties = BitmapProperties(ArrayList(bitmapProperties.palettes).apply {
-            set(index, palette)
-        }, bitmapProperties.shaderProperties)
     }
 
     interface Listener {

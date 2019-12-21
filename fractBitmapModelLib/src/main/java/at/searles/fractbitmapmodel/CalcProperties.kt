@@ -77,11 +77,10 @@ class CalcProperties (
         )
     }
 
-    fun createJson(): JSONObject {
+    fun createJson(obj: JSONObject): JSONObject {
         val parametersObj = JSONObject()
         parameters.forEach { (key, value) -> parametersObj.put(key, value) }
 
-        val obj = JSONObject()
         obj.put(sourceCodeKey, sourceCode)
         obj.put(parametersKey, parameters)
 
