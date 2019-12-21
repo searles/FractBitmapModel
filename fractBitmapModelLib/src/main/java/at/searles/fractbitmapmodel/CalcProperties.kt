@@ -13,6 +13,9 @@ import at.searles.paletteeditor.colors.Rgb
 import org.json.JSONArray
 import org.json.JSONObject
 
+/**
+ * Collection of all properties that are needed for the Calc-Script.
+ */
 class CalcProperties (
     scale: Scale?,
     private val fractlangProgram: FractlangProgram

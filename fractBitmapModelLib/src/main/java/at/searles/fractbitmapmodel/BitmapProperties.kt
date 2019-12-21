@@ -7,6 +7,10 @@ import at.searles.paletteeditor.colors.Rgb
 import org.json.JSONArray
 import org.json.JSONObject
 
+/**
+ * Collection of all properties that are needed by the
+ * bitmap/interpolate-scripts
+ */
 class BitmapProperties (
     palettes: List<Palette>,
     val shaderProperties: ShaderProperties

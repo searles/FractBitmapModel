@@ -1,118 +1,85 @@
 package at.searles.fractbitmapprovider.demo
 
 import android.os.Bundle
-import android.renderscript.RenderScript
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import at.searles.fractbitmapmodel.*
 import at.searles.fractimageview.ScalableImageView
-import at.searles.fractlang.FractlangProgram
 
-class DemoActivity : AppCompatActivity() {
+class DemoActivity : AppCompatActivity(), BitmapController.Listener, CalcBitmapModel.Listener, BitmapModelFragment.Listener {
 
     private val imageView: ScalableImageView by lazy {
         findViewById<ScalableImageView>(R.id.scalableImageView)
     }
 
-    private lateinit var controller: CalcController
-    private lateinit var bitmapModel: CalcBitmapModel
+    private lateinit var bitmapModelFragment: BitmapModelFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initBitmapModel()
+        imageView.visibility = View.INVISIBLE
 
-        imageView.scalableBitmapModel = bitmapModel
-
-        //AnimationTask(calculationTaskFactory).start()
+        initBitmapModelFragment()
     }
 
-    private fun initBitmapModel() {
-        val shaderProperties = ShaderProperties()
+    override fun onResume() {
+        super.onResume()
 
-        val fractlangProgram = FractlangProgram(program, emptyMap())
-
-        val initialScale = CalcProperties.getScale(fractlangProgram.scale)
-        val initialPalettes = CalcProperties.getPalettes(fractlangProgram.palettes)
-
-        val calcProperties = CalcProperties(
-            initialScale,
-            fractlangProgram
-        )
-
-        val bitmapProperties = BitmapProperties(
-            initialPalettes,
-            shaderProperties
-        )
-
-        val rs = RenderScript.create(this)
-
-        val bitmapAllocation = BitmapAllocation(rs, 1000,600)
-
-        controller = CalcController(rs, calcProperties, bitmapProperties, bitmapAllocation)
-
-        controller.bitmapSync.listener = object: BitmapSync.Listener {
-            override fun bitmapUpdated() {
-                imageView.invalidate()
-            }
+        if(!bitmapModelFragment.isInitializing) {
+            connectBitmapModelFragment()
         }
+    }
 
-        bitmapModel = CalcBitmapModel(controller).apply {
-            listener = object: CalcBitmapModel.Listener {
-                var timerStart: Long = 0
+    private fun initBitmapModelFragment() {
+        val fragment =
+            supportFragmentManager.findFragmentByTag(bitmapModelFragmentTag) as BitmapModelFragment?
 
-                override fun started() {
-                    imageView.invalidate()
-                    timerStart = System.currentTimeMillis()
+        bitmapModelFragment = fragment ?:
+                BitmapModelFragment.createInstance(program).also {
+                    supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
 
-                override fun progress(progress: Float) {
-                }
+        bitmapModelFragment.initListener = this
+    }
 
-                override fun bitmapUpdated() {
-                    imageView.invalidate()
-                }
+    override fun initializationFinished() {
+        connectBitmapModelFragment()
+    }
 
-                override fun finished() {
-                    imageView.invalidate()
-                    Log.d("TIMER", "duration: ${System.currentTimeMillis() - timerStart}")
-                }
-            }
-        }
+    private fun connectBitmapModelFragment() {
+        imageView.scalableBitmapModel = bitmapModelFragment.bitmapModel
+        imageView.visibility = View.VISIBLE
+        imageView.invalidate()
 
-        bitmapModel.startTask()
+        bitmapModelFragment.listener = this
     }
 
     companion object {
-        //val program = "setResult(0, cos (arc point + 2), sin rad point);"
-        const val program =
-            "val z0 = 0:0;\n" +
-                    "var c = point;\n" +
-                    "var n = 0;\n" +
-                    "\n" +
-                    "var z = z0;\n" +
-                    "\n" +
-                    "val bailoutValue = 64;\n" +
-                    "val maxExponent = 2;\n" +
-                    "val maxIterationCount = 1024;\n" +
-                    "\n" +
-                    "while ({\n" +
-                    "\tz = z^maxExponent + c;\n" +
-                    "\t\n" +
-                    "\tvar radZ = rad z;\n" +
-                    "\t\n" +
-                    "\tif(radZ > bailoutValue) {\n" +
-                    "\t\tvar continuousAddend = log(log radZ / log bailoutValue) / log maxExponent;\n" +
-                    "\t\tvar logN = log(n + 1 - continuousAddend);\n" +
-                    "\t\tsetResult(0, logN, logN);\n" +
-                    "\t\tfalse\n" +
-                    "\t} else if(not next(maxIterationCount, n)) {\n" +
-                    "\t\tsetResult(1, 0, log radZ);\n" +
-                    "\t\tfalse\n" +
-                    "\t} else {\n" +
-                    "\t\ttrue\n" +
-                    "\t}\n" +
-                    "})"
+        const val bitmapModelFragmentTag = "bitmapModelFragment"
+        
+        val program =
+            "extern addend: \"Addend\" = \"0.1\";" +
+            "setResult(0, cos (arc point), sin rad point);" +
+            "declareScale(5,0,0,5,0,0);" +
+            "declarePalette(\"1\", 2, 2, [1,1,#ffff0000], [0,0,#ff0000ff]);"
+    }
+
+    override fun started() {
+        Log.d("DemoActivity", "started")
+    }
+
+    override fun progress(progress: Float) {
+        Log.d("DemoActivity", "progress: $progress")
+    }
+
+    override fun bitmapUpdated() {
+        imageView.invalidate()
+    }
+
+    override fun finished() {
+        Log.d("DemoActivity", "finished")
     }
 }

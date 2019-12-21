@@ -1,26 +1,21 @@
 package at.searles.fractbitmapmodel
 
 import android.renderscript.RenderScript
+import at.searles.paletteeditor.Palette
 import kotlin.math.hypot
 import kotlin.math.max
 
-class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, initBitmapAllocation: BitmapAllocation) {
+class BitmapController(val rs: RenderScript, initBitmapProperties: BitmapProperties) {
 
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
     private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
 
-    private val paletteUpdater = PaletteUpdater(rs, bitmapScript)
-
-    var bitmapAllocation: BitmapAllocation = initBitmapAllocation
-        set(value) {
-            field = value
-            setBitmapAllocationInScripts()
-        }
+    private val paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
 
     var minPixelGap: Int = 1 // use this to ensure a lower but faster resolution.
-    var pixelGap: Int = 0
-
     var listener: Listener? = null
+
+    private lateinit var bitmapAllocation: BitmapAllocation
 
     var bitmapProperties: BitmapProperties = initBitmapProperties
         set(value) {
@@ -32,18 +27,40 @@ class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, i
     init {
         setPalettesInScripts()
         setLightParametersInScripts()
-        setBitmapAllocationInScripts()
     }
 
     fun setPaletteOffset(index: Int, offsetX: Float, offsetY: Float) {
+        // TODO these are used for color cycling. Also update in bitmap properties.
         paletteUpdater.updateOffsets(index, offsetX, offsetY)
     }
 
     fun setLightVector(polarAngle: Double, azimuthAngle: Double) {
+        // TODO also.
         bitmapScript._lightVector = ShaderProperties.getLightVector(polarAngle, azimuthAngle)
     }
 
-    fun setScaleInScripts(scaleInScript: ScriptField_Scale.Item) {
+    fun setPalettes(palettes: List<Palette>) {
+        bitmapProperties = BitmapProperties(palettes, bitmapProperties.shaderProperties)
+        setPalettesInScripts()
+    }
+
+    fun bindToBitmapAllocation(bitmapAllocation: BitmapAllocation) {
+        this.bitmapAllocation = bitmapAllocation
+
+        with(bitmapAllocation) {
+            bitmapScript.bind_bitmapData(calcData)
+
+            bitmapScript._width = width.toLong()
+            bitmapScript._height = height.toLong()
+
+            interpolateGapsScript._width = width.toLong()
+            interpolateGapsScript._height = height.toLong()
+
+            interpolateGapsScript._bitmap = rsBitmap
+        }
+    }
+
+    fun setScriptScale(scaleInScript: ScriptField_Scale.Item) {
         bitmapScript._scale = scaleInScript
 
         val xStepLength = hypot(scaleInScript.a, scaleInScript.c)
@@ -62,7 +79,7 @@ class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, i
      * Renders bitmapData into the bitmap using the current parameters.
      */
     fun updateBitmap() {
-        val currentPixelGap = max(minPixelGap, pixelGap)
+        val currentPixelGap = max(minPixelGap, bitmapAllocation.pixelGap)
 
         if(currentPixelGap == 1) {
             bitmapScript.forEach_root(bitmapAllocation.rsBitmap)
@@ -78,20 +95,6 @@ class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, i
         listener?.bitmapUpdated()
     }
 
-    private fun setBitmapAllocationInScripts() {
-        with(bitmapAllocation) {
-            bitmapScript.bind_bitmapData(calcData)
-
-            bitmapScript._width = width.toLong()
-            bitmapScript._height = height.toLong()
-
-            interpolateGapsScript._width = width.toLong()
-            interpolateGapsScript._height = height.toLong()
-
-            interpolateGapsScript._bitmap = rsBitmap
-        }
-    }
-
     private fun setPalettesInScripts() {
         paletteUpdater.updatePalettes(bitmapProperties.palettes)
     }
@@ -105,6 +108,12 @@ class BitmapSync(val rs: RenderScript, initBitmapProperties: BitmapProperties, i
             bitmapScript._specularReflection = shaderProperties.specularReflection
             bitmapScript._shininess = shaderProperties.shininess.toLong()
         }
+    }
+
+    fun setPalette(index: Int, palette: Palette) {
+        bitmapProperties = BitmapProperties(ArrayList(bitmapProperties.palettes).apply {
+            set(index, palette)
+        }, bitmapProperties.shaderProperties)
     }
 
     interface Listener {

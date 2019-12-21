@@ -5,15 +5,23 @@ import android.renderscript.Allocation
 import android.renderscript.RenderScript
 import kotlin.math.abs
 
-class CalculationTask(private val rs: RenderScript, val width: Int, val height: Int,
-                      private val calcScript: ScriptC_calc,
-                      private val part: Allocation
+class CalcTask(private val rs: RenderScript,
+               private val bitmapAllocation: BitmapAllocation,
+               private val calcScript: ScriptC_calc,
+               private val part: Allocation
 ): AsyncTask<Unit?, Int, Unit?>() {
 
     lateinit var listener: Listener
 
+    private val width = bitmapAllocation.width
+    private val height = bitmapAllocation.height
+
     override fun onPreExecute() {
         listener.started()
+
+        calcScript._calcData = bitmapAllocation.calcData
+        calcScript._width = width.toLong()
+        calcScript._height = height.toLong()
     }
 
     override fun doInBackground(vararg param: Unit?) {
@@ -36,13 +44,13 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
 
             index += CalcController.parallelCalculationsCount
 
-            val pixelGap = if(index < count) {
+            bitmapAllocation.pixelGap = if(index < count) {
                 getPixelGapAfterIndex(index, ceilLog2Width, ceilLog2Height)
             } else {
                 1
             }
 
-            publishProgress(index, count, pixelGap)
+            publishProgress(index, count)
 
             if(isCancelled) {
                 return
@@ -53,9 +61,8 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
     override fun onProgressUpdate(vararg values: Int?) {
         val index = values[0]!!
         val count = values[1]!!
-        val pixelGap = values[2]!!
 
-        listener.progress(index.toFloat() / count.toFloat(), pixelGap)
+        listener.progress(index.toFloat() / count.toFloat())
     }
 
     override fun onCancelled(result: Unit?) {
@@ -118,7 +125,7 @@ class CalculationTask(private val rs: RenderScript, val width: Int, val height: 
         /**
          * This method is called at least once, even if the task is cancelled.
          */
-        fun progress(progress: Float, pixelGap: Int)
+        fun progress(progress: Float)
         fun finished()
     }
 

@@ -12,7 +12,7 @@ import java.util.*
 /**
  * Inside the palette I use yuv squared for the sake of efficiency.
  */
-class PaletteUpdater(private val rs: RenderScript, private val script: ScriptC_bitmap) {
+class PaletteToScriptUpdater(private val rs: RenderScript, private val script: ScriptC_bitmap) {
 
     private lateinit var rsSegments: ScriptField_paletteSegment
     private lateinit var rsPalettes: ScriptField_palette

@@ -1,6 +1,7 @@
 package at.searles.fractbitmapmodel.changes
 
 import at.searles.fractbitmapmodel.BitmapProperties
+import at.searles.fractbitmapmodel.CalcBitmapModel
 import at.searles.fractbitmapmodel.CalcController
 import at.searles.fractbitmapmodel.CalcProperties
 import at.searles.fractlang.FractlangProgram
@@ -9,7 +10,7 @@ import at.searles.fractlang.FractlangProgram
  * Use this one to load a demo. Existing settings are dropped apart from
  * shader properties.
  */
-class FractlangWithDefaultsChange(private val fractlangProgram: FractlangProgram): CalcPropertiesChange, ControllerChange {
+class FractlangWithDefaultsChange(private val fractlangProgram: FractlangProgram): CalcPropertiesChange, BitmapModelChange {
 
     private val newCalcProperties: CalcProperties
 
@@ -22,13 +23,8 @@ class FractlangWithDefaultsChange(private val fractlangProgram: FractlangProgram
         return newCalcProperties
     }
 
-    override fun accept(controller: CalcController) {
+    override fun accept(model: CalcBitmapModel) {
         val palettes = CalcProperties.getPalettes(fractlangProgram.palettes)
-        val shaderProperties = controller.bitmapProperties.shaderProperties
-
-        controller.bitmapProperties = BitmapProperties(palettes, shaderProperties)
-
-        // TODO: Change scale or palette if they are default in the controller.
-        controller.updateDefaultPropertiesFromSource()
+        model.setPalettes(palettes)
     }
 }
