@@ -163,6 +163,10 @@ class FractBitmapModel(
         startTask()
     }
 
+    fun updateBitmap() {
+        bitmapController.updateBitmap()
+    }
+
     private fun setCalcProperties(newCalcProperties: CalcProperties) {
         require(!isTaskRunning)
         calcController.calcProperties = newCalcProperties

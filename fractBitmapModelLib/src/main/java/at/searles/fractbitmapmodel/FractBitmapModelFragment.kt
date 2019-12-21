@@ -32,11 +32,17 @@ class FractBitmapModelFragment : Fragment(), FractBitmapModel.Listener {
     val parameters
         get() = bitmapModel.parameters
 
-    val palettes
+    var palettes
         get() = bitmapModel.palettes
+        set(value) {
+            bitmapModel.palettes = value
+        }
 
-    val shaderProperties
+    var shaderProperties
         get() = bitmapModel.shaderProperties
+        set(value) {
+            bitmapModel.shaderProperties = value
+        }
 
     var isInitializing: Boolean = true
         private set
@@ -56,6 +62,13 @@ class FractBitmapModelFragment : Fragment(), FractBitmapModel.Listener {
         } catch(th: Throwable) {
             Toast.makeText(context, th.localizedMessage, Toast.LENGTH_LONG).show()
         }
+    }
+
+    /**
+     * Applies new bitmap properties
+     */
+    fun updateBitmap() {
+        bitmapModel.updateBitmap()
     }
 
     fun addChange(change: Change) {
