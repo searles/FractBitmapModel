@@ -82,7 +82,7 @@ class CalcProperties (
         parameters.forEach { (key, value) -> parametersObj.put(key, value) }
 
         obj.put(sourceCodeKey, sourceCode)
-        obj.put(parametersKey, parameters)
+        obj.put(parametersKey, parametersObj)
 
         val scaleArray = JSONArray()
 
