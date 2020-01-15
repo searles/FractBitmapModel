@@ -1,125 +1,73 @@
-static double2 mul(double2 a, double2 b) {
+#include "doublemath.rsh"
+
+static double2 __attribute__((overloadable)) mul(double2 a, double2 b) {
     return (double2){ a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x };
 }
 
-static double2 div(double2 a, double2 b) {
+static double2 __attribute__((overloadable)) div(double2 a, double2 b) {
     double r = b.x * b.x + b.y * b.y;
     return (double2){ (a.x * b.x + a.y * b.y) / r, (-a.x * b.y + a.y * b.x) / r };
 }
 
-static double2 crecip(double2 a) {
+static double2 __attribute__((overloadable)) rec(double2 a) {
     double r = a.x * a.x + a.y * a.y;
     return (double2){ a.x / r, -a.y / r };
 }
 
-static double __attribute__((overloadable)) abs(double a) {
-    if(a < 0) return -a;
-    return a;
+static double __attribute__((overloadable)) rad(double2 z) {
+	// avoid overflow/underflow
+	double a = abs(z.x);
+	double b = abs(z.y);
+
+	// argument for sqrt is in interval 1..2
+	if(a > b) {
+		double quot = b / a;
+		// TODO fast sqrt
+		return a * sqrt(1 + quot * quot);
+	} else {
+		double quot = a / b;
+		return b * sqrt(1 + quot * quot);
+	}
 }
 
-static double2 __attribute__((overloadable)) abs(double2 a) {
-    if(a.x < 0) a.x = -a.x;
-    if(a.y < 0) a.y = -a.y;
-    return a;
+static double __attribute__((overloadable)) arc(double2 f) {
+    return atan2(f.y, f.x);
 }
 
-static int __attribute__((overloadable)) pow(int base, int exp) {
-    int r = 1; if(exp < 0) { base = 1 / base; exp = -exp; }
-    for(;exp; exp >>= 1, base *= base) if(exp & 1) r *= base;
-    return r;
+static double2 __attribute__((overloadable)) exp(double2 z) {
+	double ez = exp(z.x);
+
+	double si, co;
+	si = sincos(z.y, &co);
+
+	return ez * (double2) {co, si};
 }
 
-static double __attribute__((overloadable)) pow(double base, int exp) {
-    double r = 1; if(exp < 0) { base = 1 / base; exp = -exp; }
-    for(;exp; exp >>= 1, base *= base) if(exp & 1) r *= base;
-    return r;
+static double2 __attribute__((overloadable)) log(double2 z) {
+	return (double2) { log(rad(z)), arc(z) };
 }
 
 static double2 __attribute__((overloadable)) pow(double2 base, int exp) {
     double2 r = (double2){1., 0.};
-    if(exp < 0) { base = crecip(base); exp = -exp; }
+    if(exp < 0) { base = rec(base); exp = -exp; }
     for(;exp; exp >>= 1, base = mul(base, base))
         if(exp & 1) r = mul(r, base);
     return r;
 }
 
-// -----
-
-static double __attribute__((overloadable)) exp(double d) {
-    return exp((float) d);
-}
-
-static double __attribute__((overloadable)) log(double d) {
-    return log((float) d);
-}
-
-static double __attribute__((overloadable)) sin(double d) {
-    return sin((float) d);
-}
-
-static double __attribute__((overloadable)) cos(double d) {
-    return cos((float) d);
-}
-
-static double __attribute__((overloadable)) sinh(double d) {
-    return sinh((float) d);
-}
-
-static double __attribute__((overloadable)) cosh(double d) {
-    return cosh((float) d);
-}
-
-static double __attribute__((overloadable)) sqrt(double d) {
-    return sqrt((float) d);
-}
-
-static double __attribute__((overloadable)) rad(double2 f) {
-	return sqrt(f.x * f.x + f.y * f.y);
-}
-
-static double __attribute__((overloadable)) arc(double2 f) {
-    return atan2((float) f.y, (float) f.x);
-}
-
-static double __attribute__((overloadable)) pow(double base, double ex) {
-    return pow((float) base, (float) ex);
-}
-
-
-// -----
-
-static double2 __attribute__((overloadable)) log(double2 f) {
-	return (double2) { log(rad(f)), arc(f) };
-}
-
-static double2 __attribute__((overloadable)) exp(double2 f) {
-	double e = exp(f.x);
-	double c = cos(f.y);
-	double s = sin(f.y);
-	return (double2) { e * c, e * s };
-}
-
 static double2 __attribute__((overloadable)) pow(double2 base, double power) {
 	if(base.x == 0 && base.y == 0) return (double2) {0, 0};
 
-	// base^power = exp(log base * power) =
-	// = exp ((log rad base + i arc base) * power)
-	// = exp (power * log rad base + i power arc base)
-	// = rad base ^ power * exp(i power arc base)
-	// = rad base ^ power * (cos power arc base + i sin power arc base)
 	double r = pow(rad(base), power);
 	double pa = power * arc(base);
 
-    // TODO: s = sincos(pa, c)
-	double c = cos(pa); double s = sin(pa);
+    double si, co;
+    si = sincos(pa, &co);
 
-	return (double2) {r * c, r * s};
+	return (double2) {r * co, r * si};
 }
 
 static double2 __attribute__((overloadable)) pow(double2 base, double2 power) {
-	// base^power = exp(log base * power) =
-	// = exp ((log rad base + i ab) * power)
-	// = exp ((log rb + i arc base) * power)
 	if(base.x == 0 && base.y == 0) return (double2) {0, 0};
 
 	double lrb = log(rad(base));
@@ -131,45 +79,10 @@ static double2 __attribute__((overloadable)) pow(double2 base, double2 power) {
 	return exp(prod);
 }
 
-static double2 __attribute__((overloadable)) sin(double2 a) {
-	double2 eia = exp((double2) {-a.y, a.x});
-	double2 eia2 = eia * eia;
-
-    eia2 = (double2) { -eia2.y, eia2.x - 1 };
-    eia = (double2) { 2 * eia.x, 2 * eia.y };
-
-	return div(eia2, eia);
-}
-
-static double2 __attribute__((overloadable)) cos(double2 a) {
-	// cos x = (e^iz - e^-iz) / 2i = (e^2iz + 1) / (2i e^iz)
-	double2 eia = exp((double2) {-a.y, a.x});
-	double2 eia2 = eia * eia;
-
-    eia2.x += 1;
-    eia = (double2) { 2 * eia.x, 2 * eia.y };
-
-	return div(eia2, eia);
-}
-
-static double2 __attribute__((overloadable)) sinh(double2 a) {
-	double2 eia = exp((double2) {a.x, a.y});
-	double2 eia2 = eia * eia;
-
-    eia2 = (double2) { -eia2.y, eia2.x - 1 };
-    eia = (double2) { 2 * eia.x, 2 * eia.y };
-
-	return div(eia2, eia);
-}
-
-static double2 __attribute__((overloadable)) cosh(double2 a) {
-	double2 eia = exp((double2) {a.x, a.y});
-	double2 eia2 = eia * eia;
-
-    eia2.x += 1;
-    eia = (double2) { 2 * eia.x, 2 * eia.y };
-
-	return div(eia2, eia);
+static double2 __attribute__((overloadable)) abs(double2 a) {
+    if(a.x < 0) a.x = -a.x;
+    if(a.y < 0) a.y = -a.y;
+    return a;
 }
 
 static double2 __attribute__((overloadable)) sqrt(double2 f) {
@@ -183,6 +96,10 @@ static double2 __attribute__((overloadable)) conj(double2 f) {
 	return (double2) {f.x, -f.y};
 }
 
+static double2 __attribute__((overloadable)) muli(double2 f) {
+	return (double2) {-f.y, f.x};
+}
+
 static double2 __attribute__((overloadable)) rabs(double2 f) {
 	return (double2) {abs(f.x), f.y};
 }
@@ -190,4 +107,24 @@ static double2 __attribute__((overloadable)) rabs(double2 f) {
 static double2 __attribute__((overloadable)) iabs(double2 f) {
 	return (double2) {f.x, abs(f.y)};
 }
+
+static double2 __attribute__((overloadable)) sinh(double2 z) {
+	double2 ez = exp(z);
+	return (ez - rec(ez)) / 2;
+}
+
+static double2 __attribute__((overloadable)) cosh(double2 z) {
+	double2 ez = exp(z);
+	return (ez + rec(ez)) / 2;
+}
+
+
+static double2 __attribute__((overloadable)) sin(double2 z) {
+	return muli(sinh(muli(z)));
+}
+
+static double2 __attribute__((overloadable)) cos(double2 z) {
+	return cosh(muli(z));
+}
+
 

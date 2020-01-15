@@ -59,7 +59,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         
         const val program =
             "extern addend: \"Addend\" = \"0.1\";" +
-            "setResult(0, cos (arc point), sin rad point);" +
+            "setResult(0, exp point, sin rad point);" +
             "declareScale(5,0,0,5,0,0);" +
             "declarePalette(\"1\", 2, 2, [1,1,#ffff0000], [0,0,#ff0000ff]);"
     }
