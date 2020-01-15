@@ -1,12 +1,8 @@
-static double2 csqr(double2 z) {
-    return  (double2) { z.x * z.x - z.y * z.y, 2 * z.x * z.y};
-}
-
-static double2 cmul(double2 a, double2 b) {
+static double2 mul(double2 a, double2 b) {
     return (double2){ a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x };
 }
 
-static double2 cdiv(double2 a, double2 b) {
+static double2 div(double2 a, double2 b) {
     double r = b.x * b.x + b.y * b.y;
     return (double2){ (a.x * b.x + a.y * b.y) / r, (-a.x * b.y + a.y * b.x) / r };
 }
@@ -16,12 +12,12 @@ static double2 crecip(double2 a) {
     return (double2){ a.x / r, -a.y / r };
 }
 
-static double dabs(double a) {
+static double __attribute__((overloadable)) abs(double a) {
     if(a < 0) return -a;
     return a;
 }
 
-static double2 cabs(double2 a) {
+static double2 __attribute__((overloadable)) abs(double2 a) {
     if(a.x < 0) a.x = -a.x;
     if(a.y < 0) a.y = -a.y;
     return a;
@@ -42,8 +38,8 @@ static double __attribute__((overloadable)) pow(double base, int exp) {
 static double2 __attribute__((overloadable)) pow(double2 base, int exp) {
     double2 r = (double2){1., 0.};
     if(exp < 0) { base = crecip(base); exp = -exp; }
-    for(;exp; exp >>= 1, base = cmul(base, base))
-        if(exp & 1) r = cmul(r, base);
+    for(;exp; exp >>= 1, base = mul(base, base))
+        if(exp & 1) r = mul(r, base);
     return r;
 }
 
@@ -142,7 +138,7 @@ static double2 __attribute__((overloadable)) sin(double2 a) {
     eia2 = (double2) { -eia2.y, eia2.x - 1 };
     eia = (double2) { 2 * eia.x, 2 * eia.y };
 
-	return cdiv(eia2, eia);
+	return div(eia2, eia);
 }
 
 static double2 __attribute__((overloadable)) cos(double2 a) {
@@ -153,7 +149,7 @@ static double2 __attribute__((overloadable)) cos(double2 a) {
     eia2.x += 1;
     eia = (double2) { 2 * eia.x, 2 * eia.y };
 
-	return cdiv(eia2, eia);
+	return div(eia2, eia);
 }
 
 static double2 __attribute__((overloadable)) sinh(double2 a) {
@@ -163,7 +159,7 @@ static double2 __attribute__((overloadable)) sinh(double2 a) {
     eia2 = (double2) { -eia2.y, eia2.x - 1 };
     eia = (double2) { 2 * eia.x, 2 * eia.y };
 
-	return cdiv(eia2, eia);
+	return div(eia2, eia);
 }
 
 static double2 __attribute__((overloadable)) cosh(double2 a) {
@@ -173,7 +169,7 @@ static double2 __attribute__((overloadable)) cosh(double2 a) {
     eia2.x += 1;
     eia = (double2) { 2 * eia.x, 2 * eia.y };
 
-	return cdiv(eia2, eia);
+	return div(eia2, eia);
 }
 
 static double2 __attribute__((overloadable)) sqrt(double2 f) {
@@ -188,10 +184,10 @@ static double2 __attribute__((overloadable)) conj(double2 f) {
 }
 
 static double2 __attribute__((overloadable)) rabs(double2 f) {
-	return (double2) {dabs(f.x), f.y};
+	return (double2) {abs(f.x), f.y};
 }
 
 static double2 __attribute__((overloadable)) iabs(double2 f) {
-	return (double2) {f.x, dabs(f.y)};
+	return (double2) {f.x, abs(f.y)};
 }
 

@@ -9,7 +9,7 @@ static float3 mandelbrotValueAt(double2 pt) {
     double2 z = (double2) {0.0, 0.0};
 
     while(i < maxIterationCount) {
-        z = csqr(z) + pt;
+        z = mul(z, z) + pt;
         float d = fast_length(convert_float2(z));
 
         if(d > bailoutValue) {
