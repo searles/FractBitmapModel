@@ -14,7 +14,7 @@ static double2 __attribute__((overloadable)) rec(double2 a) {
     return (double2){ a.x / r, -a.y / r };
 }
 
-static double __attribute__((overloadable)) rad(double2 z) {
+static double __attribute__((overloadable)) abs(double2 z) {
 	// avoid overflow/underflow
 	double a = abs(z.x);
 	double b = abs(z.y);
@@ -37,14 +37,17 @@ static double __attribute__((overloadable)) arc(double2 f) {
 static double2 __attribute__((overloadable)) exp(double2 z) {
 	double ez = exp(z.x);
 
-	double si, co;
+	double si; // sin(z.y);
+	double co; // cos(z.y);
 	si = sincos(z.y, &co);
 
-	return ez * (double2) {co, si};
+	double2 result = ez * (double2) {co, si};
+
+	return result;
 }
 
 static double2 __attribute__((overloadable)) log(double2 z) {
-	return (double2) { log(rad(z)), arc(z) };
+	return (double2) { log(abs(z)), arc(z) };
 }
 
 static double2 __attribute__((overloadable)) pow(double2 base, int exp) {
@@ -58,7 +61,7 @@ static double2 __attribute__((overloadable)) pow(double2 base, int exp) {
 static double2 __attribute__((overloadable)) pow(double2 base, double power) {
 	if(base.x == 0 && base.y == 0) return (double2) {0, 0};
 
-	double r = pow(rad(base), power);
+	double r = pow(abs(base), power);
 	double pa = power * arc(base);
 
     double si, co;
@@ -70,7 +73,7 @@ static double2 __attribute__((overloadable)) pow(double2 base, double power) {
 static double2 __attribute__((overloadable)) pow(double2 base, double2 power) {
 	if(base.x == 0 && base.y == 0) return (double2) {0, 0};
 
-	double lrb = log(rad(base));
+	double lrb = log(abs(base));
 	double ab = arc(base);
 
 	// = exp (lrb * pr - ab * pi, lrb * pi + ab * pr)
@@ -79,14 +82,14 @@ static double2 __attribute__((overloadable)) pow(double2 base, double2 power) {
 	return exp(prod);
 }
 
-static double2 __attribute__((overloadable)) abs(double2 a) {
+static double2 cabs(double2 a) {
     if(a.x < 0) a.x = -a.x;
     if(a.y < 0) a.y = -a.y;
     return a;
 }
 
 static double2 __attribute__((overloadable)) sqrt(double2 f) {
-	double r = rad(f);
+	double r = abs(f);
 	double2 ret = { sqrt((r + f.x) / 2), sqrt((r - f.x) / 2) };
 	if(f.y < 0) ret.y = -ret.y;
 	return ret;

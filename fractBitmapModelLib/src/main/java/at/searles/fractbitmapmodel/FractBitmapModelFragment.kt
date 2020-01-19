@@ -1,7 +1,6 @@
 package at.searles.fractbitmapmodel
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.os.AsyncTask
 import android.os.Bundle
 import android.renderscript.RenderScript
@@ -26,6 +25,8 @@ class FractBitmapModelFragment : Fragment() {
         super.onCreate(savedInstanceState)
         retainInstance = true
         asyncInitialize()
+
+        // TODO: Dimensions as parameter
     }
 
     fun addImageSizeChange(width: Int, height: Int) {
@@ -51,7 +52,7 @@ class FractBitmapModelFragment : Fragment() {
                 val calcProperties = CalcProperties(CalcProperties.getScale(program.scale), program)
                 val bitmapProperties = BitmapProperties(CalcProperties.getPalettes(program.palettes), ShaderProperties())
 
-                val bitmapAllocation = BitmapAllocation(rs, 1000,600)
+                val bitmapAllocation = BitmapAllocation(rs, defaultWidth, defaultHeight)
 
                 bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
             }
@@ -82,5 +83,8 @@ class FractBitmapModelFragment : Fragment() {
                 arguments = bundle
             }
         }
+
+        const val defaultWidth = 1024
+        const val defaultHeight = 768
     }
 }

@@ -58,10 +58,11 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         const val bitmapModelFragmentTag = "bitmapModelFragment"
         
         const val program =
-            "extern addend: \"Addend\" = \"0.1\";" +
-            "setResult(0, exp point, sin rad point);" +
+            "extern fn: \"Fn\" = \"exp point\";" +
+            "var t = fn;" +
+            "setResult(0, arc t / tau, rad t);" +
             "declareScale(5,0,0,5,0,0);" +
-            "declarePalette(\"1\", 2, 2, [1,1,#ffff0000], [0,0,#ff0000ff]);"
+            "declarePalette(\"1\", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);"
     }
 
     override fun started() {
