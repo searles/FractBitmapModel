@@ -87,8 +87,7 @@ class FractBitmapModel(
     }
 
     override fun started() {
-        require(nextBitmapTransformMatrix.isIdentity)
-        listener?.started()
+        // started in listener is already called in startTask
     }
 
     private var lastPixelGap = -1
@@ -188,6 +187,8 @@ class FractBitmapModel(
 
         // before the first preview is generated, we must use the old imageTransformMatrix.
         nextBitmapTransformMatrix.set(null)
+
+        listener?.started()
 
         if(!isInitialized) {
             // Initialize script the first time this method is called.

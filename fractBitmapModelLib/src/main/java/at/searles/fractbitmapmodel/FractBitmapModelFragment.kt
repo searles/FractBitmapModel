@@ -16,11 +16,6 @@ class FractBitmapModelFragment : Fragment() {
     lateinit var bitmapModel: FractBitmapModel
         private set
 
-//    var isInitializing: Boolean = true
-//        private set
-
-    var listener: Listener? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
@@ -51,13 +46,7 @@ class FractBitmapModelFragment : Fragment() {
         val bitmapAllocation = BitmapAllocation(rs, defaultWidth, defaultHeight)
 
         bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
-
-        listener?.initializationFinished()
         bitmapModel.startTask()
-    }
-
-    interface Listener {
-        fun initializationFinished()
     }
 
     companion object {

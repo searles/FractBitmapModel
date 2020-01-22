@@ -10,7 +10,7 @@ import at.searles.fractbitmapmodel.*
 import at.searles.fractbitmapmodel.changes.RelativeScaleChange
 import at.searles.fractimageview.ScalableImageView
 
-class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModelFragment.Listener, FractBitmapModel.Listener {
+class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModel.Listener {
 
     private val imageView: ScalableImageView by lazy {
         findViewById<ScalableImageView>(R.id.scalableImageView)
@@ -40,12 +40,6 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
                 FractBitmapModelFragment.createInstance(program).also {
                     supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
-
-        bitmapModelFragment.listener = this
-    }
-
-    override fun initializationFinished() {
-        connectBitmapModelFragment()
     }
 
     private fun connectBitmapModelFragment() {
@@ -53,7 +47,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         imageView.visibility = View.VISIBLE
         imageView.invalidate()
 
-        /*val delay: Long = 1
+        val delay: Long = 1
         val handler = Handler()
         val runnable = object: Runnable {
             override fun run() {
@@ -63,7 +57,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             }
         }
 
-        handler.postDelayed(runnable, delay)*/
+        handler.postDelayed(runnable, delay)
     }
 
     companion object {
