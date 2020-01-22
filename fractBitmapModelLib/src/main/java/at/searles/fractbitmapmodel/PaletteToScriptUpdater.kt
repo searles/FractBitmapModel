@@ -76,8 +76,6 @@ class PaletteToScriptUpdater(private val rs: RenderScript, private val script: S
         script._palettes.copyAll()
     }
 
-
-
     private fun toComponents(lab: Lab): FloatArray {
         // XXX If yuv is used, it must be switched here and in bitmap.rs
         //return floatArrayOf(lab.l, lab.a, lab.b, lab.alpha)

@@ -59,7 +59,7 @@ uchar4 RS_KERNEL fastRoot(uint32_t x, uint32_t y) {
     float3 p00 = bitmapData[x + y * (width + 1)];
     float4 color = colorAt(p00.x, p00.y);
 
-    if(useLightEffect == 0) {
+    if(useLightEffect == 0 || x + pixelGap > width || y + pixelGap > height) {
         return to8888(color);
     }
 

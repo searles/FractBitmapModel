@@ -123,7 +123,7 @@ static double2 __attribute__((overloadable)) cosh(double2 z) {
 
 
 static double2 __attribute__((overloadable)) sin(double2 z) {
-	return muli(sinh(muli(z)));
+	return -muli(sinh(muli(z)));
 }
 
 static double2 __attribute__((overloadable)) cos(double2 z) {

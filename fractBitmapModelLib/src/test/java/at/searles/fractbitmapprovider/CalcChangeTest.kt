@@ -1,11 +1,8 @@
 package at.searles.fractbitmapprovider
 
-import android.graphics.Matrix
 import at.searles.commons.math.Scale
 import at.searles.fractbitmapmodel.CalcProperties
 import at.searles.fractbitmapmodel.changes.CalcPropertiesChange
-import at.searles.fractbitmapmodel.changes.Change
-import at.searles.fractbitmapmodel.changes.RelativeScaleChange
 import at.searles.fractbitmapmodel.changes.ScaleChange
 import at.searles.fractlang.FractlangProgram
 import org.junit.Assert

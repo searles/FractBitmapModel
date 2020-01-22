@@ -5,7 +5,11 @@ import at.searles.paletteeditor.Palette
 import kotlin.math.hypot
 import kotlin.math.max
 
-class BitmapController(val rs: RenderScript, initBitmapProperties: BitmapProperties) {
+class BitmapController(
+    val rs: RenderScript,
+    initBitmapProperties: BitmapProperties,
+    initialBitmapAllocation: BitmapAllocation
+) {
 
     private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
     private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
@@ -15,7 +19,12 @@ class BitmapController(val rs: RenderScript, initBitmapProperties: BitmapPropert
     var minPixelGap: Int = 1 // use this to ensure a lower but faster resolution.
     var listener: Listener? = null
 
-    private lateinit var bitmapAllocation: BitmapAllocation
+    var bitmapAllocation: BitmapAllocation = initialBitmapAllocation
+        set(value) {
+            field.rsBitmap.destroy()
+            field = value
+            bindToBitmapAllocation()
+        }
 
     var bitmapProperties: BitmapProperties = initBitmapProperties
         set(value) {
@@ -27,6 +36,7 @@ class BitmapController(val rs: RenderScript, initBitmapProperties: BitmapPropert
     init {
         setPalettesInScripts()
         setShaderPropertiesInScripts()
+        bindToBitmapAllocation()
     }
 
     var shaderProperties
@@ -43,9 +53,7 @@ class BitmapController(val rs: RenderScript, initBitmapProperties: BitmapPropert
             setPalettesInScripts()
         }
 
-    fun bindToBitmapAllocation(bitmapAllocation: BitmapAllocation) {
-        this.bitmapAllocation = bitmapAllocation
-
+    private fun bindToBitmapAllocation() {
         with(bitmapAllocation) {
             bitmapScript.bind_bitmapData(calcData)
 

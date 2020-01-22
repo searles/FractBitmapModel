@@ -46,15 +46,14 @@ class FractBitmapModel(
         set(value) {
             field = value
             updateScaleInScripts()
-            bitmapController.bindToBitmapAllocation(bitmapAllocation)
+            bitmapController.bitmapAllocation = bitmapAllocation
         }
 
     private val calcController = CalcController(rs, initialCalcProperties)
-    private val bitmapController = BitmapController(rs, initialBitmapProperties)
+    private val bitmapController = BitmapController(rs, initialBitmapProperties, initialBitmapAllocation)
 
     init {
         updateScaleInScripts()
-        bitmapController.bindToBitmapAllocation(bitmapAllocation)
     }
 
     override val bitmapTransformMatrix = Matrix()

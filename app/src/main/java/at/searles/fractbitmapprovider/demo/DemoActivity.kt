@@ -1,6 +1,7 @@
 package at.searles.fractbitmapprovider.demo
 
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         findViewById<ScalableImageView>(R.id.scalableImageView)
     }
 
+    // TODO Create bitmapModelFragment right away.
     private lateinit var bitmapModelFragment: FractBitmapModelFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +54,20 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         imageView.scalableBitmapModel = bitmapModelFragment.bitmapModel
         imageView.visibility = View.VISIBLE
         imageView.invalidate()
+
+        /*
+        XXX Trigger lots of changes in a short amount of time
+        val delay: Long = 500
+        val handler = Handler()
+        val runnable = object: Runnable {
+            override fun run() {
+                bitmapModelFragment.addImageSizeChange(5080, 6000)
+                handler.postDelayed(this, delay)
+            }
+        }
+
+        handler.postDelayed(runnable, delay)
+         */
     }
 
     companion object {
