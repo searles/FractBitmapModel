@@ -11,10 +11,10 @@ class BitmapController(
     initialBitmapAllocation: BitmapAllocation
 ) {
 
-    private val bitmapScript: ScriptC_bitmap = ScriptC_bitmap(rs)
-    private val interpolateGapsScript = ScriptC_interpolate_gaps(rs)
+    private lateinit var bitmapScript: ScriptC_bitmap
+    private lateinit var interpolateGapsScript: ScriptC_interpolate_gaps
 
-    private val paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
+    private lateinit var paletteUpdater: PaletteToScriptUpdater
 
     var minPixelGap: Int = 1 // use this to ensure a lower but faster resolution.
     var listener: Listener? = null
@@ -33,7 +33,10 @@ class BitmapController(
             setShaderPropertiesInScripts()
         }
 
-    init {
+    fun initialize() {
+        bitmapScript = ScriptC_bitmap(rs)
+        interpolateGapsScript = ScriptC_interpolate_gaps(rs)
+        paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
         setPalettesInScripts()
         setShaderPropertiesInScripts()
         bindToBitmapAllocation()

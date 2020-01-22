@@ -16,15 +16,15 @@ class FractBitmapModelFragment : Fragment() {
     lateinit var bitmapModel: FractBitmapModel
         private set
 
-    var isInitializing: Boolean = true
-        private set
+//    var isInitializing: Boolean = true
+//        private set
 
     var listener: Listener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
-        asyncInitialize()
+        initialize()
 
         // TODO: Dimensions as parameter
     }
@@ -38,33 +38,22 @@ class FractBitmapModelFragment : Fragment() {
         }
     }
 
-    private fun asyncInitialize() {
-        // This should be fast enough to not raise problems wrt leaks.
-        @SuppressLint("StaticFieldLeak")
-        val task = object: AsyncTask<Unit, Unit, Unit>() {
-            override fun doInBackground(vararg params: Unit?) {
-                val sourceCode = arguments!!.getString(sourceCodeKey)!!
+    private fun initialize() {
+        val sourceCode = arguments!!.getString(sourceCodeKey)!!
 
-                val program = FractlangProgram(sourceCode, emptyMap())
+        val program = FractlangProgram(sourceCode, emptyMap())
 
-                rs = RenderScript.create(context)
+        rs = RenderScript.create(context)
 
-                val calcProperties = CalcProperties(CalcProperties.getScale(program.scale), program)
-                val bitmapProperties = BitmapProperties(CalcProperties.getPalettes(program.palettes), ShaderProperties())
+        val calcProperties = CalcProperties(CalcProperties.getScale(program.scale), program)
+        val bitmapProperties = BitmapProperties(CalcProperties.getPalettes(program.palettes), ShaderProperties())
 
-                val bitmapAllocation = BitmapAllocation(rs, defaultWidth, defaultHeight)
+        val bitmapAllocation = BitmapAllocation(rs, defaultWidth, defaultHeight)
 
-                bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
-            }
+        bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
 
-            override fun onPostExecute(result: Unit?) {
-                isInitializing = false
-                listener?.initializationFinished()
-                bitmapModel.startTask()
-            }
-        }
-
-        task.execute()
+        listener?.initializationFinished()
+        bitmapModel.startTask()
     }
 
     interface Listener {

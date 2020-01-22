@@ -1,11 +1,13 @@
 package at.searles.fractbitmapprovider.demo
 
+import android.graphics.Matrix
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
+import at.searles.fractbitmapmodel.changes.RelativeScaleChange
 import at.searles.fractimageview.ScalableImageView
 
 class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModelFragment.Listener, FractBitmapModel.Listener {
@@ -14,7 +16,6 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         findViewById<ScalableImageView>(R.id.scalableImageView)
     }
 
-    // TODO Create bitmapModelFragment right away.
     private lateinit var bitmapModelFragment: FractBitmapModelFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,10 +29,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
 
     override fun onResume() {
         super.onResume()
-
-        if(!bitmapModelFragment.isInitializing) {
-            connectBitmapModelFragment()
-        }
+        connectBitmapModelFragment()
     }
 
     private fun initBitmapModelFragment() {
@@ -55,19 +53,17 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         imageView.visibility = View.VISIBLE
         imageView.invalidate()
 
-        /*
-        XXX Trigger lots of changes in a short amount of time
-        val delay: Long = 500
+        /*val delay: Long = 1
         val handler = Handler()
         val runnable = object: Runnable {
             override fun run() {
-                bitmapModelFragment.addImageSizeChange(5080, 6000)
+                bitmapModelFragment.bitmapModel.addChange(RelativeScaleChange(Matrix()))
+                bitmapModelFragment.addImageSizeChange(100, 100)
                 handler.postDelayed(this, delay)
             }
         }
 
-        handler.postDelayed(runnable, delay)
-         */
+        handler.postDelayed(runnable, delay)*/
     }
 
     companion object {

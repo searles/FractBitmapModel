@@ -49,12 +49,14 @@ class FractBitmapModel(
             bitmapController.bitmapAllocation = bitmapAllocation
         }
 
+    /*
+     * Must be initialized before starting a calculation. This will happen in the
+     * first call to startTask.
+     */
     private val calcController = CalcController(rs, initialCalcProperties)
     private val bitmapController = BitmapController(rs, initialBitmapProperties, initialBitmapAllocation)
 
-    init {
-        updateScaleInScripts()
-    }
+    private var isInitialized: Boolean = false
 
     override val bitmapTransformMatrix = Matrix()
     override val bitmap get() = bitmapAllocation.bitmap
@@ -137,8 +139,6 @@ class FractBitmapModel(
 
     fun addChange(change: Change) {
         if(isTaskRunning) {
-            require(calcTask != null)
-
             if(change is CalcPropertiesChange) {
                 nextCalcProperties = if (nextCalcProperties == null) {
                     change.accept(calcController.calcProperties)
@@ -188,6 +188,14 @@ class FractBitmapModel(
 
         // before the first preview is generated, we must use the old imageTransformMatrix.
         nextBitmapTransformMatrix.set(null)
+
+        if(!isInitialized) {
+            // Initialize script the first time this method is called.
+            calcController.initialize()
+            bitmapController.initialize()
+            updateScaleInScripts()
+            isInitialized = true
+        }
 
         calcTask = calcController.createCalculationTask(bitmapAllocation).apply {
             listener = this@FractBitmapModel

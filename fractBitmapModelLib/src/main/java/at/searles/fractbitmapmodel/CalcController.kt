@@ -24,7 +24,7 @@ class CalcController(val rs: RenderScript,
     val parameters: Map<String, String>
         get() = calcProperties.parameters
 
-    private val calcScript: ScriptC_calc = ScriptC_calc(rs)
+    private lateinit var calcScript: ScriptC_calc
 
     val scale
         get() = calcProperties.scale
@@ -42,7 +42,8 @@ class CalcController(val rs: RenderScript,
             setVmCodeInScript()
         }
 
-    init {
+    fun initialize() {
+        calcScript = ScriptC_calc(rs)
         setVmCodeInScript()
     }
 
