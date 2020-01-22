@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
 import at.searles.fractbitmapmodel.changes.RelativeScaleChange
@@ -18,6 +19,10 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
 
     private lateinit var bitmapModelFragment: FractBitmapModelFragment
 
+    private val experimentButton by lazy {
+        findViewById<Button>(R.id.triggerExperimentButton)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,6 +30,10 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         imageView.visibility = View.INVISIBLE
 
         initBitmapModelFragment()
+
+        experimentButton.setOnClickListener {
+            bitmapModelFragment.addImageSizeChange(5080, 6000)
+        }
     }
 
     override fun onResume() {
@@ -85,6 +94,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
 
     override fun finished() {
         Log.d("DemoActivity", "finished")
+        imageView.invalidate()
     }
 
     override fun propertiesChanged(src: FractBitmapModel) {

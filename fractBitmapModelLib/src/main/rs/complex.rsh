@@ -24,9 +24,11 @@ static double __attribute__((overloadable)) abs(double2 z) {
 		double quot = b / a;
 		// TODO fast sqrt
 		return a * sqrt(1 + quot * quot);
-	} else {
+	} else if(b < a) {
 		double quot = a / b;
 		return b * sqrt(1 + quot * quot);
+	} else {
+	    return a * 1.41421356237;
 	}
 }
 

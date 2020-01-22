@@ -63,6 +63,6 @@ class FractBitmapModelFragment : Fragment() {
         }
 
         const val defaultWidth = 1024
-        const val defaultHeight = 768
+        const val defaultHeight = 600 // FIXME
     }
 }
