@@ -230,30 +230,64 @@ static float3 valueAt(double2 pt) {
             case 87: (*((double2*) (&data[code[pc + 2]]))) = cabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Rabs ===
             // Rabs: [*Cplx]
-            case 88: (*((double2*) (&data[code[pc + 2]]))) = rabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break; 
+            case 88: (*((double2*) (&data[code[pc + 2]]))) = rabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Iabs ===
             // Iabs: [*Cplx]
-            case 89: (*((double2*) (&data[code[pc + 2]]))) = iabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break; 
+            case 89: (*((double2*) (&data[code[pc + 2]]))) = iabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            // === Norm ===
+            // Norm: [*Cplx]
+            case 90: (*((double2*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))) / abs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Point ===
             // Point: []
-            case 90: (*((double2*) (&data[code[pc + 1]]))) = pt; pc += 2; break; 
+            case 91: (*((double2*) (&data[code[pc + 1]]))) = pt; pc += 2; break;
             // === SetResult ===
             // SetResult: [*Int, *Cplx, *Real]
-            case 91: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break; 
+            case 92: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
             // SetResult: [Int, *Cplx, *Real]
-            case 92: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break; 
+            case 93: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
             // SetResult: [*Int, Cplx, *Real]
-            case 93: result = createResult(data[code[pc + 1]], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]])))); pc += 7; break; 
+            case 94: result = createResult(data[code[pc + 1]], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
             // SetResult: [Int, Cplx, *Real]
-            case 94: result = createResult(code[pc + 1], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]])))); pc += 7; break; 
+            case 95: result = createResult(code[pc + 1], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
             // SetResult: [*Int, *Cplx, Real]
-            case 95: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break; 
+            case 96: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
             // SetResult: [Int, *Cplx, Real]
-            case 96: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break; 
+            case 97: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
             // SetResult: [*Int, Cplx, Real]
-            case 97: result = createResult(data[code[pc + 1]], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6])))); pc += 8; break; 
+            case 98: result = createResult(data[code[pc + 1]], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6])))); pc += 8; break;
             // SetResult: [Int, Cplx, Real]
-            case 98: result = createResult(code[pc + 1], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6])))); pc += 8; break; 
+            case 99: result = createResult(code[pc + 1], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6])))); pc += 8; break;
+            // === Max ===
+            // Max: [*Int, *Int]
+            case 100: data[code[pc + 3]] = max(data[code[pc + 1]], data[code[pc + 2]]); pc += 4; break;
+            // Max: [Int, *Int]
+            case 101: data[code[pc + 3]] = max(code[pc + 1], data[code[pc + 2]]); pc += 4; break;
+            // Max: [*Real, *Real]
+            case 102: (*((double*) (&data[code[pc + 3]]))) = max((*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))); pc += 4; break;
+            // Max: [Real, *Real]
+            case 103: (*((double*) (&data[code[pc + 4]]))) = max((*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))); pc += 5; break;
+            // Max: [*Cplx, *Cplx]
+            case 104: (*((double2*) (&data[code[pc + 3]]))) = max((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]])))); pc += 4; break;
+            // Max: [Cplx, *Cplx]
+            case 105: (*((double2*) (&data[code[pc + 6]]))) = max(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]])))); pc += 7; break;
+            // === Min ===
+            // Min: [*Int, *Int]
+            case 106: data[code[pc + 3]] = min(data[code[pc + 1]], data[code[pc + 2]]); pc += 4; break;
+            // Min: [Int, *Int]
+            case 107: data[code[pc + 3]] = min(code[pc + 1], data[code[pc + 2]]); pc += 4; break;
+            // Min: [*Real, *Real]
+            case 108: (*((double*) (&data[code[pc + 3]]))) = min((*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))); pc += 4; break;
+            // Min: [Real, *Real]
+            case 109: (*((double*) (&data[code[pc + 4]]))) = min((*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))); pc += 5; break;
+            // Min: [*Cplx, *Cplx]
+            case 110: (*((double2*) (&data[code[pc + 3]]))) = min((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]])))); pc += 4; break;
+            // Min: [Cplx, *Cplx]
+            case 111: (*((double2*) (&data[code[pc + 6]]))) = min(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]])))); pc += 7; break;
+            // === Floor ===
+            // Floor: [*Real]
+            case 112: (*((double*) (&data[code[pc + 2]]))) = floor((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            // Floor: [*Cplx]
+            case 113: (*((double2*) (&data[code[pc + 2]]))) = floor((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
 		}
 	}
 	

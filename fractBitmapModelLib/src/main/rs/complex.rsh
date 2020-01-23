@@ -132,4 +132,18 @@ static double2 __attribute__((overloadable)) cos(double2 z) {
 	return cosh(muli(z));
 }
 
+static double2 __attribute__((overloadable)) max(double2 a, double2 b) {
+	return (double2) {max(a.x, b.x), max(a.y, b.y)};
+}
 
+static double2 __attribute__((overloadable)) min(double2 a, double2 b) {
+	return (double2) {min(a.x, b.x), min(a.y, b.y)};
+}
+
+static double2 __attribute__((overloadable)) norm(double2 z) {
+	return z / abs(z);
+}
+
+static double2 __attribute__((overloadable)) floor(double2 z) {
+	return (double2) {floor(z.x), floor(z.y)};
+}

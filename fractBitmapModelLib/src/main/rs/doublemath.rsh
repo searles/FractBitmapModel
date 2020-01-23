@@ -62,3 +62,13 @@ static double __attribute__((overloadable)) pow(double base, int exp) {
 static double __attribute__((overloadable)) pow(double base, double ex) {
     return pow((float) base, (float) ex);
 }
+
+static double __attribute__((overloadable)) max(double a, double b) {
+    if(a > b) return a;
+    else return b;
+}
+
+static double __attribute__((overloadable)) min(double a, double b) {
+    if(a > b) return a;
+    else return b;
+}
