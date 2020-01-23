@@ -62,7 +62,7 @@ class ShaderProperties(
             return Float3(
                 (sin(polarAngle) * sin(azimuthAngle)).toFloat(),
                 (sin(polarAngle) * cos(azimuthAngle)).toFloat(),
-                cos(polarAngle).toFloat()
+                -cos(polarAngle).toFloat()
             )
         }
 
