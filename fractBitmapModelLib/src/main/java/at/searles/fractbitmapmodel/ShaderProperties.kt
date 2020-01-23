@@ -60,8 +60,8 @@ class ShaderProperties(
 
         fun getLightVector(polarAngle: Double, azimuthAngle: Double): Float3 {
             return Float3(
-                (sin(polarAngle) * sin(azimuthAngle)).toFloat(),
                 (sin(polarAngle) * cos(azimuthAngle)).toFloat(),
+                (sin(polarAngle) * sin(azimuthAngle)).toFloat(),
                 -cos(polarAngle).toFloat()
             )
         }
