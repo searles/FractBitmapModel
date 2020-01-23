@@ -24,7 +24,7 @@ static double __attribute__((overloadable)) abs(double2 z) {
 		double quot = b / a;
 		// TODO fast sqrt
 		return a * sqrt(1 + quot * quot);
-	} else if(b < a) {
+	} else if(b > a) {
 		double quot = a / b;
 		return b * sqrt(1 + quot * quot);
 	} else {
@@ -69,7 +69,7 @@ static double2 __attribute__((overloadable)) pow(double2 base, double power) {
     double si, co;
     si = sincos(pa, &co);
 
-	return (double2) {r * co, r * si};
+	return r * (double2) {co, si};
 }
 
 static double2 __attribute__((overloadable)) pow(double2 base, double2 power) {
