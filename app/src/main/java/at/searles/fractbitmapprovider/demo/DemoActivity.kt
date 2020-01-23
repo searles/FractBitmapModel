@@ -56,7 +56,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         imageView.visibility = View.VISIBLE
         imageView.invalidate()
 
-        val delay: Long = 1
+        /*val delay: Long = 1
         val handler = Handler()
         val runnable = object: Runnable {
             override fun run() {
@@ -66,7 +66,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             }
         }
 
-        handler.postDelayed(runnable, delay)
+        handler.postDelayed(runnable, delay)*/
     }
 
     companion object {
