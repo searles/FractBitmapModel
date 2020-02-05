@@ -1,14 +1,11 @@
 package at.searles.fractbitmapprovider.demo
 
-import android.graphics.Matrix
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
-import at.searles.fractbitmapmodel.changes.RelativeScaleChange
 import at.searles.fractimageview.ScalableImageView
 
 class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModel.Listener {
@@ -32,7 +29,11 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         initBitmapModelFragment()
 
         experimentButton.setOnClickListener {
-            bitmapModelFragment.addImageSizeChange(5080, 6000)
+            if(bitmapModelFragment.bitmapModel.width != 10000) {
+                bitmapModelFragment.addImageSizeChange(10000, 6000)
+            } else {
+                bitmapModelFragment.addImageSizeChange(1000, 600)
+            }
         }
     }
 
@@ -73,9 +74,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         const val bitmapModelFragmentTag = "bitmapModelFragment"
         
         const val program =
-            "extern fn: \"Fn\" = \"exp point\";" +
-            "var t = fn;" +
-            "setResult(0, arc t / tau, rad t);" +
+            "setResult(0, {var a = 0; [cos rad point, sin rad point][a]}, {var a = 1; [cos rad point, sin rad point][a]});" +
             "declareScale(5,0,0,5,0,0);" +
             "declarePalette(\"1\", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);"
     }

@@ -170,7 +170,7 @@ static float3 valueAt(double2 pt) {
             case 64: if(++data[code[pc + 2]] < code[pc + 1]) pc = code[pc + 3]; else pc = code[pc + 4];break;
             // === Switch ===
             // Switch: [*Int, Int]
-            case 65: pc = code[pc + 3 + ((data[code[pc + 1]] % code[pc + 2] + code[pc + 2]) % code[pc + 2]]; break;
+            case 65: pc = code[pc + 3 + (data[code[pc + 1]] % code[pc + 2] + code[pc + 2]) % code[pc + 2]]; break;
             // === Sqrt ===
             // Sqrt: [*Real]
             case 66: (*((double*) (&data[code[pc + 2]]))) = sqrt((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
