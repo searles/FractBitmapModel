@@ -52,7 +52,7 @@ class CalcProperties (
     }
 
     fun createWithResetParameter(parameterKey: String): CalcProperties {
-        val newParameters = parameters.toMutableMap().apply {
+        val newParameters = parameters.mapValues { it.value.expr }.toMutableMap().apply {
             remove(parameterKey)
         }
 
@@ -65,7 +65,7 @@ class CalcProperties (
     }
 
     fun createWithNewParameter(parameterKey: String, value: String): CalcProperties {
-        val newParameters = parameters.toMutableMap().apply {
+        val newParameters = parameters.mapValues { it.value.expr }.toMutableMap().apply {
             this[parameterKey] = value
         }
 

@@ -4,6 +4,7 @@ import android.os.Looper
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
+import at.searles.fractlang.ParameterEntry
 
 /**
  * This class has 3 purposes:
@@ -21,7 +22,7 @@ class CalcController(val rs: RenderScript,
     val sourceCode: String
         get() = calcProperties.sourceCode
 
-    val parameters: Map<String, String>
+    val parameters: Map<String, ParameterEntry>
         get() = calcProperties.parameters
 
     private lateinit var calcScript: ScriptC_calc
