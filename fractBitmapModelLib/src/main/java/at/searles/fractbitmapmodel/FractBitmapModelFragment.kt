@@ -1,12 +1,11 @@
 package at.searles.fractbitmapmodel
 
-import android.annotation.SuppressLint
-import android.os.AsyncTask
 import android.os.Bundle
 import android.renderscript.RenderScript
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import at.searles.fractbitmapmodel.changes.BitmapAllocationChange
+import at.searles.fractbitmapmodel.palette.PaletteUtils
 import at.searles.fractlang.FractlangProgram
 
 class FractBitmapModelFragment : Fragment() {
@@ -40,8 +39,8 @@ class FractBitmapModelFragment : Fragment() {
 
         rs = RenderScript.create(context)
 
-        val calcProperties = CalcProperties(CalcProperties.getScale(program.scale), program)
-        val bitmapProperties = BitmapProperties(CalcProperties.getPalettes(program.palettes), ShaderProperties())
+        val calcProperties = CalcProperties(program.defaultScale, program)
+        val bitmapProperties = BitmapProperties(PaletteUtils.getPalettes(program.defaultPalettes), ShaderProperties())
 
         val bitmapAllocation = BitmapAllocation(rs, defaultWidth, defaultHeight)
 

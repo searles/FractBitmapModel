@@ -1,8 +1,6 @@
 package at.searles.fractbitmapmodel.changes
 
-import at.searles.fractbitmapmodel.BitmapProperties
 import at.searles.fractbitmapmodel.FractBitmapModel
-import at.searles.fractbitmapmodel.CalcProperties
 import org.json.JSONObject
 
 /**

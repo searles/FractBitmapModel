@@ -1,7 +1,6 @@
 package at.searles.fractbitmapmodel.changes
 
 import at.searles.fractbitmapmodel.FractBitmapModel
-import at.searles.fractbitmapmodel.CalcProperties
 import at.searles.fractlang.FractlangProgram
 
 /**

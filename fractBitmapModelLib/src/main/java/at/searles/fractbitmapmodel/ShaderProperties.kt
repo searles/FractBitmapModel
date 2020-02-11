@@ -24,7 +24,7 @@ class ShaderProperties(
         )
     }
 
-    fun createJson(): JSONObject {
+    fun toJson(): JSONObject {
         val obj = JSONObject()
         obj.put(useLightEffectKey, useLightEffect)
 

@@ -1,6 +1,5 @@
 package at.searles.fractbitmapmodel.changes
 
-import at.searles.fractbitmapmodel.CalcProperties
 import at.searles.fractlang.semanticanalysis.SemanticAnalysisException
 
 class ParameterResetChange(private val key: String): CalcPropertiesChange {

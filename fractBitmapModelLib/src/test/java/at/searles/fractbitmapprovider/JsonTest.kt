@@ -1,6 +1,5 @@
 package at.searles.fractbitmapprovider
 
-import at.searles.fractbitmapmodel.CalcProperties
 import at.searles.fractlang.FractlangProgram
 import org.json.JSONObject
 import org.junit.Assert
