@@ -34,8 +34,6 @@ class FractBitmapModelFragment : Fragment() {
     private fun initialize() {
         val sourceCode = arguments!!.getString(sourceCodeKey)!!
 
-        val program = FractlangProgram(sourceCode, emptyMap())
-
         rs = RenderScript.create(context)
 
         val properties = FractProperties.create(sourceCode, emptyMap(), null, null, emptyList())

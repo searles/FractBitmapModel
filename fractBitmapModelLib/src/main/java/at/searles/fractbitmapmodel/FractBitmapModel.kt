@@ -16,29 +16,6 @@ class FractBitmapModel(
     initialBitmapAllocation: BitmapAllocation,
     initialProperties: FractProperties): CalcTask.Listener, ScalableBitmapModel() {
 
-    /*val sourceCode: String
-        get() = calcController.sourceCode
-
-    val parameters
-        get() = calcController.parameters
-
-    val scale
-        get() = calcController.scale
-
-    var palettes: List<Palette>
-        get() = bitmapController.palettes
-        set(value) {
-            bitmapController.palettes = value
-            listener?.propertiesChanged(this)
-        }
-
-    var shaderProperties: ShaderProperties
-        get() = bitmapController.shaderProperties
-        set(value) {
-            bitmapController.shaderProperties = value
-            listener?.propertiesChanged(this)
-        }*/
-
     var bitmapAllocation = initialBitmapAllocation
         set(value) {
             field = value
@@ -145,13 +122,13 @@ class FractBitmapModel(
                 nextProperties = change.accept(nextProperties!!)
                 nextProperties!!
             } else {
-                calcController.properties = change.accept(nextProperties!!)
+                calcController.properties = change.accept(calcController.properties)
                 calcController.properties
             }
 
         bitmapController.updateShaderProperties(bitmapProperties)
         bitmapController.updatePalettes(bitmapProperties)
-        bitmapController.updateBitmap()
+        bitmapController.updateBitmap(change.useFastRoot)
     }
 
     fun scheduleCalcPropertiesChange(change: CalcPropertiesChange) {

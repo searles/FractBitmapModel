@@ -11,6 +11,6 @@ import at.searles.fractlang.FractlangProgram
  */
 class FractlangChange(private val fractlangProgram: FractlangProgram): CalcPropertiesChange {
     override fun accept(properties: FractProperties): FractProperties {
-        return properties.createWithNewProgram(fractlangProgram)
+        return properties.createWithNewProperties(fractlangProgram)
     }
 }

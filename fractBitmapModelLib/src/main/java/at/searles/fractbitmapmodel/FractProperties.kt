@@ -27,6 +27,10 @@ class FractProperties(
 
     val paletteCount: Int = defaultPalettes.size
 
+    val palettes: List<Palette> by lazy {
+        (0 until paletteCount).map { getPalette(it) }
+    }
+
     fun getPalette(index: Int): Palette {
         require(index in 0 until paletteCount)
         return customPalettes.getOrNull(index) ?: defaultPalettes[index].defaultPalette
@@ -60,39 +64,34 @@ class FractProperties(
         parameters.values.filter { !it.isDefault }.map { it.id to it.expr }.toMap()
     }
 
+    fun createWithNewBitmapProperties(customPalettes: List<Palette?>?, customShaderProperties: ShaderProperties?): FractProperties {
+        return FractProperties(sourceCode,
+            customScale,
+            customShaderProperties ?: this.customShaderProperties,
+            customPalettes ?: this.customPalettes,
+            defaultScale,
+            defaultShaderProperties,
+            defaultPalettes,
+            parameters,
+            vmCode)
+    }
+
     fun createWithRelativeScale(relativeMatrix: Matrix): FractProperties {
         val mInverse = Matrix()
         relativeMatrix.invert(mInverse)
 
         val newScale = scale.createRelative(Scale.fromMatrix(*mInverse.values()))
 
-        return FractProperties(sourceCode, newScale, customShaderProperties, customPalettes, defaultScale, defaultShaderProperties, defaultPalettes, parameters, vmCode)
+        return createWithNewScale(newScale)
     }
 
     fun createWithNewScale(newScale: Scale): FractProperties {
         return FractProperties(sourceCode, newScale, customShaderProperties, customPalettes, defaultScale, defaultShaderProperties, defaultPalettes, parameters, vmCode)
     }
 
-    fun createWithNewProgram(newFractlangProgram: FractlangProgram): FractProperties {
+    fun createWithNewProperties(newFractlangProgram: FractlangProgram): FractProperties {
         return create(newFractlangProgram, customScale, customShaderProperties, customPalettes)
     }
-
-    fun createWithResetParameter(parameterKey: String): FractProperties {
-        val newParameters = customParameters.toMutableMap().apply {
-            remove(parameterKey)
-        }
-
-        return create(sourceCode, newParameters, customScale, customShaderProperties, customPalettes)
-    }
-
-    fun createWithNewParameter(parameterKey: String, value: String): FractProperties {
-        val newParameters = customParameters.toMutableMap().apply {
-            this[parameterKey] = value
-        }
-
-        return create(sourceCode, newParameters, customScale, customShaderProperties, customPalettes)
-    }
-
 
     companion object {
         fun create(sourceCode: String, customParameters: Map<String, String>, customScale: Scale?, customShaderProperties: ShaderProperties?, customPalettes: List<Palette?>): FractProperties {

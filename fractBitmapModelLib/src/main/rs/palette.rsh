@@ -71,11 +71,13 @@ static float4 colorAtNormalized(int layer, float2 pt) {
     // determine which palette to use
     uint32_t segmentIndex = p->segmentIndex + (x0 + y0 * p->w);
 
+    segment_t segment = segments[segmentIndex];
+
     return (float4) {
-        z(&(segments[segmentIndex].comp0), pt),
-        z(&(segments[segmentIndex].comp1), pt),
-        z(&(segments[segmentIndex].comp2), pt),
-        z(&(segments[segmentIndex].alpha), pt)
+        z(&(segment.comp0), pt),
+        z(&(segment.comp1), pt),
+        z(&(segment.comp2), pt),
+        z(&(segment.alpha), pt)
     };
 }
 

@@ -9,6 +9,12 @@ import at.searles.fractbitmapmodel.FractProperties
  */
 interface BitmapPropertiesChange {
     /**
+     * This is in particular a good idea for color cycling.
+     */
+    val useFastRoot: Boolean
+        get() = false
+
+    /**
      * Returns an instance of FractProperties with modified palettes and/or shaderproperties.
      */
     fun accept(properties: FractProperties): FractProperties

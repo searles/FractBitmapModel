@@ -1,6 +1,7 @@
 package at.searles.fractbitmapmodel.changes
 
 import at.searles.fractbitmapmodel.FractProperties
+import at.searles.fractlang.FractlangProgram
 import at.searles.fractlang.semanticanalysis.SemanticAnalysisException
 
 class ParameterChange(private val key: String, private val newValue: String): CalcPropertiesChange {
@@ -8,6 +9,12 @@ class ParameterChange(private val key: String, private val newValue: String): Ca
      * @throws SemanticAnalysisException if it causes a compiler error.
      */
     override fun accept(properties: FractProperties): FractProperties {
-        return properties.createWithNewParameter(key, newValue)
+        val newParameters = properties.customParameters.toMutableMap()
+
+        newParameters[key] = newValue
+
+        val newProgram = FractlangProgram(properties.sourceCode, newParameters)
+
+        return properties.createWithNewProperties(newProgram)
     }
 }

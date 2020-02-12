@@ -1,12 +1,15 @@
 package at.searles.fractbitmapprovider.demo
 
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
+import at.searles.fractbitmapmodel.changes.PaletteOffsetChange
 import at.searles.fractimageview.ScalableImageView
+import kotlinx.android.synthetic.main.activity_main.*
 
 class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModel.Listener {
 
@@ -57,17 +60,34 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         imageView.visibility = View.VISIBLE
         imageView.invalidate()
 
-        /*val delay: Long = 1
-        val handler = Handler()
-        val runnable = object: Runnable {
-            override fun run() {
-                bitmapModelFragment.bitmapModel.addChange(RelativeScaleChange(Matrix()))
-                bitmapModelFragment.addImageSizeChange(100, 100)
-                handler.postDelayed(this, delay)
-            }
-        }
+        bitmapModelFragment.bitmapModel.listener = this
 
-        handler.postDelayed(runnable, delay)*/
+        startColorCycling()
+    }
+
+    private fun startColorCycling() {
+        val delay: Long = 10
+        val handler = Handler()
+        val runnable = ColorCycling(handler, delay)
+        runnable.run()
+    }
+
+    inner class ColorCycling(private val handler: Handler, private val delay: Long): Runnable {
+        private val startTime = System.currentTimeMillis()
+
+        override fun run() {
+            val currentTime = System.currentTimeMillis()
+
+            val offsetX = (currentTime - startTime) / 1000f
+            val offsetY = 0f
+
+            val change = PaletteOffsetChange(0, offsetX, offsetY)
+
+            bitmapModelFragment.bitmapModel.applyBitmapPropertiesChange(change)
+            scalableImageView.invalidate()
+
+            handler.postDelayed(this, delay)
+        }
     }
 
     companion object {

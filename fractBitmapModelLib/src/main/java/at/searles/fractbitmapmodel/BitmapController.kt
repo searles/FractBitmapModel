@@ -65,13 +65,17 @@ class BitmapController(
     /**
      * Renders bitmapData into the bitmap using the current parameters.
      */
-    fun updateBitmap() {
+    fun updateBitmap(alwaysUseFast: Boolean = false) {
         val currentPixelGap = max(minPixelGap, bitmapAllocation.pixelGap)
+        bitmapScript._pixelGap = currentPixelGap.toLong()
 
         if(currentPixelGap == 1) {
-            bitmapScript.forEach_root(bitmapAllocation.rsBitmap)
+            if(alwaysUseFast) {
+                bitmapScript.forEach_fastRoot(bitmapAllocation.rsBitmap)
+            } else {
+                bitmapScript.forEach_root(bitmapAllocation.rsBitmap)
+            }
         } else {
-            bitmapScript._pixelGap = currentPixelGap.toLong()
             interpolateGapsScript._pixelGap = currentPixelGap.toLong()
 
             bitmapScript.forEach_fastRoot(bitmapAllocation.rsBitmap)
