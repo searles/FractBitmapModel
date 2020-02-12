@@ -1,5 +1,12 @@
 package at.searles.fractbitmapmodel.changes
 
-interface CalcPropertiesChange: Change {
-    fun accept(calcProperties: CalcProperties): CalcProperties
+import at.searles.fractbitmapmodel.FractProperties
+
+/**
+ * Modifications of the calculation, ie, the calculation must be restarted.
+ * These changes create a new instance of FractProperties based on
+ * the previous one and schedule it for future modifications.
+ */
+interface CalcPropertiesChange {
+    fun accept(properties: FractProperties): FractProperties
 }

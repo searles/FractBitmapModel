@@ -17,43 +17,29 @@ import at.searles.fractlang.ParameterEntry
  *
  */
 class CalcController(val rs: RenderScript,
-                     initCalcProperties: CalcProperties) {
-
-    val sourceCode: String
-        get() = calcProperties.sourceCode
-
-    val parameters: Map<String, ParameterEntry>
-        get() = calcProperties.parameters
+                     initialProperties: FractProperties) {
 
     private lateinit var calcScript: ScriptC_calc
 
-    val scale
-        get() = calcProperties.scale
-
-    var codeAllocation: Allocation = Allocation.createSized(rs, Element.I32(rs), 1)
+    private var codeAllocation: Allocation = Allocation.createSized(rs, Element.I32(rs), 1)
 
     private val part = Allocation.createSized(rs, Element.F32_3(rs),
         parallelCalculationsCount
     )
 
-    var calcProperties = initCalcProperties
-        set(value) {
-            require(Looper.getMainLooper().isCurrentThread)
-            field = value
-            setVmCodeInScript()
-        }
+    var properties = initialProperties
 
     fun initialize() {
         calcScript = ScriptC_calc(rs)
-        setVmCodeInScript()
+        updateVmCodeInScript()
     }
 
     fun createCalculationTask(bitmapAllocation: BitmapAllocation): CalcTask {
         return CalcTask(rs, bitmapAllocation, calcScript, part)
     }
 
-    private fun setVmCodeInScript() {
-        val vmCode = calcProperties.vmCode
+    fun updateVmCodeInScript() {
+        val vmCode = properties.vmCode
 
         codeAllocation.destroy()
         codeAllocation = Allocation.createSized(rs, Element.I32(rs), vmCode.size)
@@ -68,6 +54,8 @@ class CalcController(val rs: RenderScript,
         val centerX = width / 2.0
         val centerY = height / 2.0
         val factor = 1.0 / if (centerX < centerY) centerX else centerY
+
+        val scale = properties.scale
 
         return ScriptField_Scale.Item().apply {
             a = scale.xx * factor

@@ -1,13 +1,11 @@
 package at.searles.fractbitmapmodel
 
 import android.renderscript.RenderScript
-import at.searles.paletteeditor.Palette
 import kotlin.math.hypot
 import kotlin.math.max
 
 class BitmapController(
     val rs: RenderScript,
-    initBitmapProperties: BitmapProperties,
     initialBitmapAllocation: BitmapAllocation
 ) {
 
@@ -26,35 +24,14 @@ class BitmapController(
             bindToBitmapAllocation()
         }
 
-    var bitmapProperties: BitmapProperties = initBitmapProperties
-        set(value) {
-            field = value
-            setPalettesInScripts()
-            setShaderPropertiesInScripts()
-        }
-
-    fun initialize() {
+    fun initialize(props: FractProperties) {
         bitmapScript = ScriptC_bitmap(rs)
         interpolateGapsScript = ScriptC_interpolate_gaps(rs)
         paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
-        setPalettesInScripts()
-        setShaderPropertiesInScripts()
+        updatePalettes(props)
+        updateShaderProperties(props)
         bindToBitmapAllocation()
     }
-
-    var shaderProperties
-        get() = bitmapProperties.shaderProperties
-        set(value) {
-            bitmapProperties = BitmapProperties(palettes, value)
-            setShaderPropertiesInScripts()
-        }
-
-    var palettes: List<Palette>
-        get() = bitmapProperties.palettes
-        set(value) {
-            bitmapProperties = BitmapProperties(value, shaderProperties)
-            setPalettesInScripts()
-        }
 
     private fun bindToBitmapAllocation() {
         with(bitmapAllocation) {
@@ -105,12 +82,12 @@ class BitmapController(
         listener?.bitmapUpdated()
     }
 
-    private fun setPalettesInScripts() {
-        paletteUpdater.updatePalettes(bitmapProperties.palettes)
+    fun updatePalettes(props: FractProperties) {
+        paletteUpdater.updatePalettes(props)
     }
 
-    private fun setShaderPropertiesInScripts() {
-        with(bitmapProperties) {
+    fun updateShaderProperties(props: FractProperties) {
+        with(props) {
             bitmapScript._useLightEffect = if (shaderProperties.useLightEffect) 1 else 0
             bitmapScript._lightVector = shaderProperties.lightVector
             bitmapScript._ambientReflection = shaderProperties.ambientReflection

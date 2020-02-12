@@ -5,8 +5,6 @@ import android.os.Looper
 import android.renderscript.RenderScript
 import at.searles.fractbitmapmodel.changes.*
 import at.searles.fractimageview.ScalableBitmapModel
-import at.searles.paletteeditor.Palette
-import org.json.JSONObject
 
 /**
  * Represents bitmap models that depend on potentially long running tasks and therefore
@@ -16,10 +14,9 @@ import org.json.JSONObject
 class FractBitmapModel(
     val rs: RenderScript,
     initialBitmapAllocation: BitmapAllocation,
-    initialCalcProperties: CalcProperties,
-    initialBitmapProperties: BitmapProperties): CalcTask.Listener, ScalableBitmapModel() {
+    initialProperties: FractProperties): CalcTask.Listener, ScalableBitmapModel() {
 
-    val sourceCode: String
+    /*val sourceCode: String
         get() = calcController.sourceCode
 
     val parameters
@@ -40,7 +37,7 @@ class FractBitmapModel(
         set(value) {
             bitmapController.shaderProperties = value
             listener?.propertiesChanged(this)
-        }
+        }*/
 
     var bitmapAllocation = initialBitmapAllocation
         set(value) {
@@ -53,8 +50,8 @@ class FractBitmapModel(
      * Must be initialized before starting a calculation. This will happen in the
      * first call to startTask.
      */
-    private val calcController = CalcController(rs, initialCalcProperties)
-    private val bitmapController = BitmapController(rs, initialBitmapProperties, initialBitmapAllocation)
+    private val calcController = CalcController(rs, initialProperties)
+    private val bitmapController = BitmapController(rs, initialBitmapAllocation)
 
     private var isInitialized: Boolean = false
 
@@ -70,8 +67,12 @@ class FractBitmapModel(
     private var isTaskRunning: Boolean = false
     private var calcTask: CalcTask? = null
 
-    private val postCalcChanges = ArrayList<BitmapModelChange>()
-    private var nextCalcProperties: CalcProperties? = null
+    private val bitmapModelChanges = ArrayList<BitmapModelChange>()
+
+    val properties: FractProperties
+        get() = calcController.properties
+
+    private var nextProperties: FractProperties? = null
 
     override fun scale(relativeMatrix: Matrix) {
         require(Looper.getMainLooper().isCurrentThread)
@@ -79,7 +80,7 @@ class FractBitmapModel(
         bitmapTransformMatrix.postConcat(relativeMatrix)
         nextBitmapTransformMatrix.postConcat(relativeMatrix)
 
-        addChange(RelativeScaleChange(relativeMatrix))
+        scheduleCalcPropertiesChange(RelativeScaleChange(relativeMatrix))
     }
 
     fun updateBitmap() {
@@ -116,16 +117,16 @@ class FractBitmapModel(
 
         var propertiesChanged = false
 
-        if(nextCalcProperties != null) {
-            setCalcProperties(nextCalcProperties!!)
-            nextCalcProperties = null
+        if(nextProperties != null) {
+            setProperties(nextProperties!!)
+            nextProperties = null
 
             propertiesChanged = true
         }
 
-        if(postCalcChanges.isNotEmpty()) {
-            postCalcChanges.forEach { it.accept(this) }
-            postCalcChanges.clear()
+        if(bitmapModelChanges.isNotEmpty()) {
+            bitmapModelChanges.forEach { it.accept(this) }
+            bitmapModelChanges.clear()
 
             propertiesChanged = true
         }
@@ -136,49 +137,70 @@ class FractBitmapModel(
         }
     }
 
-    fun addChange(change: Change) {
+    fun applyBitmapPropertiesChange(change: BitmapPropertiesChange) {
+        require(Looper.getMainLooper().isCurrentThread)
+
+        val bitmapProperties =
+            if(nextProperties != null) {
+                nextProperties = change.accept(nextProperties!!)
+                nextProperties!!
+            } else {
+                calcController.properties = change.accept(nextProperties!!)
+                calcController.properties
+            }
+
+        bitmapController.updateShaderProperties(bitmapProperties)
+        bitmapController.updatePalettes(bitmapProperties)
+        bitmapController.updateBitmap()
+    }
+
+    fun scheduleCalcPropertiesChange(change: CalcPropertiesChange) {
+        require(Looper.getMainLooper().isCurrentThread)
+
+        val currentProperties = nextProperties ?: calcController.properties
+
         if(isTaskRunning) {
-            if(change is CalcPropertiesChange) {
-                nextCalcProperties = if (nextCalcProperties == null) {
-                    change.accept(calcController.calcProperties)
-                } else {
-                    change.accept(nextCalcProperties!!)
-                }
-            }
-
-            if(change is BitmapModelChange) {
-                postCalcChanges.add(change)
-            }
-
+            nextProperties = change.accept(currentProperties)
             calcTask!!.cancel(true)
             return
         }
 
-        require(nextCalcProperties == null)
-
-        if(change is CalcPropertiesChange) {
-            setCalcProperties(change.accept(calcController.calcProperties))
-        }
-
-        if(change is BitmapModelChange) {
-            change.accept(this)
-        }
-
+        require(nextProperties == null)
+        setProperties(change.accept(calcController.properties))
         listener?.propertiesChanged(this)
 
         startTask()
     }
 
-    private fun setCalcProperties(newCalcProperties: CalcProperties) {
+    fun scheduleBitmapModelChange(change: BitmapModelChange) {
+        if(isTaskRunning) {
+            bitmapModelChanges.add(change)
+            calcTask!!.cancel(true)
+            return
+        }
+
+        change.accept(this)
+        // TODO update scale?
+        listener?.propertiesChanged(this)
+        startTask()
+    }
+
+    /**
+     * Sets new properties
+     */
+    private fun setProperties(newProperties: FractProperties) {
         require(!isTaskRunning)
-        calcController.calcProperties = newCalcProperties
+        calcController.properties = newProperties
+        bitmapController.updatePalettes(newProperties)
+        bitmapController.updatePalettes(newProperties)
+        calcController.updateVmCodeInScript()
         updateScaleInScripts()
     }
 
     fun startTask() {
         require(Looper.getMainLooper().isCurrentThread)
 
-        require(postCalcChanges.isEmpty())
+        require(bitmapModelChanges.isEmpty())
         require(!isTaskRunning)
         require(calcTask == null)
 
@@ -193,7 +215,7 @@ class FractBitmapModel(
         if(!isInitialized) {
             // Initialize script the first time this method is called.
             calcController.initialize()
-            bitmapController.initialize()
+            bitmapController.initialize(properties)
             updateScaleInScripts()
             isInitialized = true
         }
@@ -210,18 +232,6 @@ class FractBitmapModel(
 
         calcController.setScriptScale(scriptScale)
         bitmapController.setScriptScale(scriptScale)
-    }
-
-    fun setBitmapProperties(newBitmapProperties: BitmapProperties) {
-        bitmapController.bitmapProperties = newBitmapProperties
-    }
-
-    fun createJson(): JSONObject {
-        val obj = JSONObject()
-        calcController.calcProperties.createJson(obj)
-        bitmapController.bitmapProperties.createJson(obj)
-
-        return obj
     }
 
     interface Listener {

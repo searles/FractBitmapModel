@@ -2,11 +2,11 @@ package at.searles.fractbitmapmodel
 
 import android.renderscript.Matrix4f
 import android.renderscript.RenderScript
+import at.searles.commons.color.Lab
+import at.searles.commons.color.Palette
 import at.searles.commons.math.InterpolationMatrix
 import at.searles.fractbitmapmodel.palette.SplineSegment
 import at.searles.fractbitmapmodel.palette.Yuv
-import at.searles.paletteeditor.Palette
-import at.searles.paletteeditor.colors.Lab
 import java.util.*
 
 /**
@@ -17,10 +17,11 @@ class PaletteToScriptUpdater(private val rs: RenderScript, private val script: S
     private lateinit var rsSegments: ScriptField_paletteSegment
     private lateinit var rsPalettes: ScriptField_palette
 
-    fun updatePalettes(palettes: List<Palette>) {
+    fun updatePalettes(properties: FractProperties) {
         val splineSegments = ArrayList<SplineSegment>()
 
-        val palettesWithSegmentIndex = palettes.map {palette ->
+        val palettesWithSegmentIndex = (0 until properties.paletteCount).map {paletteIndex ->
+            val palette = properties.getPalette(paletteIndex)
             val segmentStartIndex = splineSegments.size
             val segments = createSplineSegments(palette)
 
@@ -29,7 +30,7 @@ class PaletteToScriptUpdater(private val rs: RenderScript, private val script: S
             Pair(palette, segmentStartIndex)
         }
 
-        script._palettesCount = palettes.size.toLong()
+        script._palettesCount = properties.paletteCount.toLong()
 
         setPalettesInScript(palettesWithSegmentIndex)
         setSegmentsInScript(splineSegments)

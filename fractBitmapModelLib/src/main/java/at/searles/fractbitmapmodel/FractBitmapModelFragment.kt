@@ -5,7 +5,6 @@ import android.renderscript.RenderScript
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import at.searles.fractbitmapmodel.changes.BitmapAllocationChange
-import at.searles.fractbitmapmodel.palette.PaletteUtils
 import at.searles.fractlang.FractlangProgram
 
 class FractBitmapModelFragment : Fragment() {
@@ -26,7 +25,7 @@ class FractBitmapModelFragment : Fragment() {
     fun addImageSizeChange(width: Int, height: Int) {
         try {
             val newBitmapAllocation = BitmapAllocation(rs, width, height)
-            bitmapModel.addChange(BitmapAllocationChange(newBitmapAllocation))
+            bitmapModel.scheduleBitmapModelChange(BitmapAllocationChange(newBitmapAllocation))
         } catch(th: Throwable) {
             Toast.makeText(context, th.localizedMessage, Toast.LENGTH_LONG).show()
         }
@@ -39,12 +38,11 @@ class FractBitmapModelFragment : Fragment() {
 
         rs = RenderScript.create(context)
 
-        val calcProperties = CalcProperties(program.defaultScale, program)
-        val bitmapProperties = BitmapProperties(PaletteUtils.getPalettes(program.defaultPalettes), ShaderProperties())
+        val properties = FractProperties.create(sourceCode, emptyMap(), null, null, emptyList())
 
         val bitmapAllocation = BitmapAllocation(rs, defaultWidth, defaultHeight)
 
-        bitmapModel = FractBitmapModel(rs, bitmapAllocation, calcProperties, bitmapProperties)
+        bitmapModel = FractBitmapModel(rs, bitmapAllocation, properties)
         bitmapModel.startTask()
     }
 

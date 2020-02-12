@@ -1,6 +1,6 @@
 package at.searles.fractbitmapmodel.palette
 
-import at.searles.paletteeditor.colors.Rgb
+import at.searles.commons.color.Rgb
 
 class Yuv(val y: Float, val u: Float, val v: Float, val alpha: Float = 1f) {
     constructor(rgb: Rgb): this(

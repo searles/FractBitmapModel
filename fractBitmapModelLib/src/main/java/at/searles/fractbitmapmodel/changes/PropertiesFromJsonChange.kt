@@ -1,21 +1,17 @@
 package at.searles.fractbitmapmodel.changes
 
-import at.searles.fractbitmapmodel.FractBitmapModel
+import at.searles.fractbitmapmodel.FractProperties
+import at.searles.fractbitmapmodel.FractPropertiesAdapter
 import org.json.JSONObject
 
 /**
  * Use this one to load favorites
  */
-class PropertiesFromJsonChange(obj: JSONObject): CalcPropertiesChange, BitmapModelChange {
+class PropertiesFromJsonChange(obj: JSONObject): CalcPropertiesChange {
 
-    private val newCalcProperties = CalcProperties.fromJson(obj)
-    private val newBitmapProperties = BitmapProperties.fromJson(obj)
+    private val newProperties = FractPropertiesAdapter.fromJson(obj)
 
-    override fun accept(calcProperties: CalcProperties): CalcProperties {
-        return newCalcProperties
-    }
-
-    override fun accept(model: FractBitmapModel) {
-        model.setBitmapProperties(newBitmapProperties)
+    override fun accept(properties: FractProperties): FractProperties {
+        return newProperties
     }
 }

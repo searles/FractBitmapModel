@@ -1,27 +1,13 @@
 package at.searles.fractbitmapmodel.changes
 
-import at.searles.fractbitmapmodel.FractBitmapModel
+import at.searles.fractbitmapmodel.FractProperties
 import at.searles.fractlang.FractlangProgram
 
-/**
- * Use this one to load a demo. Existing settings are dropped apart from
- * shader properties.
- */
-class FractlangWithDefaultsChange(private val fractlangProgram: FractlangProgram): CalcPropertiesChange, BitmapModelChange {
+class FractlangWithDefaultsChange(program: FractlangProgram): CalcPropertiesChange {
 
-    private val newCalcProperties: CalcProperties
+    private val newProperties: FractProperties = FractProperties.create(program, null, null, emptyList())
 
-    init {
-        val scale = CalcProperties.getScale(fractlangProgram.scale)
-        newCalcProperties = CalcProperties(scale, fractlangProgram)
-    }
-
-    override fun accept(calcProperties: CalcProperties): CalcProperties {
-        return newCalcProperties
-    }
-
-    override fun accept(model: FractBitmapModel) {
-        val palettes = CalcProperties.getPalettes(fractlangProgram.palettes)
-        model.palettes = palettes
+    override fun accept(properties: FractProperties): FractProperties {
+        return newProperties
     }
 }
