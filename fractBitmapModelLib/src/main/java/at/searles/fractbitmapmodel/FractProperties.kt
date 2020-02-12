@@ -38,7 +38,7 @@ class FractProperties(
 
     fun isDefaultPalette(index: Int): Boolean {
         require(index in 0 until paletteCount)
-        return customPalettes[index] == null
+        return customPalettes.getOrNull(index) == null
     }
 
     fun getPaletteDescription(index: Int): String {
