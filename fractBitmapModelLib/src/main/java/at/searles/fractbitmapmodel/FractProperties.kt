@@ -5,35 +5,32 @@ import androidx.core.graphics.values
 import at.searles.commons.color.Palette
 import at.searles.commons.math.Scale
 import at.searles.fractlang.FractlangProgram
-import at.searles.fractlang.PaletteEntry
-import at.searles.fractlang.ParameterEntry
 
 class FractProperties(
-    val sourceCode: String,
-    private val customScale: Scale?,
-    private val customShaderProperties: ShaderProperties?,
-    private val customPalettes: List<Palette?>,
-    private val defaultScale: Scale,
-    private val defaultShaderProperties: ShaderProperties,
-    private val defaultPalettes: List<PaletteEntry>,
-    private val parameters: Map<String, ParameterEntry>,
-    val vmCode: IntArray
-) {
-    val scale = customScale ?: defaultScale
+    private val program: FractlangProgram,
+    val customScale: Scale?,
+    val customShaderProperties: ShaderProperties?,
+    val customPalettes: List<Palette?>) {
+    val sourceCode: String = program.sourceCode
+
+    val scale = customScale ?: program.defaultScale
     val isDefaultScale = customScale == null
 
-    val shaderProperties = customShaderProperties ?: defaultShaderProperties
+    val shaderProperties = customShaderProperties ?: fallBackShaderProperties
     val isDefaultShaderProperties = customShaderProperties == null
 
-    val paletteCount: Int = defaultPalettes.size
+    val paletteCount: Int = program.defaultPalettes.size
 
     val palettes: List<Palette> by lazy {
         (0 until paletteCount).map { getPalette(it) }
     }
 
+    val vmCode
+            get() = program.vmCode
+
     fun getPalette(index: Int): Palette {
         require(index in 0 until paletteCount)
-        return customPalettes.getOrNull(index) ?: defaultPalettes[index].defaultPalette
+        return customPalettes.getOrNull(index) ?: program.defaultPalettes[index].defaultPalette
     }
 
     fun isDefaultPalette(index: Int): Boolean {
@@ -43,37 +40,35 @@ class FractProperties(
 
     fun getPaletteDescription(index: Int): String {
         require(index in 0 until paletteCount)
-        return defaultPalettes[index].description
+        return program.defaultPalettes[index].description
     }
 
-    val parameterIds: Iterable<String> = parameters.keys
+    val parameterIds: Iterable<String> = program.activeParameters.keys
 
     fun getParameterDescription(id: String): String {
-        return parameters.getValue(id).description
+        return program.activeParameters.getValue(id).description
     }
 
+    /**
+     * Since FractProgram is compiled using custom parameters,
+     * this will be identical to the ones in customParameters.
+     */
     fun getParameter(id: String): String {
-        return parameters.getValue(id).expr
+        return program.activeParameters.getValue(id).expr
     }
 
     fun isDefaultParameter(id: String): Boolean {
-        return parameters.getValue(id).isDefault
+        return program.activeParameters.getValue(id).isDefault
     }
 
-    val customParameters: Map<String, String> by lazy {
-        parameters.values.filter { !it.isDefault }.map { it.id to it.expr }.toMap()
-    }
+    val customParameters = program.customParameters
 
     fun createWithNewBitmapProperties(customPalettes: List<Palette?>?, customShaderProperties: ShaderProperties?): FractProperties {
-        return FractProperties(sourceCode,
+        return FractProperties(program,
             customScale,
             customShaderProperties ?: this.customShaderProperties,
-            customPalettes ?: this.customPalettes,
-            defaultScale,
-            defaultShaderProperties,
-            defaultPalettes,
-            parameters,
-            vmCode)
+            customPalettes ?: this.customPalettes
+        )
     }
 
     fun createWithRelativeScale(relativeMatrix: Matrix): FractProperties {
@@ -86,7 +81,7 @@ class FractProperties(
     }
 
     fun createWithNewScale(newScale: Scale): FractProperties {
-        return FractProperties(sourceCode, newScale, customShaderProperties, customPalettes, defaultScale, defaultShaderProperties, defaultPalettes, parameters, vmCode)
+        return FractProperties(program, newScale, customShaderProperties, customPalettes)
     }
 
     fun createWithNewProperties(newFractlangProgram: FractlangProgram): FractProperties {
@@ -101,15 +96,10 @@ class FractProperties(
         }
 
         fun create(program: FractlangProgram, customScale: Scale?, customShaderProperties: ShaderProperties?, customPalettes: List<Palette?>): FractProperties {
-            return FractProperties(program.sourceCode,
+            return FractProperties(program,
                 customScale,
                 customShaderProperties,
-                customPalettes,
-                program.defaultScale,
-                fallBackShaderProperties,
-                program.defaultPalettes,
-                program.activeParameters,
-                program.vmCode
+                customPalettes
             )
         }
 
