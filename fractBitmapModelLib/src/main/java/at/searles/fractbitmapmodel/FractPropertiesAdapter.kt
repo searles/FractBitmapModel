@@ -80,7 +80,15 @@ object FractPropertiesAdapter {
         val palettes = ArrayList<Palette?>()
 
         for(i in 0 until palettesArray.length()) {
-            palettes.add(PaletteAdapter.toPalette(palettesArray.getJSONObject(i)))
+            val paletteOpt = palettesArray.get(i)
+
+            palettes.add(
+                if(paletteOpt != null) {
+                    PaletteAdapter.toPalette(paletteOpt as JSONObject)
+                } else {
+                    null
+                }
+            )
         }
 
         return palettes
