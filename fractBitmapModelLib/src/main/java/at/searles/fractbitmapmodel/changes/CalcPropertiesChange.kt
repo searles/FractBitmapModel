@@ -8,5 +8,8 @@ import at.searles.fractbitmapmodel.FractProperties
  * the previous one and schedule it for future modifications.
  */
 interface CalcPropertiesChange {
+    val addToHistory: Boolean
+        get() = true
+
     fun accept(properties: FractProperties): FractProperties
 }

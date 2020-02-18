@@ -3,6 +3,7 @@ package at.searles.fractbitmapmodel
 import android.graphics.Matrix
 import android.os.Looper
 import android.renderscript.RenderScript
+import at.searles.commons.util.History
 import at.searles.fractbitmapmodel.changes.*
 import at.searles.fractimageview.ScalableBitmapModel
 
@@ -50,6 +51,8 @@ class FractBitmapModel(
         get() = calcController.properties
 
     private var nextProperties: FractProperties? = null
+
+    private val history = History<FractProperties>()
 
     override fun scale(relativeMatrix: Matrix) {
         require(Looper.getMainLooper().isCurrentThread)
@@ -133,17 +136,23 @@ class FractBitmapModel(
 
     fun scheduleCalcPropertiesChange(change: CalcPropertiesChange) {
         require(Looper.getMainLooper().isCurrentThread)
+        require(nextProperties == null || isTaskRunning)
 
         val currentProperties = nextProperties ?: calcController.properties
 
+        val changedProperties = change.accept(currentProperties)
+
+        if(change.addToHistory) {
+            history.add(changedProperties)
+        }
+
         if(isTaskRunning) {
-            nextProperties = change.accept(currentProperties)
+            nextProperties = changedProperties
             calcTask!!.cancel(true)
             return
         }
 
-        require(nextProperties == null)
-        setProperties(change.accept(calcController.properties))
+        setProperties(changedProperties)
         listener?.propertiesChanged(this)
 
         startTask()
@@ -157,9 +166,21 @@ class FractBitmapModel(
         }
 
         change.accept(this)
-        // TODO update scale?
+
         listener?.propertiesChanged(this)
         startTask()
+    }
+
+    fun hasBackHistory() = history.hasBack()
+
+    fun hasForwardHistory() = history.hasForward()
+
+    fun historyBack() {
+        scheduleCalcPropertiesChange(NewFractPropertiesChange(history.back(), false))
+    }
+
+    fun historyForward() {
+        scheduleCalcPropertiesChange(NewFractPropertiesChange(history.forward(), false))
     }
 
     /**

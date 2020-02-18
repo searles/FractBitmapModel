@@ -1,10 +1,8 @@
 package at.searles.fractbitmapmodel
 
-import android.os.Looper
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
-import at.searles.fractlang.ParameterEntry
 
 /**
  * This class has 3 purposes:

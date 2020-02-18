@@ -32,10 +32,12 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         initBitmapModelFragment()
 
         experimentButton.setOnClickListener {
-            if(bitmapModelFragment.bitmapModel.width != 10000) {
-                bitmapModelFragment.addImageSizeChange(10000, 6000)
+            if (bitmapModelFragment.bitmapModel.hasBackHistory()) {
+                bitmapModelFragment.bitmapModel.historyBack()
             } else {
-                bitmapModelFragment.addImageSizeChange(1000, 600)
+                while(bitmapModelFragment.bitmapModel.hasForwardHistory()) {
+                    bitmapModelFragment.bitmapModel.historyForward()
+                }
             }
         }
     }
