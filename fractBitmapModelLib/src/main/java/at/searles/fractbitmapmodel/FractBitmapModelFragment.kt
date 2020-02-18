@@ -62,13 +62,17 @@ class FractBitmapModelFragment : Fragment() {
         const val parametersKey = "parameters"
 
         fun createInstance(sourceCode: String, parameters: Map<String, String>): FractBitmapModelFragment {
-            val bundle = Bundle().apply {
-                putString(sourceCodeKey, sourceCode)
-            }
-
             val parametersBundle = Bundle()
 
-            parameters.forEach{(key, value) -> parametersBundle.putString(key, value)}
+            parameters.forEach { (key, value) ->
+                parametersBundle.putString(key, value)
+            }
+
+            val bundle = Bundle().apply {
+                putString(sourceCodeKey, sourceCode)
+                putBundle(parametersKey, parametersBundle)
+            }
+
 
             return FractBitmapModelFragment().apply {
                 arguments = bundle
