@@ -20,6 +20,16 @@ class FractBitmapModelFragment : Fragment() {
         initialize()
 
         // TODO: Dimensions as parameter
+
+        if(savedInstanceState != null) {
+            // TODO Deserialize fractal
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // TODO: Save it.
     }
 
     fun addImageSizeChange(width: Int, height: Int) {
@@ -33,10 +43,13 @@ class FractBitmapModelFragment : Fragment() {
 
     private fun initialize() {
         val sourceCode = arguments!!.getString(sourceCodeKey)!!
+        val parameters = arguments!!.getBundle(parametersKey)!!
+
+        val parametersMap = parameters.keySet().map { it to parameters.getString(it)!! }.toMap()
+
+        val properties = FractProperties.create(sourceCode, parametersMap, null, null, emptyList())
 
         rs = RenderScript.create(context)
-
-        val properties = FractProperties.create(sourceCode, emptyMap(), null, null, emptyList())
 
         val bitmapAllocation = BitmapAllocation(rs, defaultWidth, defaultHeight)
 
@@ -46,11 +59,16 @@ class FractBitmapModelFragment : Fragment() {
 
     companion object {
         const val sourceCodeKey = "sourceCode"
+        const val parametersKey = "parameters"
 
-        fun createInstance(sourceCode: String): FractBitmapModelFragment {
+        fun createInstance(sourceCode: String, parameters: Map<String, String>): FractBitmapModelFragment {
             val bundle = Bundle().apply {
                 putString(sourceCodeKey, sourceCode)
             }
+
+            val parametersBundle = Bundle()
+
+            parameters.forEach{(key, value) -> parametersBundle.putString(key, value)}
 
             return FractBitmapModelFragment().apply {
                 arguments = bundle

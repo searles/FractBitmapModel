@@ -52,7 +52,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             supportFragmentManager.findFragmentByTag(bitmapModelFragmentTag) as FractBitmapModelFragment?
 
         bitmapModelFragment = fragment ?:
-                FractBitmapModelFragment.createInstance(program).also {
+                FractBitmapModelFragment.createInstance(program, parameters).also {
                     supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
     }
@@ -99,6 +99,8 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             "setResult(0, {var a = 1000001; [cos rad point, sin rad point][a]}, {var a = 1; [cos rad point, sin rad point][a]});" +
             "declareScale(5,0,0,5,0,0);" +
             "declarePalette(\"1\", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);"
+
+        val parameters = emptyMap<String, String>()
     }
 
     override fun started() {
