@@ -52,7 +52,9 @@ class FractBitmapModel(
 
     private var nextProperties: FractProperties? = null
 
-    private val history = History<FractProperties>()
+    private val history = History<FractProperties>().apply {
+        add(initialProperties)
+    }
 
     override fun scale(relativeMatrix: Matrix) {
         require(Looper.getMainLooper().isCurrentThread)
