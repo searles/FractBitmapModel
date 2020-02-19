@@ -195,6 +195,10 @@ class FractBitmapModel(
         bitmapController.updatePalettes(newProperties)
         calcController.updateVmCodeInScript()
         updateScaleInScripts()
+
+        bitmapController.updateShaderProperties(newProperties)
+        bitmapController.updatePalettes(newProperties)
+        bitmapController.updateBitmap(false)
     }
 
     fun startTask() {
