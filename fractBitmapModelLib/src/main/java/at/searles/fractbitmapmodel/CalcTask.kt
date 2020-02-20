@@ -17,14 +17,14 @@ class CalcTask(private val rs: RenderScript,
     private val height = bitmapAllocation.height
 
     override fun onPreExecute() {
-        listener.started()
-
         calcScript._calcData = bitmapAllocation.calcData
         calcScript._width = width.toLong()
         calcScript._height = height.toLong()
     }
 
     override fun doInBackground(vararg param: Unit?) {
+        // FIXME Ideally, initialization of scripts happens here if necessary.
+
         val ceilLog2Width = ceilLog2(width + 1)
         val ceilLog2Height = ceilLog2(height + 1)
 
@@ -121,7 +121,6 @@ class CalcTask(private val rs: RenderScript,
     }
 
     interface Listener {
-        fun started()
         /**
          * This method is called at least once, even if the task is cancelled.
          */

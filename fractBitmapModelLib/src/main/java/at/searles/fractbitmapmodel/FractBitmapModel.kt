@@ -1,6 +1,7 @@
 package at.searles.fractbitmapmodel
 
 import android.graphics.Matrix
+import android.os.AsyncTask
 import android.os.Looper
 import android.renderscript.RenderScript
 import at.searles.commons.util.History
@@ -69,10 +70,6 @@ class FractBitmapModel(
         bitmapController.updateBitmap()
     }
 
-    override fun started() {
-        // started in listener is already called in startTask
-    }
-
     private var lastPixelGap = -1
 
     override fun setProgress(progress: Float) {
@@ -100,7 +97,7 @@ class FractBitmapModel(
         var propertiesChanged = false
 
         if(nextProperties != null) {
-            setProperties(nextProperties!!)
+            setProperties(nextProperties!!) // FIXME shouldnt this be calc.properties?
             nextProperties = null
 
             propertiesChanged = true
@@ -131,9 +128,11 @@ class FractBitmapModel(
                 calcController.properties
             }
 
-        bitmapController.updateShaderProperties(bitmapProperties)
-        bitmapController.updatePalettes(bitmapProperties)
-        bitmapController.updateBitmap(change.useFastRoot)
+        if(isInitialized) {
+            // otherwise they will be updated anyways when initialization is finished
+            updateBitmapParametersInScripts(bitmapProperties)
+            bitmapController.updateBitmap(change.useFastRoot)
+        }
     }
 
     fun scheduleCalcPropertiesChange(change: CalcPropertiesChange) {
@@ -191,14 +190,25 @@ class FractBitmapModel(
     private fun setProperties(newProperties: FractProperties) {
         require(!isTaskRunning)
         calcController.properties = newProperties
-        bitmapController.updatePalettes(newProperties)
-        bitmapController.updatePalettes(newProperties)
         calcController.updateVmCodeInScript()
         updateScaleInScripts()
+        updateBitmapParametersInScripts(properties)
+        bitmapController.updateBitmap(false)
+    }
 
+    private fun updateBitmapParametersInScripts(newProperties: FractProperties) {
+        // Cannot use 'properties' because they might be only set
+        // once the calculation is done.
         bitmapController.updateShaderProperties(newProperties)
         bitmapController.updatePalettes(newProperties)
-        bitmapController.updateBitmap(false)
+    }
+
+    private fun updateScaleInScripts() {
+        val scriptScale =
+            calcController.createScriptScale(bitmapAllocation.width, bitmapAllocation.height)
+
+        calcController.setScriptScale(scriptScale)
+        bitmapController.setScriptScale(scriptScale)
     }
 
     fun startTask() {
@@ -208,34 +218,44 @@ class FractBitmapModel(
         require(!isTaskRunning)
         require(calcTask == null)
 
+        // Initialize/Reset values
         isWaitingForPreview = true
         isTaskRunning = true
 
         // before the first preview is generated, we must use the old imageTransformMatrix.
         nextBitmapTransformMatrix.set(null)
 
+        // Now, we start.
         listener?.started()
 
-        if(!isInitialized) {
-            // Initialize script the first time this method is called.
-            calcController.initialize()
-            bitmapController.initialize(properties)
-            updateScaleInScripts()
-            isInitialized = true
-        }
-
-        calcTask = calcController.createCalculationTask(bitmapAllocation).apply {
-            listener = this@FractBitmapModel
-            execute()
-        }
+        StartUpTask(this).execute()
     }
 
-    private fun updateScaleInScripts() {
-        val scriptScale =
-            calcController.createScriptScale(bitmapAllocation.width, bitmapAllocation.height)
+    private class StartUpTask(val parent: FractBitmapModel): AsyncTask<Void, Void, Void>() {
+        override fun doInBackground(vararg params: Void?): Void? {
+            with(parent) {
+                if (!isInitialized) {
+                    bitmapController.initialize(properties)
+                    calcController.initialize()
 
-        calcController.setScriptScale(scriptScale)
-        bitmapController.setScriptScale(scriptScale)
+                    // Initialize script the first time this method is called.
+                    updateScaleInScripts()
+                    updateBitmapParametersInScripts(properties)
+                    isInitialized = true
+                }
+            }
+
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            with(parent) {
+                calcTask = calcController.createCalculationTask(bitmapAllocation).apply {
+                    listener = parent
+                    execute()
+                }
+            }
+        }
     }
 
     interface Listener {
