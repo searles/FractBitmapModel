@@ -47,7 +47,9 @@ class FractBitmapModel(
 
     private var isWaitingForPreview: Boolean = false
 
-    private var isTaskRunning: Boolean = false
+    var isTaskRunning: Boolean = false
+        private set
+
     private var calcTask: CalcTask? = null
 
     private val bitmapModelChanges = ArrayList<BitmapModelChange>()
