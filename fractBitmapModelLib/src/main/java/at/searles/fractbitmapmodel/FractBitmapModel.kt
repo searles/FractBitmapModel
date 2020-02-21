@@ -213,11 +213,14 @@ class FractBitmapModel(
     fun initialize() {
         if(!isInitialized) {
             isInitialized = true
+
             bitmapController.initialize(properties)
             calcController.initialize()
 
             // Initialize script the first time this method is called.
             updateScaleInScripts()
+
+            Thread.sleep(10000)
         }
     }
 
