@@ -219,8 +219,6 @@ class FractBitmapModel(
 
             // Initialize script the first time this method is called.
             updateScaleInScripts()
-
-            Thread.sleep(10000)
         }
     }
 
