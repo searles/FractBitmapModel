@@ -17,26 +17,27 @@ import android.renderscript.RenderScript
 class CalcController(val rs: RenderScript,
                      initialProperties: FractProperties) {
 
-    private lateinit var calcScript: ScriptC_calc
+    lateinit var calcScript: ScriptC_calc
+
+    private var isInitialized: Boolean = false
 
     private var codeAllocation: Allocation = Allocation.createSized(rs, Element.I32(rs), 1)
-
-    private val part = Allocation.createSized(rs, Element.F32_3(rs),
-        parallelCalculationsCount
-    )
 
     var properties = initialProperties
 
     fun initialize() {
-        calcScript = ScriptC_calc(rs)
-        updateVmCodeInScript()
-    }
-
-    fun createCalculationTask(bitmapAllocation: BitmapAllocation): CalcTask {
-        return CalcTask(rs, bitmapAllocation, calcScript, part)
+        if(!isInitialized) {
+            calcScript = ScriptC_calc(rs)
+            isInitialized = true
+            updateVmCodeInScript()
+        }
     }
 
     fun updateVmCodeInScript() {
+        if(!isInitialized) {
+            return
+        }
+
         val vmCode = properties.vmCode
 
         codeAllocation.destroy()
@@ -67,6 +68,7 @@ class CalcController(val rs: RenderScript,
     }
 
     fun setScriptScale(scriptScale: ScriptField_Scale.Item) {
+        require(isInitialized)
         calcScript._scale = scriptScale
     }
 

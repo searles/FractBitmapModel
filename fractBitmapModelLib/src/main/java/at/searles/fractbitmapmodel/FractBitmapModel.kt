@@ -1,8 +1,9 @@
 package at.searles.fractbitmapmodel
 
 import android.graphics.Matrix
-import android.os.AsyncTask
 import android.os.Looper
+import android.renderscript.Allocation
+import android.renderscript.Element
 import android.renderscript.RenderScript
 import at.searles.commons.util.History
 import at.searles.fractbitmapmodel.changes.*
@@ -25,14 +26,17 @@ class FractBitmapModel(
             bitmapController.bitmapAllocation = bitmapAllocation
         }
 
+    val renderSegment: Allocation = Allocation.createSized(rs, Element.F32_3(rs),
+        CalcController.parallelCalculationsCount
+    )
+
+
     /*
      * Must be initialized before starting a calculation. This will happen in the
      * first call to startTask.
      */
     private val calcController = CalcController(rs, initialProperties)
     private val bitmapController = BitmapController(rs, initialBitmapAllocation)
-
-    private var isInitialized: Boolean = false
 
     override val bitmapTransformMatrix = Matrix()
     override val bitmap get() = bitmapAllocation.bitmap
@@ -128,11 +132,9 @@ class FractBitmapModel(
                 calcController.properties
             }
 
-        if(isInitialized) {
-            // otherwise they will be updated anyways when initialization is finished
-            updateBitmapParametersInScripts(bitmapProperties)
-            bitmapController.updateBitmap(change.useFastRoot)
-        }
+        // otherwise they will be updated anyways when initialization is finished
+        updateBitmapParametersInScripts(bitmapProperties)
+        bitmapController.updateBitmap(change.useFastRoot)
     }
 
     fun scheduleCalcPropertiesChange(change: CalcPropertiesChange) {
@@ -162,6 +164,7 @@ class FractBitmapModel(
     fun scheduleBitmapModelChange(change: BitmapModelChange) {
         if(isTaskRunning) {
             bitmapModelChanges.add(change)
+            // FIXME
             calcTask!!.cancel(true)
             return
         }
@@ -203,7 +206,23 @@ class FractBitmapModel(
         bitmapController.updatePalettes(newProperties)
     }
 
-    private fun updateScaleInScripts() {
+    private var isInitialized = false
+
+    fun initialize() {
+        if(!isInitialized) {
+            isInitialized = true
+            bitmapController.initialize(properties)
+            calcController.initialize()
+
+            // Initialize script the first time this method is called.
+            updateScaleInScripts()
+        }
+    }
+
+    /**
+     * Synchronizes scale value between bitmap scripts and calc script
+     */
+    fun updateScaleInScripts() {
         val scriptScale =
             calcController.createScriptScale(bitmapAllocation.width, bitmapAllocation.height)
 
@@ -228,33 +247,16 @@ class FractBitmapModel(
         // Now, we start.
         listener?.started()
 
-        StartUpTask(this).execute()
+        startCalcTask()
     }
 
-    private class StartUpTask(val parent: FractBitmapModel): AsyncTask<Void, Void, Void>() {
-        override fun doInBackground(vararg params: Void?): Void? {
-            with(parent) {
-                if (!isInitialized) {
-                    bitmapController.initialize(properties)
-                    calcController.initialize()
+    val calcScript: ScriptC_calc
+        get() = calcController.calcScript
 
-                    // Initialize script the first time this method is called.
-                    updateScaleInScripts()
-                    updateBitmapParametersInScripts(properties)
-                    isInitialized = true
-                }
-            }
-
-            return null
-        }
-
-        override fun onPostExecute(result: Void?) {
-            with(parent) {
-                calcTask = calcController.createCalculationTask(bitmapAllocation).apply {
-                    listener = parent
-                    execute()
-                }
-            }
+    private fun startCalcTask() {
+        calcTask = CalcTask(rs, this).apply {
+            listener = this@FractBitmapModel
+            execute()
         }
     }
 

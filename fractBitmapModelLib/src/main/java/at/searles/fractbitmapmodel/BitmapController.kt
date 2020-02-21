@@ -8,8 +8,10 @@ class BitmapController(
     val rs: RenderScript,
     initialBitmapAllocation: BitmapAllocation
 ) {
-
-    private lateinit var bitmapScript: ScriptC_bitmap
+    lateinit var bitmapScript: ScriptC_bitmap
+    
+    private var isInitialized: Boolean = false
+    
     private lateinit var interpolateGapsScript: ScriptC_interpolate_gaps
 
     private lateinit var paletteUpdater: PaletteToScriptUpdater
@@ -25,15 +27,20 @@ class BitmapController(
         }
 
     fun initialize(props: FractProperties) {
-        bitmapScript = ScriptC_bitmap(rs)
-        interpolateGapsScript = ScriptC_interpolate_gaps(rs)
-        paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
-        updatePalettes(props)
-        updateShaderProperties(props)
-        bindToBitmapAllocation()
+        if(!isInitialized) {
+            bitmapScript = ScriptC_bitmap(rs)
+            interpolateGapsScript = ScriptC_interpolate_gaps(rs)
+            paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
+            isInitialized = true
+            updatePalettes(props)
+            updateShaderProperties(props)
+            bindToBitmapAllocation()
+        }
     }
 
     private fun bindToBitmapAllocation() {
+        require(isInitialized)
+        
         with(bitmapAllocation) {
             bitmapScript.bind_bitmapData(calcData)
 
@@ -48,6 +55,8 @@ class BitmapController(
     }
 
     fun setScriptScale(scaleInScript: ScriptField_Scale.Item) {
+        require(isInitialized)
+
         bitmapScript._scale = scaleInScript
 
         val xStepLength = hypot(scaleInScript.a, scaleInScript.c)
@@ -66,6 +75,10 @@ class BitmapController(
      * Renders bitmapData into the bitmap using the current parameters.
      */
     fun updateBitmap(alwaysUseFast: Boolean = false) {
+        if(!isInitialized) {
+            return
+        }
+
         val currentPixelGap = max(minPixelGap, bitmapAllocation.pixelGap)
         bitmapScript._pixelGap = currentPixelGap.toLong()
 
@@ -87,10 +100,18 @@ class BitmapController(
     }
 
     fun updatePalettes(props: FractProperties) {
+        if(!isInitialized) {
+            return
+        }
+
         paletteUpdater.updatePalettes(props)
     }
 
     fun updateShaderProperties(props: FractProperties) {
+        if(!isInitialized) {
+            return 
+        }
+        
         with(props) {
             bitmapScript._useLightEffect = if (shaderProperties.useLightEffect) 1 else 0
             bitmapScript._lightVector = shaderProperties.lightVector

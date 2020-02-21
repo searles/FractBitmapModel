@@ -1,29 +1,29 @@
 package at.searles.fractbitmapmodel
 
 import android.os.AsyncTask
-import android.renderscript.Allocation
 import android.renderscript.RenderScript
 import kotlin.math.abs
 
 class CalcTask(private val rs: RenderScript,
-               private val bitmapAllocation: BitmapAllocation,
-               private val calcScript: ScriptC_calc,
-               private val part: Allocation
+               private val model: FractBitmapModel
 ): AsyncTask<Unit?, Int, Unit?>() {
 
     lateinit var listener: Listener
 
+    private val bitmapAllocation = model.bitmapAllocation
+    private val part = model.renderSegment
+
     private val width = bitmapAllocation.width
     private val height = bitmapAllocation.height
 
-    override fun onPreExecute() {
+    override fun doInBackground(vararg param: Unit?) {
+        model.initialize()
+
+        val calcScript = model.calcScript
+
         calcScript._calcData = bitmapAllocation.calcData
         calcScript._width = width.toLong()
         calcScript._height = height.toLong()
-    }
-
-    override fun doInBackground(vararg param: Unit?) {
-        // FIXME Ideally, initialization of scripts happens here if necessary.
 
         val ceilLog2Width = ceilLog2(width + 1)
         val ceilLog2Height = ceilLog2(height + 1)
