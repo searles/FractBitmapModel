@@ -54,23 +54,6 @@ class BitmapController(
         }
     }
 
-    fun setScriptScale(scaleInScript: ScriptField_Scale.Item) {
-        require(isInitialized)
-
-        bitmapScript._scale = scaleInScript
-
-        val xStepLength = hypot(scaleInScript.a, scaleInScript.c)
-        val yStepLength = hypot(scaleInScript.b, scaleInScript.d)
-
-        bitmapScript._xStepLength = xStepLength
-        bitmapScript._yStepLength = yStepLength
-
-        bitmapScript._aNorm = (scaleInScript.a / xStepLength).toFloat()
-        bitmapScript._bNorm = (scaleInScript.b / yStepLength).toFloat()
-        bitmapScript._cNorm = (scaleInScript.c / xStepLength).toFloat()
-        bitmapScript._dNorm = (scaleInScript.d / yStepLength).toFloat()
-    }
-
     /**
      * Renders bitmapData into the bitmap using the current parameters.
      */

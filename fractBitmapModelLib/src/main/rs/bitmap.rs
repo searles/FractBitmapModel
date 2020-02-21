@@ -5,7 +5,6 @@
 #pragma version(1)
 #pragma rs java_package_name(at.searles.fractbitmapmodel)
 
-#include "scale.rsh"
 #include "palette.rsh"
 #include "colormodels.rsh"
 #include "light.rsh"
@@ -46,7 +45,9 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
         return to8888(color);
     }
 
-    return to8888(adjustLight(color, (p10.z - p00.z), (p01.z - p00.z)));
+    double scaleTo01Factor = ((double) min(width, height) / 2.0);
+
+    return to8888(adjustLight(color, (p10.z - p00.z) * scaleTo01Factor, (p01.z - p00.z) * scaleTo01Factor));
 }
 
 uint32_t pixelGap; // for the fast kernel.
@@ -66,7 +67,9 @@ uchar4 RS_KERNEL fastRoot(uint32_t x, uint32_t y) {
     float3 p10 = bitmapData[x + y * (width + 1) + pixelGap];
     float3 p01 = bitmapData[x + (y + pixelGap) * (width + 1)];
 
-    float4 finalColor = adjustLight(color, (p10.z - p00.z) / pixelGap, (p01.z - p00.z) / pixelGap);
+    double scaleTo01Factor = ((double) min(width, height) / 2.0) / (double) pixelGap;
+
+    float4 finalColor = adjustLight(color, (p10.z - p00.z) * scaleTo01Factor, (p01.z - p00.z) * scaleTo01Factor);
 
     return to8888(finalColor);
 }

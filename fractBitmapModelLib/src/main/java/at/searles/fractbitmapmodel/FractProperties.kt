@@ -103,6 +103,6 @@ class FractProperties(
             )
         }
 
-        private val fallBackShaderProperties = ShaderProperties(false)
+        private val fallBackShaderProperties = ShaderProperties(true)
     }
 }

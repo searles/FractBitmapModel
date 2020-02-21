@@ -8,12 +8,12 @@ import kotlin.math.sin
 
 class ShaderProperties(
     val useLightEffect: Boolean = true,
-    val polarAngle: Double = PI / 4,
-    val azimuthAngle: Double = PI / 4,
+    val polarAngle: Double = PI / 4.0,
+    val azimuthAngle: Double = 3.0 * PI / 4.0,
     val ambientReflection: Float = 0.75f,
     val diffuseReflection: Float = 0.25f,
     val specularReflection: Float = 1f,
-    val shininess: Int = 32) {
+    val shininess: Int = 16) {
 
     val lightVector: Float3
         get() = getLightVector(polarAngle, azimuthAngle)
@@ -61,8 +61,8 @@ class ShaderProperties(
         fun getLightVector(polarAngle: Double, azimuthAngle: Double): Float3 {
             return Float3(
                 (sin(polarAngle) * cos(azimuthAngle)).toFloat(),
-                (sin(polarAngle) * sin(azimuthAngle)).toFloat(),
-                -cos(polarAngle).toFloat()
+                -(sin(polarAngle) * sin(azimuthAngle)).toFloat(),
+                cos(polarAngle).toFloat()
             )
         }
 

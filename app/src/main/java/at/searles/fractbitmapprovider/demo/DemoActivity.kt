@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
+import at.searles.fractbitmapmodel.changes.BitmapAllocationChange
 import at.searles.fractbitmapmodel.changes.PaletteOffsetChange
 import at.searles.fractimageview.ScalableImageView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -32,12 +33,18 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         initBitmapModelFragment()
 
         experimentButton.setOnClickListener {
-            if (bitmapModelFragment.bitmapModel.hasBackHistory()) {
-                bitmapModelFragment.bitmapModel.historyBack()
+            if(bitmapModelFragment.bitmapModel.width != 2000) {
+                bitmapModelFragment.bitmapModel.scheduleBitmapModelChange(
+                    BitmapAllocationChange(
+                        BitmapAllocation(bitmapModelFragment.bitmapModel.rs, 2000, 2000)
+                    )
+                )
             } else {
-                while(bitmapModelFragment.bitmapModel.hasForwardHistory()) {
-                    bitmapModelFragment.bitmapModel.historyForward()
-                }
+                bitmapModelFragment.bitmapModel.scheduleBitmapModelChange(
+                    BitmapAllocationChange(
+                        BitmapAllocation(bitmapModelFragment.bitmapModel.rs, 100, 100)
+                    )
+                )
             }
         }
     }
@@ -71,7 +78,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         val delay: Long = 10
         val handler = Handler()
         val runnable = ColorCycling(handler, delay)
-        runnable.run()
+        //runnable.run()
     }
 
     inner class ColorCycling(private val handler: Handler, private val delay: Long): Runnable {
@@ -96,8 +103,8 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         const val bitmapModelFragmentTag = "bitmapModelFragment"
         
         const val program =
-            "setResult(0, {var a = 1000001; [cos rad point, sin rad point][a]}, {var a = 1; [cos rad point, sin rad point][a]});" +
-            "declareScale(5,0,0,5,0,0);" +
+            "setResult(0, 0, re point);" +
+            "declareScale(1,0,0,1,0,0);" +
             "declarePalette(\"1\", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);"
 
         val parameters = emptyMap<String, String>()

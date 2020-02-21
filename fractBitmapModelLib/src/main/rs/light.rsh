@@ -6,15 +6,6 @@ float diffuseReflection;
 float specularReflection;
 uint32_t shininess;
 
-// factors set internally for more accuracy in deeper zooms:
-double xStepLength;
-double yStepLength;
-
-float aNorm; // = scale.a / |(scale.a, scale.c)|
-float bNorm;
-float cNorm;
-float dNorm;
-
 static float4 getPhongRefectionModelValue(float3 normalVector, float4 color) {
     float cosineAlpha = max(0.f, dot(normalVector, lightVector));
     float diffuse = diffuseReflection * cosineAlpha;
@@ -32,9 +23,13 @@ static float3 getNormalVectorOf(float3 xVec, float3 yVec) {
     return fast_normalize(cross(xVec, yVec));
 }
 
+/*
+ * dzx and dzy are scaled up to screen size by the caller.
+ */
 static float4 adjustLight(float4 color, double dzx, double dzy) {
-    float3 xVec = (float3) { aNorm, cNorm, (float) (dzx / xStepLength) };
-    float3 yVec = (float3) { bNorm, dNorm, (float) (dzy / yStepLength) };
+
+    float3 xVec = (float3) { 1.0f, 0.0f, (float) dzx };
+    float3 yVec = (float3) { 0.0f, 1.0f, (float) dzy };
 
     float3 normalVector = getNormalVectorOf(xVec, yVec);
 

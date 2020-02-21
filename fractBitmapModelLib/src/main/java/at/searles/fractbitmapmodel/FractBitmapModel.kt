@@ -226,11 +226,7 @@ class FractBitmapModel(
      * Synchronizes scale value between bitmap scripts and calc script
      */
     fun updateScaleInScripts() {
-        val scriptScale =
-            calcController.createScriptScale(bitmapAllocation.width, bitmapAllocation.height)
-
-        calcController.setScriptScale(scriptScale)
-        bitmapController.setScriptScale(scriptScale)
+        calcController.updateScale(bitmapAllocation.width, bitmapAllocation.height)
     }
 
     fun startTask() {
