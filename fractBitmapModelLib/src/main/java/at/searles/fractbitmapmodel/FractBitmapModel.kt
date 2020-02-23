@@ -35,7 +35,7 @@ class FractBitmapModel(
      * Must be initialized before starting a calculation. This will happen in the
      * first call to startTask.
      */
-    private val calcController = CalcController(rs, initialProperties)
+    private val calcController = CalcController(rs)
     private val bitmapController = BitmapController(rs, initialBitmapAllocation)
 
     override val bitmapTransformMatrix = Matrix()
@@ -54,10 +54,10 @@ class FractBitmapModel(
 
     private val bitmapModelChanges = ArrayList<BitmapModelChange>()
 
-    val properties: FractProperties
-        get() = calcController.properties
+    var properties: FractProperties = initialProperties
+    private var calcPropertiesChanged = false
 
-    private var nextProperties: FractProperties? = null
+    private var isInitialized = false
 
     private val history = History<FractProperties>().apply {
         add(initialProperties)
@@ -72,8 +72,10 @@ class FractBitmapModel(
         scheduleCalcPropertiesChange(RelativeScaleChange(relativeMatrix))
     }
 
-    fun updateBitmap() {
-        bitmapController.updateBitmap()
+    fun updateBitmap(alwaysUseFastIfPossible: Boolean = false) {
+        if(isInitialized) {
+            bitmapController.updateBitmap(alwaysUseFastIfPossible)
+        }
     }
 
     private var lastPixelGap = -1
@@ -82,11 +84,11 @@ class FractBitmapModel(
         if(isWaitingForPreview) {
             bitmapTransformMatrix.set(nextBitmapTransformMatrix)
             isWaitingForPreview = false
-            bitmapController.updateBitmap()
+            updateBitmap()
             lastPixelGap = bitmapAllocation.pixelGap
             listener?.bitmapUpdated()
         } else if(lastPixelGap != bitmapAllocation.pixelGap) {
-            bitmapController.updateBitmap()
+            updateBitmap()
             lastPixelGap = bitmapAllocation.pixelGap
             listener?.bitmapUpdated()
         }
@@ -100,23 +102,19 @@ class FractBitmapModel(
 
         listener?.finished()
 
-        var propertiesChanged = false
+        val hasBitmapModelChange = bitmapModelChanges.isNotEmpty()
 
-        if(nextProperties != null) {
-            setProperties(nextProperties!!) // FIXME shouldnt this be calc.properties?
-            nextProperties = null
-
-            propertiesChanged = true
-        }
-
-        if(bitmapModelChanges.isNotEmpty()) {
+        if(hasBitmapModelChange) {
             bitmapModelChanges.forEach { it.accept(this) }
             bitmapModelChanges.clear()
-
-            propertiesChanged = true
         }
 
-        if(propertiesChanged) {
+        if(calcPropertiesChanged) {
+            updatePropertiesInScript()
+        }
+
+        if(hasBitmapModelChange || calcPropertiesChanged) {
+            calcPropertiesChanged = false
             listener?.propertiesChanged(this)
             startTask()
         }
@@ -124,55 +122,39 @@ class FractBitmapModel(
 
     fun applyBitmapPropertiesChange(change: BitmapPropertiesChange) {
         require(Looper.getMainLooper().isCurrentThread)
-
-        val bitmapProperties =
-            if(nextProperties != null) {
-                nextProperties = change.accept(nextProperties!!)
-                nextProperties!!
-            } else {
-                calcController.properties = change.accept(calcController.properties)
-                calcController.properties
-            }
-
-        // otherwise they will be updated anyways when initialization is finished
-        updateBitmapParametersInScripts(bitmapProperties)
-        bitmapController.updateBitmap(change.useFastRoot)
+        properties = change.accept(properties)
+        updateBitmapParametersInScripts()
+        updateBitmap()
     }
 
     fun scheduleCalcPropertiesChange(change: CalcPropertiesChange) {
         require(Looper.getMainLooper().isCurrentThread)
-        require(nextProperties == null || isTaskRunning)
 
-        val currentProperties = nextProperties ?: calcController.properties
-
-        val changedProperties = change.accept(currentProperties)
+        properties = change.accept(properties)
 
         if(change.addToHistory) {
-            history.add(changedProperties)
+            history.add(properties)
         }
 
         if(isTaskRunning) {
-            nextProperties = changedProperties
+            calcPropertiesChanged = true
             calcTask!!.cancel(true)
             return
         }
 
-        setProperties(changedProperties)
+        updatePropertiesInScript()
         listener?.propertiesChanged(this)
-
         startTask()
     }
 
     fun scheduleBitmapModelChange(change: BitmapModelChange) {
         if(isTaskRunning) {
             bitmapModelChanges.add(change)
-            // FIXME
             calcTask!!.cancel(true)
             return
         }
 
         change.accept(this)
-
         listener?.propertiesChanged(this)
         startTask()
     }
@@ -192,41 +174,44 @@ class FractBitmapModel(
     /**
      * Sets new properties
      */
-    private fun setProperties(newProperties: FractProperties) {
+    private fun updatePropertiesInScript() {
         require(!isTaskRunning)
-        calcController.properties = newProperties
-        calcController.updateVmCodeInScript()
+        calcController.updateVmCodeInScript(properties)
         updateScaleInScripts()
-        updateBitmapParametersInScripts(properties)
+
+        updateBitmapParametersInScripts()
         bitmapController.updateBitmap(false)
     }
 
-    private fun updateBitmapParametersInScripts(newProperties: FractProperties) {
-        // Cannot use 'properties' because they might be only set
-        // once the calculation is done.
-        bitmapController.updateShaderProperties(newProperties)
-        bitmapController.updatePalettes(newProperties)
-    }
+    private fun updateBitmapParametersInScripts() {
+        if(!isInitialized) {
+            // they will be initialized later.
+            return
+        }
 
-    private var isInitialized = false
+        bitmapController.updateShaderProperties(properties)
+        bitmapController.updatePalettes(properties)
+    }
 
     fun initialize() {
         if(!isInitialized) {
-            isInitialized = true
-
-            bitmapController.initialize(properties)
             calcController.initialize()
-
-            // Initialize script the first time this method is called.
+            calcController.updateVmCodeInScript(properties)
             updateScaleInScripts()
+
+            bitmapController.initialize()
+            bitmapController.updatePalettes(properties)
+            bitmapController.updateShaderProperties(properties)
+
+            isInitialized = true
         }
     }
 
     /**
      * Synchronizes scale value between bitmap scripts and calc script
      */
-    fun updateScaleInScripts() {
-        calcController.updateScale(bitmapAllocation.width, bitmapAllocation.height)
+    private fun updateScaleInScripts() {
+        calcController.updateScale(properties, bitmapAllocation.width, bitmapAllocation.height)
     }
 
     fun startTask() {

@@ -78,7 +78,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         val delay: Long = 10
         val handler = Handler()
         val runnable = ColorCycling(handler, delay)
-        //runnable.run()
+        runnable.run()
     }
 
     inner class ColorCycling(private val handler: Handler, private val delay: Long): Runnable {
@@ -103,7 +103,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         const val bitmapModelFragmentTag = "bitmapModelFragment"
         
         const val program =
-            "setResult(0, 0, re point);" +
+            "setResult(0, sin rad point, sin rad point);" +
             "declareScale(1,0,0,1,0,0);" +
             "declarePalette(\"1\", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);"
 

@@ -1,7 +1,6 @@
 package at.searles.fractbitmapmodel
 
 import android.renderscript.RenderScript
-import kotlin.math.hypot
 import kotlin.math.max
 
 class BitmapController(
@@ -9,9 +8,7 @@ class BitmapController(
     initialBitmapAllocation: BitmapAllocation
 ) {
     lateinit var bitmapScript: ScriptC_bitmap
-    
-    private var isInitialized: Boolean = false
-    
+
     private lateinit var interpolateGapsScript: ScriptC_interpolate_gaps
 
     private lateinit var paletteUpdater: PaletteToScriptUpdater
@@ -26,21 +23,14 @@ class BitmapController(
             bindToBitmapAllocation()
         }
 
-    fun initialize(props: FractProperties) {
-        if(!isInitialized) {
-            bitmapScript = ScriptC_bitmap(rs)
-            interpolateGapsScript = ScriptC_interpolate_gaps(rs)
-            paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
-            isInitialized = true
-            updatePalettes(props)
-            updateShaderProperties(props)
-            bindToBitmapAllocation()
-        }
+    fun initialize() {
+        bitmapScript = ScriptC_bitmap(rs)
+        interpolateGapsScript = ScriptC_interpolate_gaps(rs)
+        paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
+        bindToBitmapAllocation()
     }
 
     private fun bindToBitmapAllocation() {
-        require(isInitialized)
-        
         with(bitmapAllocation) {
             bitmapScript.bind_bitmapData(calcData)
 
@@ -57,16 +47,12 @@ class BitmapController(
     /**
      * Renders bitmapData into the bitmap using the current parameters.
      */
-    fun updateBitmap(alwaysUseFast: Boolean = false) {
-        if(!isInitialized) {
-            return
-        }
-
+    fun updateBitmap(alwaysUseFastIfPossible: Boolean) {
         val currentPixelGap = max(minPixelGap, bitmapAllocation.pixelGap)
         bitmapScript._pixelGap = currentPixelGap.toLong()
 
         if(currentPixelGap == 1) {
-            if(alwaysUseFast) {
+            if(alwaysUseFastIfPossible) {
                 bitmapScript.forEach_fastRoot(bitmapAllocation.rsBitmap)
             } else {
                 bitmapScript.forEach_root(bitmapAllocation.rsBitmap)
@@ -83,18 +69,10 @@ class BitmapController(
     }
 
     fun updatePalettes(props: FractProperties) {
-        if(!isInitialized) {
-            return
-        }
-
         paletteUpdater.updatePalettes(props)
     }
 
     fun updateShaderProperties(props: FractProperties) {
-        if(!isInitialized) {
-            return 
-        }
-        
         with(props) {
             bitmapScript._useLightEffect = if (shaderProperties.useLightEffect) 1 else 0
             bitmapScript._lightVector = shaderProperties.lightVector
