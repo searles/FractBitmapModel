@@ -18,18 +18,6 @@ class FractBitmapModelFragment : Fragment() {
         super.onCreate(savedInstanceState)
         retainInstance = true
         initialize()
-
-        // TODO: Dimensions as parameter
-
-        if(savedInstanceState != null) {
-            // TODO Deserialize fractal
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        // TODO: Save it.
     }
 
     fun addImageSizeChange(width: Int, height: Int) {
@@ -44,6 +32,8 @@ class FractBitmapModelFragment : Fragment() {
     private fun initialize() {
         val sourceCode = arguments!!.getString(sourceCodeKey)!!
         val parameters = arguments!!.getBundle(parametersKey)!!
+        val width = arguments!!.getInt(widthKey)
+        val height = arguments!! .getInt(heightKey)
 
         val parametersMap = parameters.keySet().map { it to parameters.getString(it)!! }.toMap()
 
@@ -51,7 +41,7 @@ class FractBitmapModelFragment : Fragment() {
 
         rs = RenderScript.create(context)
 
-        val bitmapAllocation = BitmapAllocation(rs, defaultWidth, defaultHeight)
+        val bitmapAllocation = BitmapAllocation(rs, width, height)
 
         bitmapModel = FractBitmapModel(rs, bitmapAllocation, properties)
         bitmapModel.startTask()
@@ -60,8 +50,10 @@ class FractBitmapModelFragment : Fragment() {
     companion object {
         const val sourceCodeKey = "sourceCode"
         const val parametersKey = "parameters"
+        const val widthKey = "width"
+        const val heightKey ="height"
 
-        fun createInstance(sourceCode: String, parameters: Map<String, String>): FractBitmapModelFragment {
+        fun createInstance(sourceCode: String, parameters: Map<String, String>, width: Int, height: Int): FractBitmapModelFragment {
             val parametersBundle = Bundle()
 
             parameters.forEach { (key, value) ->
@@ -71,6 +63,8 @@ class FractBitmapModelFragment : Fragment() {
             val bundle = Bundle().apply {
                 putString(sourceCodeKey, sourceCode)
                 putBundle(parametersKey, parametersBundle)
+                putInt(widthKey, width)
+                putInt(heightKey, height)
             }
 
 
@@ -78,8 +72,5 @@ class FractBitmapModelFragment : Fragment() {
                 arguments = bundle
             }
         }
-
-        const val defaultWidth = 1024
-        const val defaultHeight = 600 // FIXME
     }
 }
