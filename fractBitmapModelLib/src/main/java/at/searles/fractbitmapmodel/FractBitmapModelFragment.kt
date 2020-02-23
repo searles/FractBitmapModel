@@ -5,7 +5,6 @@ import android.renderscript.RenderScript
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import at.searles.fractbitmapmodel.changes.BitmapAllocationChange
-import at.searles.fractlang.FractlangProgram
 
 class FractBitmapModelFragment : Fragment() {
 
@@ -30,14 +29,11 @@ class FractBitmapModelFragment : Fragment() {
     }
 
     private fun initialize() {
-        val sourceCode = arguments!!.getString(sourceCodeKey)!!
-        val parameters = arguments!!.getBundle(parametersKey)!!
+        val propertiesBundle = arguments!!.getBundle(propertiesKey)!!
         val width = arguments!!.getInt(widthKey)
-        val height = arguments!! .getInt(heightKey)
+        val height = arguments!!.getInt(heightKey)
 
-        val parametersMap = parameters.keySet().map { it to parameters.getString(it)!! }.toMap()
-
-        val properties = FractProperties.create(sourceCode, parametersMap, null, null, emptyList())
+        val properties = FractPropertiesAdapter.fromBundle(propertiesBundle)
 
         rs = RenderScript.create(context)
 
@@ -48,21 +44,15 @@ class FractBitmapModelFragment : Fragment() {
     }
 
     companion object {
-        const val sourceCodeKey = "sourceCode"
-        const val parametersKey = "parameters"
+        const val propertiesKey = "properties"
         const val widthKey = "width"
         const val heightKey ="height"
 
-        fun createInstance(sourceCode: String, parameters: Map<String, String>, width: Int, height: Int): FractBitmapModelFragment {
-            val parametersBundle = Bundle()
-
-            parameters.forEach { (key, value) ->
-                parametersBundle.putString(key, value)
-            }
+        fun createInstance(properties: FractProperties, width: Int, height: Int): FractBitmapModelFragment {
+            val propertiesBundle = FractPropertiesAdapter.toBundle(properties)
 
             val bundle = Bundle().apply {
-                putString(sourceCodeKey, sourceCode)
-                putBundle(parametersKey, parametersBundle)
+                putBundle(propertiesKey, propertiesBundle)
                 putInt(widthKey, width)
                 putInt(heightKey, height)
             }

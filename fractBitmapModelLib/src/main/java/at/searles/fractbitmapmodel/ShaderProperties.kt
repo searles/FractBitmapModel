@@ -1,5 +1,7 @@
 package at.searles.fractbitmapmodel
 
+import android.graphics.Shader
+import android.os.Bundle
 import android.renderscript.Float3
 import org.json.JSONObject
 import kotlin.math.PI
@@ -40,6 +42,20 @@ class ShaderProperties(
         return obj
     }
 
+    fun toBundle(): Bundle {
+        val bundle = Bundle()
+        bundle.putBoolean(useLightEffectKey, useLightEffect)
+
+        bundle.putDouble(polarAngleKey, polarAngle)
+        bundle.putDouble(azimuthAngleKey, azimuthAngle)
+        bundle.putFloat(ambientReflectionKey, ambientReflection)
+        bundle.putFloat(diffuseReflectionKey, diffuseReflection)
+        bundle.putFloat(specularReflectionKey, specularReflection)
+        bundle.putInt(shininessKey, shininess)
+
+        return bundle
+    }
+
     companion object {
         fun fromJson(obj: JSONObject): ShaderProperties {
             val useLightEffect = obj.getBoolean(useLightEffectKey)
@@ -56,6 +72,18 @@ class ShaderProperties(
             val shininess = obj.getInt(shininessKey)
 
             return ShaderProperties(useLightEffect, polarAngle, azimuthAngle, ambientReflection, diffuseReflection, specularReflection, shininess)
+        }
+
+        fun fromBundle(bundle: Bundle): ShaderProperties {
+            return ShaderProperties(
+                bundle.getBoolean(useLightEffectKey),
+                bundle.getDouble(polarAngleKey),
+                bundle.getDouble(azimuthAngleKey),
+                bundle.getFloat(ambientReflectionKey),
+                bundle.getFloat(diffuseReflectionKey),
+                bundle.getFloat(specularReflectionKey),
+                bundle.getInt(shininessKey)
+            )
         }
 
         fun getLightVector(polarAngle: Double, azimuthAngle: Double): Float3 {

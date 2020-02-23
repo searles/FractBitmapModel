@@ -10,6 +10,7 @@ import at.searles.fractbitmapmodel.*
 import at.searles.fractbitmapmodel.changes.BitmapAllocationChange
 import at.searles.fractbitmapmodel.changes.PaletteOffsetChange
 import at.searles.fractimageview.ScalableImageView
+import at.searles.fractlang.FractlangProgram
 import kotlinx.android.synthetic.main.activity_main.*
 
 class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModel.Listener {
@@ -59,10 +60,12 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             supportFragmentManager.findFragmentByTag(bitmapModelFragmentTag) as FractBitmapModelFragment?
 
         bitmapModelFragment = fragment ?:
-                FractBitmapModelFragment.createInstance(program, parameters, 1280, 640).also {
+                FractBitmapModelFragment.createInstance(defaultProperties, 1280, 640).also {
                     supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
     }
+
+    private val defaultProperties = FractProperties(FractlangProgram(sourceCode, emptyMap()), null, null, emptyList())
 
     private fun connectBitmapModelFragment() {
         imageView.scalableBitmapModel = bitmapModelFragment.bitmapModel
@@ -102,12 +105,10 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
     companion object {
         const val bitmapModelFragmentTag = "bitmapModelFragment"
         
-        const val program =
+        const val sourceCode =
             "setResult(0, sin rad point, sin rad point);" +
             "declareScale(1,0,0,1,0,0);" +
             "declarePalette(\"1\", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);"
-
-        val parameters = emptyMap<String, String>()
     }
 
     override fun started() {
