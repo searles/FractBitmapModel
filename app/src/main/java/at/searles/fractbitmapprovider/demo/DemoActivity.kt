@@ -90,7 +90,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         override fun run() {
             val currentTime = System.currentTimeMillis()
 
-            val offsetX = (currentTime - startTime) / 1000f
+            val offsetX = (currentTime - startTime) / 4000f
             val offsetY = 0f
 
             val change = PaletteOffsetChange(0, offsetX, offsetY)
@@ -106,7 +106,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         const val bitmapModelFragmentTag = "bitmapModelFragment"
         
         const val sourceCode =
-            "setResult(0, sin rad point, sin rad point);" +
+            "setResult(0, line(0:0, 0.5:0.5, point), 0);" +
             "declareScale(1,0,0,1,0,0);" +
             "declarePalette(\"1\", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);"
     }

@@ -72,3 +72,7 @@ static double __attribute__((overloadable)) min(double a, double b) {
     if(a > b) return a;
     else return b;
 }
+
+static double __attribute__((overloadable)) dot(double2 a, double2 b) {
+    return a.x * b.x + a.y * b.y;
+}

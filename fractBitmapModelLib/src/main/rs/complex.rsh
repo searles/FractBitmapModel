@@ -32,7 +32,7 @@ static double __attribute__((overloadable)) abs(double2 z) {
 	}
 }
 
-static double __attribute__((overloadable)) arc(double2 f) {
+static double __attribute__((overloadable)) arg(double2 f) {
     return atan2(f.y, f.x);
 }
 
@@ -49,7 +49,7 @@ static double2 __attribute__((overloadable)) exp(double2 z) {
 }
 
 static double2 __attribute__((overloadable)) log(double2 z) {
-	return (double2) { log(abs(z)), arc(z) };
+	return (double2) { log(abs(z)), arg(z) };
 }
 
 static double2 __attribute__((overloadable)) pow(double2 base, int exp) {
@@ -64,7 +64,7 @@ static double2 __attribute__((overloadable)) pow(double2 base, double power) {
 	if(base.x == 0 && base.y == 0) return (double2) {0, 0};
 
 	double r = pow(abs(base), power);
-	double pa = power * arc(base);
+	double pa = power * arg(base);
 
     double si, co;
     si = sincos(pa, &co);
@@ -76,7 +76,7 @@ static double2 __attribute__((overloadable)) pow(double2 base, double2 power) {
 	if(base.x == 0 && base.y == 0) return (double2) {0, 0};
 
 	double lrb = log(abs(base));
-	double ab = arc(base);
+	double ab = arg(base);
 
 	// = exp (lrb * pr - ab * pi, lrb * pi + ab * pr)
 	double2 prod = (double2) {lrb * power.x - ab * power.y, lrb * power.y + ab * power.x};
