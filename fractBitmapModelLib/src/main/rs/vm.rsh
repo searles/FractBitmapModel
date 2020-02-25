@@ -354,19 +354,19 @@ static float3 valueAt(double2 pt) {
             case 143: (*((double*) (&data[code[pc + 8]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&code[pc + 2]))), ((double2) {(*((double*) (&code[pc + 4]))), (*((double*) (&code[pc + 6])))})); pc += 9; break;
             // === RectOp ===
             // RectOp: [*Cplx, *Cplx, *Cplx]
-            case 144: (*((double*) (&data[code[pc + 4]]))) = rect((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 3]]))), (*((double2*) (&data[code[pc + 3]])))); pc += 5; break;
+            case 144: (*((double*) (&data[code[pc + 4]]))) = rect((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double2*) (&data[code[pc + 3]])))); pc += 5; break;
             // RectOp: [Cplx, *Cplx, *Cplx]
-            case 145: (*((double*) (&data[code[pc + 7]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 6]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
+            case 145: (*((double*) (&data[code[pc + 7]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
             // RectOp: [*Cplx, Cplx, *Cplx]
-            case 146: (*((double*) (&data[code[pc + 7]]))) = rect((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 6]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
+            case 146: (*((double*) (&data[code[pc + 7]]))) = rect((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
             // RectOp: [Cplx, Cplx, *Cplx]
-            case 147: (*((double*) (&data[code[pc + 10]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 9]]))), (*((double2*) (&data[code[pc + 9]])))); pc += 11; break;
+            case 147: (*((double*) (&data[code[pc + 10]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double2*) (&data[code[pc + 9]])))); pc += 11; break;
             // RectOp: [*Cplx, *Cplx, Cplx]
-            case 148: (*((double*) (&data[code[pc + 7]]))) = rect((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))}), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))})); pc += 8; break;
+            case 148: (*((double*) (&data[code[pc + 7]]))) = rect((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))})); pc += 8; break;
             // RectOp: [Cplx, *Cplx, Cplx]
-            case 149: (*((double*) (&data[code[pc + 10]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))}), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
+            case 149: (*((double*) (&data[code[pc + 10]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
             // RectOp: [*Cplx, Cplx, Cplx]
-            case 150: (*((double*) (&data[code[pc + 10]]))) = rect((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))}), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
+            case 150: (*((double*) (&data[code[pc + 10]]))) = rect((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
 		}
 	}
 	

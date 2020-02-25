@@ -69,10 +69,28 @@ static double __attribute__((overloadable)) max(double a, double b) {
 }
 
 static double __attribute__((overloadable)) min(double a, double b) {
-    if(a > b) return a;
-    else return b;
+    if(a > b) return b;
+    else return a;
 }
 
 static double __attribute__((overloadable)) dot(double2 a, double2 b) {
     return a.x * b.x + a.y * b.y;
+}
+
+static double __attribute__((overloadable)) hypot(double x, double y) {
+	// avoid overflow/underflow
+	double a = abs(x);
+	double b = abs(y);
+
+	// argument for sqrt is in interval 1..2
+	if(a > b) {
+		double quot = b / a;
+		// TODO fast sqrt
+		return a * sqrt(1 + quot * quot);
+	} else if(b > a) {
+		double quot = a / b;
+		return b * sqrt(1 + quot * quot);
+	} else {
+	    return a * 1.41421356237;
+	}
 }

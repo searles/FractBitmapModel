@@ -15,21 +15,7 @@ static double2 __attribute__((overloadable)) rec(double2 a) {
 }
 
 static double __attribute__((overloadable)) abs(double2 z) {
-	// avoid overflow/underflow
-	double a = abs(z.x);
-	double b = abs(z.y);
-
-	// argument for sqrt is in interval 1..2
-	if(a > b) {
-		double quot = b / a;
-		// TODO fast sqrt
-		return a * sqrt(1 + quot * quot);
-	} else if(b > a) {
-		double quot = a / b;
-		return b * sqrt(1 + quot * quot);
-	} else {
-	    return a * 1.41421356237;
-	}
+    return hypot(z.x, z.y);
 }
 
 static double __attribute__((overloadable)) arg(double2 f) {
