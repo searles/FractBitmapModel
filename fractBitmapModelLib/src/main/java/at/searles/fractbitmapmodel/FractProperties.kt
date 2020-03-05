@@ -7,7 +7,7 @@ import at.searles.commons.math.Scale
 import at.searles.fractlang.FractlangProgram
 
 class FractProperties(
-    private val program: FractlangProgram,
+    val program: FractlangProgram,
     val customScale: Scale?,
     val customShaderProperties: ShaderProperties?,
     val customPalettes: List<Palette?>) {
