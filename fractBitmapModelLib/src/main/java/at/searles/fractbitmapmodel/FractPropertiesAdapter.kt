@@ -23,7 +23,7 @@ object FractPropertiesAdapter {
 
         bundle.putBundle(parametersKey, parametersToBundle(props.customParameters))
 
-        bundle.putSparseParcelableArray(palettesKey, palettesToArray(props.palettes))
+        bundle.putSparseParcelableArray(palettesKey, palettesToArray(props.customPalettes))
 
         if(!props.isDefaultShaderProperties) {
             bundle.putBundle(shaderPropertiesKey, props.shaderProperties.toBundle())
@@ -63,7 +63,7 @@ object FractPropertiesAdapter {
 
         obj.put(parametersKey, JSONObject(props.customParameters))
 
-        obj.put(palettesKey, palettesToJson(props))
+        obj.put(palettesKey, palettesToJson(props.customPalettes))
 
         if(!props.isDefaultShaderProperties) {
             obj.put(shaderPropertiesKey, props.shaderProperties.toJson())
@@ -74,14 +74,14 @@ object FractPropertiesAdapter {
         return obj
     }
 
-    private fun palettesToJson(props: FractProperties): JSONArray {
+    private fun palettesToJson(palettes: List<Palette?>): JSONArray {
         val palettesArray = JSONArray()
 
-        repeat(props.paletteCount) {
-            if(props.isDefaultPalette(it)) {
+        palettes.forEach {
+            if(it == null) {
                 palettesArray.put(null)
             } else {
-                palettesArray.put(PaletteAdapter.toJson(props.getPalette(it)))
+                palettesArray.put(PaletteAdapter.toJson(it))
             }
         }
 
