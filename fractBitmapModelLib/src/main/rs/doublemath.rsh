@@ -39,6 +39,10 @@ static double __attribute__((overloadable)) sqrt(double d) {
     return sqrt((float) d);
 }
 
+static double __attribute__((overloadable)) atan(double d) {
+    return atan((float) d);
+}
+
 static double __attribute__((overloadable)) atan2(double y, double x) {
     return atan2((float) y, (float) x);
 }

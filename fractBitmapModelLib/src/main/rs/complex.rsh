@@ -83,6 +83,11 @@ static double2 __attribute__((overloadable)) sqrt(double2 f) {
 	return ret;
 }
 
+static double2 __attribute__((overloadable)) atan(double2 f) {
+    double2 a = log(div((double2) {1.0 + f.y, -f.x}, (double2) {1.0 - f.y, f.x}));
+    return (double2) {-a.y, a.x} / 2.0;
+}
+
 static double2 __attribute__((overloadable)) conj(double2 f) {
 	return (double2) {f.x, -f.y};
 }

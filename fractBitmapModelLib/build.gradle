@@ -39,7 +39,7 @@ dependencies {
     implementation 'com.github.searles:paletteeditor:0.9.4'
     implementation 'com.github.searles:scalableimageview:0.0.5'
     implementation 'com.github.searles:utils:0.5.2'
-    implementation 'com.github.searles:fractlang:1.1.2'
+    implementation 'com.github.searles:fractlang:1.1.6'
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

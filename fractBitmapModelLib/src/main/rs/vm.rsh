@@ -196,177 +196,182 @@ static float3 valueAt(double2 pt) {
             case 74: (*((double*) (&data[code[pc + 2]]))) = cos((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Cos: [*Cplx]
             case 75: (*((double2*) (&data[code[pc + 2]]))) = cos((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            // === Atan ===
+            // Atan: [*Real]
+            case 76: (*((double*) (&data[code[pc + 2]]))) = atan((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            // Atan: [*Cplx]
+            case 77: (*((double2*) (&data[code[pc + 2]]))) = atan((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Sinh ===
             // Sinh: [*Real]
-            case 76: (*((double*) (&data[code[pc + 2]]))) = sinh((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 78: (*((double*) (&data[code[pc + 2]]))) = sinh((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Sinh: [*Cplx]
-            case 77: (*((double2*) (&data[code[pc + 2]]))) = sinh((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 79: (*((double2*) (&data[code[pc + 2]]))) = sinh((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Cosh ===
             // Cosh: [*Real]
-            case 78: (*((double*) (&data[code[pc + 2]]))) = cosh((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 80: (*((double*) (&data[code[pc + 2]]))) = cosh((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Cosh: [*Cplx]
-            case 79: (*((double2*) (&data[code[pc + 2]]))) = cosh((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 81: (*((double2*) (&data[code[pc + 2]]))) = cosh((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === ToReal ===
             // ToReal: [*Int]
-            case 80: (*((double*) (&data[code[pc + 2]]))) = (double) data[code[pc + 1]]; pc += 3; break;
+            case 82: (*((double*) (&data[code[pc + 2]]))) = (double) data[code[pc + 1]]; pc += 3; break;
             // === Cons ===
             // Cons: [*Real, *Real]
-            case 81: (*((double2*) (&data[code[pc + 3]]))) = (double2) {(*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))}; pc += 4; break;
+            case 83: (*((double2*) (&data[code[pc + 3]]))) = (double2) {(*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))}; pc += 4; break;
             // Cons: [Real, *Real]
-            case 82: (*((double2*) (&data[code[pc + 4]]))) = (double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))}; pc += 5; break;
+            case 84: (*((double2*) (&data[code[pc + 4]]))) = (double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))}; pc += 5; break;
             // Cons: [*Real, Real]
-            case 83: (*((double2*) (&data[code[pc + 4]]))) = (double2) {(*((double*) (&data[code[pc + 1]]))), (*((double*) (&code[pc + 2])))}; pc += 5; break;
+            case 85: (*((double2*) (&data[code[pc + 4]]))) = (double2) {(*((double*) (&data[code[pc + 1]]))), (*((double*) (&code[pc + 2])))}; pc += 5; break;
             // === Arg ===
             // Arg: [*Cplx]
-            case 84: (*((double*) (&data[code[pc + 2]]))) = arg((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 86: (*((double*) (&data[code[pc + 2]]))) = arg((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === RealPart ===
             // RealPart: [*Cplx]
-            case 85: (*((double*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))).x; pc += 3; break;
+            case 87: (*((double*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))).x; pc += 3; break;
             // === ImagPart ===
             // ImagPart: [*Cplx]
-            case 86: (*((double*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))).y; pc += 3; break;
+            case 88: (*((double*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))).y; pc += 3; break;
             // === Conj ===
             // Conj: [*Cplx]
-            case 87: (*((double2*) (&data[code[pc + 2]]))) = conj((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 89: (*((double2*) (&data[code[pc + 2]]))) = conj((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Cabs ===
             // Cabs: [*Cplx]
-            case 88: (*((double2*) (&data[code[pc + 2]]))) = cabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 90: (*((double2*) (&data[code[pc + 2]]))) = cabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Rabs ===
             // Rabs: [*Cplx]
-            case 89: (*((double2*) (&data[code[pc + 2]]))) = rabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 91: (*((double2*) (&data[code[pc + 2]]))) = rabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Iabs ===
             // Iabs: [*Cplx]
-            case 90: (*((double2*) (&data[code[pc + 2]]))) = iabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 92: (*((double2*) (&data[code[pc + 2]]))) = iabs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Norm ===
             // Norm: [*Cplx]
-            case 91: (*((double2*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))) / abs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 93: (*((double2*) (&data[code[pc + 2]]))) = (*((double2*) (&data[code[pc + 1]]))) / abs((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === Point ===
             // Point: []
-            case 92: (*((double2*) (&data[code[pc + 1]]))) = pt; pc += 2; break;
+            case 94: (*((double2*) (&data[code[pc + 1]]))) = pt; pc += 2; break;
             // === SetResult ===
             // SetResult: [*Int, *Cplx, *Real]
-            case 93: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
+            case 95: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
             // SetResult: [Int, *Cplx, *Real]
-            case 94: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
+            case 96: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]])))); pc += 4; break;
             // SetResult: [*Int, Cplx, *Real]
-            case 95: result = createResult(data[code[pc + 1]], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
+            case 97: result = createResult(data[code[pc + 1]], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
             // SetResult: [Int, Cplx, *Real]
-            case 96: result = createResult(code[pc + 1], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
+            case 98: result = createResult(code[pc + 1], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]])))); pc += 7; break;
             // SetResult: [*Int, *Cplx, Real]
-            case 97: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
+            case 99: result = createResult(data[code[pc + 1]], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
             // SetResult: [Int, *Cplx, Real]
-            case 98: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
+            case 100: result = createResult(code[pc + 1], (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3])))); pc += 5; break;
             // SetResult: [*Int, Cplx, Real]
-            case 99: result = createResult(data[code[pc + 1]], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6])))); pc += 8; break;
+            case 101: result = createResult(data[code[pc + 1]], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6])))); pc += 8; break;
             // SetResult: [Int, Cplx, Real]
-            case 100: result = createResult(code[pc + 1], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6])))); pc += 8; break;
+            case 102: result = createResult(code[pc + 1], ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6])))); pc += 8; break;
             // === Max ===
             // Max: [*Int, *Int]
-            case 101: data[code[pc + 3]] = max(data[code[pc + 1]], data[code[pc + 2]]); pc += 4; break;
+            case 103: data[code[pc + 3]] = max(data[code[pc + 1]], data[code[pc + 2]]); pc += 4; break;
             // Max: [Int, *Int]
-            case 102: data[code[pc + 3]] = max(code[pc + 1], data[code[pc + 2]]); pc += 4; break;
+            case 104: data[code[pc + 3]] = max(code[pc + 1], data[code[pc + 2]]); pc += 4; break;
             // Max: [*Real, *Real]
-            case 103: (*((double*) (&data[code[pc + 3]]))) = max((*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))); pc += 4; break;
+            case 105: (*((double*) (&data[code[pc + 3]]))) = max((*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))); pc += 4; break;
             // Max: [Real, *Real]
-            case 104: (*((double*) (&data[code[pc + 4]]))) = max((*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))); pc += 5; break;
+            case 106: (*((double*) (&data[code[pc + 4]]))) = max((*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))); pc += 5; break;
             // Max: [*Cplx, *Cplx]
-            case 105: (*((double2*) (&data[code[pc + 3]]))) = max((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]])))); pc += 4; break;
+            case 107: (*((double2*) (&data[code[pc + 3]]))) = max((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]])))); pc += 4; break;
             // Max: [Cplx, *Cplx]
-            case 106: (*((double2*) (&data[code[pc + 6]]))) = max(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]])))); pc += 7; break;
+            case 108: (*((double2*) (&data[code[pc + 6]]))) = max(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]])))); pc += 7; break;
             // === Min ===
             // Min: [*Int, *Int]
-            case 107: data[code[pc + 3]] = min(data[code[pc + 1]], data[code[pc + 2]]); pc += 4; break;
+            case 109: data[code[pc + 3]] = min(data[code[pc + 1]], data[code[pc + 2]]); pc += 4; break;
             // Min: [Int, *Int]
-            case 108: data[code[pc + 3]] = min(code[pc + 1], data[code[pc + 2]]); pc += 4; break;
+            case 110: data[code[pc + 3]] = min(code[pc + 1], data[code[pc + 2]]); pc += 4; break;
             // Min: [*Real, *Real]
-            case 109: (*((double*) (&data[code[pc + 3]]))) = min((*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))); pc += 4; break;
+            case 111: (*((double*) (&data[code[pc + 3]]))) = min((*((double*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]])))); pc += 4; break;
             // Min: [Real, *Real]
-            case 110: (*((double*) (&data[code[pc + 4]]))) = min((*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))); pc += 5; break;
+            case 112: (*((double*) (&data[code[pc + 4]]))) = min((*((double*) (&code[pc + 1]))), (*((double*) (&data[code[pc + 3]])))); pc += 5; break;
             // Min: [*Cplx, *Cplx]
-            case 111: (*((double2*) (&data[code[pc + 3]]))) = min((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]])))); pc += 4; break;
+            case 113: (*((double2*) (&data[code[pc + 3]]))) = min((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]])))); pc += 4; break;
             // Min: [Cplx, *Cplx]
-            case 112: (*((double2*) (&data[code[pc + 6]]))) = min(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]])))); pc += 7; break;
+            case 114: (*((double2*) (&data[code[pc + 6]]))) = min(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]])))); pc += 7; break;
             // === Floor ===
             // Floor: [*Real]
-            case 113: (*((double*) (&data[code[pc + 2]]))) = floor((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 115: (*((double*) (&data[code[pc + 2]]))) = floor((*((double*) (&data[code[pc + 1]])))); pc += 3; break;
             // Floor: [*Cplx]
-            case 114: (*((double2*) (&data[code[pc + 2]]))) = floor((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
+            case 116: (*((double2*) (&data[code[pc + 2]]))) = floor((*((double2*) (&data[code[pc + 1]])))); pc += 3; break;
             // === ArcOp ===
             // ArcOp: [*Cplx, *Cplx, *Real, *Cplx]
-            case 115: (*((double*) (&data[code[pc + 5]]))) = arc((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]]))), (*((double2*) (&data[code[pc + 4]])))); pc += 6; break;
+            case 117: (*((double*) (&data[code[pc + 5]]))) = arc((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]]))), (*((double2*) (&data[code[pc + 4]])))); pc += 6; break;
             // ArcOp: [Cplx, *Cplx, *Real, *Cplx]
-            case 116: (*((double*) (&data[code[pc + 8]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double*) (&data[code[pc + 6]]))), (*((double2*) (&data[code[pc + 7]])))); pc += 9; break;
+            case 118: (*((double*) (&data[code[pc + 8]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double*) (&data[code[pc + 6]]))), (*((double2*) (&data[code[pc + 7]])))); pc += 9; break;
             // ArcOp: [*Cplx, Cplx, *Real, *Cplx]
-            case 117: (*((double*) (&data[code[pc + 8]]))) = arc((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]]))), (*((double2*) (&data[code[pc + 7]])))); pc += 9; break;
+            case 119: (*((double*) (&data[code[pc + 8]]))) = arc((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]]))), (*((double2*) (&data[code[pc + 7]])))); pc += 9; break;
             // ArcOp: [Cplx, Cplx, *Real, *Cplx]
-            case 118: (*((double*) (&data[code[pc + 11]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double*) (&data[code[pc + 9]]))), (*((double2*) (&data[code[pc + 10]])))); pc += 12; break;
+            case 120: (*((double*) (&data[code[pc + 11]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double*) (&data[code[pc + 9]]))), (*((double2*) (&data[code[pc + 10]])))); pc += 12; break;
             // ArcOp: [*Cplx, *Cplx, Real, *Cplx]
-            case 119: (*((double*) (&data[code[pc + 6]]))) = arc((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3]))), (*((double2*) (&data[code[pc + 5]])))); pc += 7; break;
+            case 121: (*((double*) (&data[code[pc + 6]]))) = arc((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3]))), (*((double2*) (&data[code[pc + 5]])))); pc += 7; break;
             // ArcOp: [Cplx, *Cplx, Real, *Cplx]
-            case 120: (*((double*) (&data[code[pc + 9]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double*) (&code[pc + 6]))), (*((double2*) (&data[code[pc + 8]])))); pc += 10; break;
+            case 122: (*((double*) (&data[code[pc + 9]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double*) (&code[pc + 6]))), (*((double2*) (&data[code[pc + 8]])))); pc += 10; break;
             // ArcOp: [*Cplx, Cplx, Real, *Cplx]
-            case 121: (*((double*) (&data[code[pc + 9]]))) = arc((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6]))), (*((double2*) (&data[code[pc + 8]])))); pc += 10; break;
+            case 123: (*((double*) (&data[code[pc + 9]]))) = arc((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6]))), (*((double2*) (&data[code[pc + 8]])))); pc += 10; break;
             // ArcOp: [Cplx, Cplx, Real, *Cplx]
-            case 122: (*((double*) (&data[code[pc + 12]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double*) (&code[pc + 9]))), (*((double2*) (&data[code[pc + 11]])))); pc += 13; break;
+            case 124: (*((double*) (&data[code[pc + 12]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double*) (&code[pc + 9]))), (*((double2*) (&data[code[pc + 11]])))); pc += 13; break;
             // ArcOp: [*Cplx, *Cplx, *Real, Cplx]
-            case 123: (*((double*) (&data[code[pc + 8]]))) = arc((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]]))), ((double2) {(*((double*) (&code[pc + 4]))), (*((double*) (&code[pc + 6])))})); pc += 9; break;
+            case 125: (*((double*) (&data[code[pc + 8]]))) = arc((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&data[code[pc + 3]]))), ((double2) {(*((double*) (&code[pc + 4]))), (*((double*) (&code[pc + 6])))})); pc += 9; break;
             // ArcOp: [Cplx, *Cplx, *Real, Cplx]
-            case 124: (*((double*) (&data[code[pc + 11]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double*) (&data[code[pc + 6]]))), ((double2) {(*((double*) (&code[pc + 7]))), (*((double*) (&code[pc + 9])))})); pc += 12; break;
+            case 126: (*((double*) (&data[code[pc + 11]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double*) (&data[code[pc + 6]]))), ((double2) {(*((double*) (&code[pc + 7]))), (*((double*) (&code[pc + 9])))})); pc += 12; break;
             // ArcOp: [*Cplx, Cplx, *Real, Cplx]
-            case 125: (*((double*) (&data[code[pc + 11]]))) = arc((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]]))), ((double2) {(*((double*) (&code[pc + 7]))), (*((double*) (&code[pc + 9])))})); pc += 12; break;
+            case 127: (*((double*) (&data[code[pc + 11]]))) = arc((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&data[code[pc + 6]]))), ((double2) {(*((double*) (&code[pc + 7]))), (*((double*) (&code[pc + 9])))})); pc += 12; break;
             // ArcOp: [Cplx, Cplx, *Real, Cplx]
-            case 126: (*((double*) (&data[code[pc + 14]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double*) (&data[code[pc + 9]]))), ((double2) {(*((double*) (&code[pc + 10]))), (*((double*) (&code[pc + 12])))})); pc += 15; break;
+            case 128: (*((double*) (&data[code[pc + 14]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double*) (&data[code[pc + 9]]))), ((double2) {(*((double*) (&code[pc + 10]))), (*((double*) (&code[pc + 12])))})); pc += 15; break;
             // ArcOp: [*Cplx, *Cplx, Real, Cplx]
-            case 127: (*((double*) (&data[code[pc + 9]]))) = arc((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3]))), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))})); pc += 10; break;
+            case 129: (*((double*) (&data[code[pc + 9]]))) = arc((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double*) (&code[pc + 3]))), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))})); pc += 10; break;
             // ArcOp: [Cplx, *Cplx, Real, Cplx]
-            case 128: (*((double*) (&data[code[pc + 12]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double*) (&code[pc + 6]))), ((double2) {(*((double*) (&code[pc + 8]))), (*((double*) (&code[pc + 10])))})); pc += 13; break;
+            case 130: (*((double*) (&data[code[pc + 12]]))) = arc(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double*) (&code[pc + 6]))), ((double2) {(*((double*) (&code[pc + 8]))), (*((double*) (&code[pc + 10])))})); pc += 13; break;
             // ArcOp: [*Cplx, Cplx, Real, Cplx]
-            case 129: (*((double*) (&data[code[pc + 12]]))) = arc((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6]))), ((double2) {(*((double*) (&code[pc + 8]))), (*((double*) (&code[pc + 10])))})); pc += 13; break;
+            case 131: (*((double*) (&data[code[pc + 12]]))) = arc((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double*) (&code[pc + 6]))), ((double2) {(*((double*) (&code[pc + 8]))), (*((double*) (&code[pc + 10])))})); pc += 13; break;
             // === LineOp ===
             // LineOp: [*Cplx, *Cplx, *Cplx]
-            case 130: (*((double*) (&data[code[pc + 4]]))) = line((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double2*) (&data[code[pc + 3]])))); pc += 5; break;
+            case 132: (*((double*) (&data[code[pc + 4]]))) = line((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double2*) (&data[code[pc + 3]])))); pc += 5; break;
             // LineOp: [Cplx, *Cplx, *Cplx]
-            case 131: (*((double*) (&data[code[pc + 7]]))) = line(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
+            case 133: (*((double*) (&data[code[pc + 7]]))) = line(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
             // LineOp: [*Cplx, Cplx, *Cplx]
-            case 132: (*((double*) (&data[code[pc + 7]]))) = line((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
+            case 134: (*((double*) (&data[code[pc + 7]]))) = line((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
             // LineOp: [Cplx, Cplx, *Cplx]
-            case 133: (*((double*) (&data[code[pc + 10]]))) = line(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double2*) (&data[code[pc + 9]])))); pc += 11; break;
+            case 135: (*((double*) (&data[code[pc + 10]]))) = line(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double2*) (&data[code[pc + 9]])))); pc += 11; break;
             // LineOp: [*Cplx, *Cplx, Cplx]
-            case 134: (*((double*) (&data[code[pc + 7]]))) = line((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))})); pc += 8; break;
+            case 136: (*((double*) (&data[code[pc + 7]]))) = line((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))})); pc += 8; break;
             // LineOp: [Cplx, *Cplx, Cplx]
-            case 135: (*((double*) (&data[code[pc + 10]]))) = line(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
+            case 137: (*((double*) (&data[code[pc + 10]]))) = line(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
             // LineOp: [*Cplx, Cplx, Cplx]
-            case 136: (*((double*) (&data[code[pc + 10]]))) = line((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
+            case 138: (*((double*) (&data[code[pc + 10]]))) = line((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
             // === CircleOp ===
             // CircleOp: [*Cplx, *Real, *Cplx]
-            case 137: (*((double*) (&data[code[pc + 4]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]]))), (*((double2*) (&data[code[pc + 3]])))); pc += 5; break;
+            case 139: (*((double*) (&data[code[pc + 4]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]]))), (*((double2*) (&data[code[pc + 3]])))); pc += 5; break;
             // CircleOp: [Cplx, *Real, *Cplx]
-            case 138: (*((double*) (&data[code[pc + 7]]))) = circle(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double*) (&data[code[pc + 5]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
+            case 140: (*((double*) (&data[code[pc + 7]]))) = circle(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double*) (&data[code[pc + 5]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
             // CircleOp: [*Cplx, Real, *Cplx]
-            case 139: (*((double*) (&data[code[pc + 5]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&code[pc + 2]))), (*((double2*) (&data[code[pc + 4]])))); pc += 6; break;
+            case 141: (*((double*) (&data[code[pc + 5]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&code[pc + 2]))), (*((double2*) (&data[code[pc + 4]])))); pc += 6; break;
             // CircleOp: [Cplx, Real, *Cplx]
-            case 140: (*((double*) (&data[code[pc + 8]]))) = circle(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double*) (&code[pc + 5]))), (*((double2*) (&data[code[pc + 7]])))); pc += 9; break;
+            case 142: (*((double*) (&data[code[pc + 8]]))) = circle(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double*) (&code[pc + 5]))), (*((double2*) (&data[code[pc + 7]])))); pc += 9; break;
             // CircleOp: [*Cplx, *Real, Cplx]
-            case 141: (*((double*) (&data[code[pc + 7]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]]))), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))})); pc += 8; break;
+            case 143: (*((double*) (&data[code[pc + 7]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&data[code[pc + 2]]))), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))})); pc += 8; break;
             // CircleOp: [Cplx, *Real, Cplx]
-            case 142: (*((double*) (&data[code[pc + 10]]))) = circle(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double*) (&data[code[pc + 5]]))), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
+            case 144: (*((double*) (&data[code[pc + 10]]))) = circle(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double*) (&data[code[pc + 5]]))), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
             // CircleOp: [*Cplx, Real, Cplx]
-            case 143: (*((double*) (&data[code[pc + 8]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&code[pc + 2]))), ((double2) {(*((double*) (&code[pc + 4]))), (*((double*) (&code[pc + 6])))})); pc += 9; break;
+            case 145: (*((double*) (&data[code[pc + 8]]))) = circle((*((double2*) (&data[code[pc + 1]]))), (*((double*) (&code[pc + 2]))), ((double2) {(*((double*) (&code[pc + 4]))), (*((double*) (&code[pc + 6])))})); pc += 9; break;
             // === RectOp ===
             // RectOp: [*Cplx, *Cplx, *Cplx]
-            case 144: (*((double*) (&data[code[pc + 4]]))) = rect((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double2*) (&data[code[pc + 3]])))); pc += 5; break;
+            case 146: (*((double*) (&data[code[pc + 4]]))) = rect((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), (*((double2*) (&data[code[pc + 3]])))); pc += 5; break;
             // RectOp: [Cplx, *Cplx, *Cplx]
-            case 145: (*((double*) (&data[code[pc + 7]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
+            case 147: (*((double*) (&data[code[pc + 7]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
             // RectOp: [*Cplx, Cplx, *Cplx]
-            case 146: (*((double*) (&data[code[pc + 7]]))) = rect((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
+            case 148: (*((double*) (&data[code[pc + 7]]))) = rect((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), (*((double2*) (&data[code[pc + 6]])))); pc += 8; break;
             // RectOp: [Cplx, Cplx, *Cplx]
-            case 147: (*((double*) (&data[code[pc + 10]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double2*) (&data[code[pc + 9]])))); pc += 11; break;
+            case 149: (*((double*) (&data[code[pc + 10]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), ((double2) {(*((double*) (&code[pc + 5]))), (*((double*) (&code[pc + 7])))}), (*((double2*) (&data[code[pc + 9]])))); pc += 11; break;
             // RectOp: [*Cplx, *Cplx, Cplx]
-            case 148: (*((double*) (&data[code[pc + 7]]))) = rect((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))})); pc += 8; break;
+            case 150: (*((double*) (&data[code[pc + 7]]))) = rect((*((double2*) (&data[code[pc + 1]]))), (*((double2*) (&data[code[pc + 2]]))), ((double2) {(*((double*) (&code[pc + 3]))), (*((double*) (&code[pc + 5])))})); pc += 8; break;
             // RectOp: [Cplx, *Cplx, Cplx]
-            case 149: (*((double*) (&data[code[pc + 10]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
+            case 151: (*((double*) (&data[code[pc + 10]]))) = rect(((double2) {(*((double*) (&code[pc + 1]))), (*((double*) (&code[pc + 3])))}), (*((double2*) (&data[code[pc + 5]]))), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
             // RectOp: [*Cplx, Cplx, Cplx]
-            case 150: (*((double*) (&data[code[pc + 10]]))) = rect((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
+            case 152: (*((double*) (&data[code[pc + 10]]))) = rect((*((double2*) (&data[code[pc + 1]]))), ((double2) {(*((double*) (&code[pc + 2]))), (*((double*) (&code[pc + 4])))}), ((double2) {(*((double*) (&code[pc + 6]))), (*((double*) (&code[pc + 8])))})); pc += 11; break;
 		}
 	}
 	
