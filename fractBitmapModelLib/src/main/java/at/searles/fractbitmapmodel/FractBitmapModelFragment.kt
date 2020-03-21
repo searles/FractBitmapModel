@@ -16,7 +16,31 @@ class FractBitmapModelFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
-        initialize()
+        initialize(savedInstanceState)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBundle(propertiesKey, FractPropertiesAdapter.toBundle(bitmapModel.properties))
+        outState.putInt(widthKey, bitmapModel.width)
+        outState.putInt(heightKey, bitmapModel.height)
+    }
+
+    private fun initialize(savedInstanceState: Bundle?) {
+        val dataBundle = savedInstanceState ?: arguments!!
+
+        val propertiesBundle = dataBundle.getBundle(propertiesKey)!!
+        val width = dataBundle.getInt(widthKey)
+        val height = dataBundle.getInt(heightKey)
+
+        val properties = FractPropertiesAdapter.fromBundle(propertiesBundle)
+
+        rs = RenderScript.create(context)
+
+        val bitmapAllocation = BitmapAllocation(rs, width, height)
+
+        bitmapModel = FractBitmapModel(rs, bitmapAllocation, properties)
+        bitmapModel.startTask()
     }
 
     fun addImageSizeChange(width: Int, height: Int) {
@@ -28,20 +52,6 @@ class FractBitmapModelFragment : Fragment() {
         }
     }
 
-    private fun initialize() {
-        val propertiesBundle = arguments!!.getBundle(propertiesKey)!!
-        val width = arguments!!.getInt(widthKey)
-        val height = arguments!!.getInt(heightKey)
-
-        val properties = FractPropertiesAdapter.fromBundle(propertiesBundle)
-
-        rs = RenderScript.create(context)
-
-        val bitmapAllocation = BitmapAllocation(rs, width, height)
-
-        bitmapModel = FractBitmapModel(rs, bitmapAllocation, properties)
-        bitmapModel.startTask()
-    }
 
     companion object {
         const val propertiesKey = "properties"
