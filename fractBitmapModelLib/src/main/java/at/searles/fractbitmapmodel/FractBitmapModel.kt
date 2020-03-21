@@ -234,11 +234,8 @@ class FractBitmapModel(
         startCalcTask()
     }
 
-    val calcScript: ScriptC_calc
-        get() = calcController.calcScript
-
     private fun startCalcTask() {
-        calcTask = CalcTask(rs, this).apply {
+        calcTask = CalcTask(rs, this, calcController.getCalcScript()).apply {
             listener = this@FractBitmapModel
             execute()
         }

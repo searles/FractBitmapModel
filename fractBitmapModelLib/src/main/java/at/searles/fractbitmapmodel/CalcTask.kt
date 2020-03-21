@@ -5,7 +5,8 @@ import android.renderscript.RenderScript
 import kotlin.math.abs
 
 class CalcTask(private val rs: RenderScript,
-               private val model: FractBitmapModel
+               private val model: FractBitmapModel,
+               private val calcScript: Lazy<ScriptC_calc>
 ): AsyncTask<Unit?, Int, Unit?>() {
 
     lateinit var listener: Listener
@@ -19,27 +20,25 @@ class CalcTask(private val rs: RenderScript,
     override fun doInBackground(vararg param: Unit?) {
         model.initialize()
 
-        val calcScript = model.calcScript
-
-        calcScript._calcData = bitmapAllocation.calcData
-        calcScript._width = width.toLong()
-        calcScript._height = height.toLong()
+        calcScript.value._calcData = bitmapAllocation.calcData
+        calcScript.value._width = width.toLong()
+        calcScript.value._height = height.toLong()
 
         val ceilLog2Width = ceilLog2(width + 1)
         val ceilLog2Height = ceilLog2(height + 1)
 
-        calcScript._ceilLog2Width = ceilLog2Width
-        calcScript._ceilLog2Height = ceilLog2Height
+        calcScript.value._ceilLog2Width = ceilLog2Width
+        calcScript.value._ceilLog2Height = ceilLog2Height
 
         val count = 1 shl (ceilLog2Width + ceilLog2Height)
-        calcScript._count = count
+        calcScript.value._count = count
 
         var index = 0
 
         while(index < count) {
-            calcScript._pixelIndex0 = index.toLong()
-            calcScript.forEach_calculate_part(part)
-            calcScript.forEach_copy_part(part, part)
+            calcScript.value._pixelIndex0 = index.toLong()
+            calcScript.value.forEach_calculate_part(part)
+            calcScript.value.forEach_copy_part(part, part)
             rs.finish()
 
             index += CalcController.parallelCalculationsCount

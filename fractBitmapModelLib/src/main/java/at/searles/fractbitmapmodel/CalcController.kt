@@ -16,15 +16,24 @@ import android.renderscript.RenderScript
  */
 class CalcController(val rs: RenderScript) {
 
-    lateinit var calcScript: ScriptC_calc
+    private var calcScript: ScriptC_calc? = null
 
     private var codeAllocation: Allocation = Allocation.createSized(rs, Element.I32(rs), 1)
+
+    fun getCalcScript(): Lazy<ScriptC_calc> {
+        return lazy { calcScript!! }
+    }
 
     fun initialize() {
         calcScript = ScriptC_calc(rs)
     }
 
     fun updateVmCodeInScript(properties: FractProperties) {
+        if(calcScript == null) {
+            // it will be initialized later.
+            return
+        }
+
         val vmCode = properties.vmCode
 
         codeAllocation.destroy()
@@ -32,11 +41,16 @@ class CalcController(val rs: RenderScript) {
 
         codeAllocation.copyFrom(vmCode)
 
-        calcScript.bind_code(codeAllocation)
-        calcScript._codeSize = vmCode.size.toLong()
+        calcScript!!.bind_code(codeAllocation)
+        calcScript!!._codeSize = vmCode.size.toLong()
     }
 
     fun updateScale(properties: FractProperties, width: Int, height: Int) {
+        if(calcScript == null) {
+            // it will be initialized later.
+            return
+        }
+
         val centerX = width / 2.0
         val centerY = height / 2.0
         val factor = 1.0 / if (centerX < centerY) centerX else centerY
@@ -53,7 +67,7 @@ class CalcController(val rs: RenderScript) {
             f = scale.cy - (c * centerX + d * centerY)
         }
 
-        calcScript._scale = scriptScale
+        calcScript!!._scale = scriptScale
     }
 
     companion object {

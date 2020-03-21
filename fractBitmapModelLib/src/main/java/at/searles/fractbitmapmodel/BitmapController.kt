@@ -7,11 +7,9 @@ class BitmapController(
     val rs: RenderScript,
     initialBitmapAllocation: BitmapAllocation
 ) {
-    lateinit var bitmapScript: ScriptC_bitmap
-
-    private lateinit var interpolateGapsScript: ScriptC_interpolate_gaps
-
-    private lateinit var paletteUpdater: PaletteToScriptUpdater
+    private var bitmapScript: ScriptC_bitmap? = null
+    private var interpolateGapsScript: ScriptC_interpolate_gaps? = null
+    private var paletteUpdater: PaletteToScriptUpdater? = null
 
     var minPixelGap: Int = 1 // use this to ensure a lower but faster resolution.
     var listener: Listener? = null
@@ -26,21 +24,26 @@ class BitmapController(
     fun initialize() {
         bitmapScript = ScriptC_bitmap(rs)
         interpolateGapsScript = ScriptC_interpolate_gaps(rs)
-        paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript)
+        paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript!!)
         bindToBitmapAllocation()
     }
 
     private fun bindToBitmapAllocation() {
+        if(bitmapScript == null) {
+            // it will be initialized later.
+            return
+        }
+
         with(bitmapAllocation) {
-            bitmapScript.bind_bitmapData(calcData)
+            bitmapScript!!.bind_bitmapData(calcData)
 
-            bitmapScript._width = width.toLong()
-            bitmapScript._height = height.toLong()
+            bitmapScript!!._width = width.toLong()
+            bitmapScript!!._height = height.toLong()
 
-            interpolateGapsScript._width = width.toLong()
-            interpolateGapsScript._height = height.toLong()
+            interpolateGapsScript!!._width = width.toLong()
+            interpolateGapsScript!!._height = height.toLong()
 
-            interpolateGapsScript._bitmap = rsBitmap
+            interpolateGapsScript!!._bitmap = rsBitmap
         }
     }
 
@@ -48,20 +51,24 @@ class BitmapController(
      * Renders bitmapData into the bitmap using the current parameters.
      */
     fun updateBitmap(alwaysUseFastIfPossible: Boolean) {
+        if(bitmapScript == null || interpolateGapsScript == null) {
+            return
+        }
+
         val currentPixelGap = max(minPixelGap, bitmapAllocation.pixelGap)
-        bitmapScript._pixelGap = currentPixelGap.toLong()
+        bitmapScript!!._pixelGap = currentPixelGap.toLong()
 
         if(currentPixelGap == 1) {
             if(alwaysUseFastIfPossible) {
-                bitmapScript.forEach_fastRoot(bitmapAllocation.rsBitmap)
+                bitmapScript!!.forEach_fastRoot(bitmapAllocation.rsBitmap)
             } else {
-                bitmapScript.forEach_root(bitmapAllocation.rsBitmap)
+                bitmapScript!!.forEach_root(bitmapAllocation.rsBitmap)
             }
         } else {
-            interpolateGapsScript._pixelGap = currentPixelGap.toLong()
+            interpolateGapsScript!!._pixelGap = currentPixelGap.toLong()
 
-            bitmapScript.forEach_fastRoot(bitmapAllocation.rsBitmap)
-            interpolateGapsScript.forEach_root(bitmapAllocation.rsBitmap)
+            bitmapScript!!.forEach_fastRoot(bitmapAllocation.rsBitmap)
+            interpolateGapsScript!!.forEach_root(bitmapAllocation.rsBitmap)
         }
 
         bitmapAllocation.sync()
@@ -69,17 +76,25 @@ class BitmapController(
     }
 
     fun updatePalettes(props: FractProperties) {
-        paletteUpdater.updatePalettes(props)
+        if(paletteUpdater == null) {
+            return
+        }
+
+        paletteUpdater!!.updatePalettes(props)
     }
 
     fun updateShaderProperties(props: FractProperties) {
+        if(bitmapScript == null) {
+            return
+        }
+
         with(props) {
-            bitmapScript._useLightEffect = if (shaderProperties.useLightEffect) 1 else 0
-            bitmapScript._lightVector = shaderProperties.lightVector
-            bitmapScript._ambientReflection = shaderProperties.ambientReflection
-            bitmapScript._diffuseReflection = shaderProperties.diffuseReflection
-            bitmapScript._specularReflection = shaderProperties.specularReflection
-            bitmapScript._shininess = shaderProperties.shininess.toLong()
+            bitmapScript!!._useLightEffect = if (shaderProperties.useLightEffect) 1 else 0
+            bitmapScript!!._lightVector = shaderProperties.lightVector
+            bitmapScript!!._ambientReflection = shaderProperties.ambientReflection
+            bitmapScript!!._diffuseReflection = shaderProperties.diffuseReflection
+            bitmapScript!!._specularReflection = shaderProperties.specularReflection
+            bitmapScript!!._shininess = shaderProperties.shininess.toLong()
         }
     }
 
