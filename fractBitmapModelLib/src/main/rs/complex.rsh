@@ -34,6 +34,7 @@ static double2 __attribute__((overloadable)) exp(double2 z) {
 	return result;
 }
 
+
 static double2 __attribute__((overloadable)) log(double2 z) {
 	return (double2) { log(abs(z)), arg(z) };
 }
@@ -121,6 +122,31 @@ static double2 __attribute__((overloadable)) sin(double2 z) {
 
 static double2 __attribute__((overloadable)) cos(double2 z) {
 	return cosh(muli(z));
+}
+
+static double2 __attribute__((overloadable)) fract(double2 z) {
+	return (double2) { fract(z.x), fract(z.y) };
+}
+
+static double2 __attribute__((overloadable)) tan(double2 a) {
+	// (e^2iz - 1) / (e^2iz + 1)
+	double2 eia = exp((double2) {-2 * a.y, 2 * a.x});
+	double2 eiai = (double2) {-eia.y, eia.x + 1};
+
+    eia.x -= 1;
+
+	return div(eia, eiai);
+}
+
+static double2 __attribute__((overloadable)) tanh(double2 a) {
+	double2 ea = exp((double2) {2 * a.x, 2 * a.y});
+	return div((double2){ea.x - 1, ea.y}, (double2){ea.x + 1, ea.y});
+}
+
+static double2 __attribute__((overloadable)) atanh(double2 a) {
+   	double2 b = div((double2){1 + a.x, a.y}, (double2){1 - a.x, -a.y});
+   	double2 c = log(b);
+   	return (double2) { c.x / 2, c.y / 2};
 }
 
 static double2 __attribute__((overloadable)) max(double2 a, double2 b) {
