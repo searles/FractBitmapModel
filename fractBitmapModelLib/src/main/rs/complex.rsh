@@ -22,6 +22,18 @@ static double __attribute__((overloadable)) arg(double2 f) {
     return atan2(f.y, f.x);
 }
 
+static const double tau = 6.283185307179586;
+
+static double __attribute__((overloadable)) argnorm(double2 f) {
+    double a = arg(f) / tau;
+
+    if(a < 0) {
+        return 1 + a;
+    }
+
+    return a;
+}
+
 static double2 __attribute__((overloadable)) exp(double2 z) {
 	double ez = exp(z.x);
 

@@ -62,17 +62,30 @@ static double __attribute__((overloadable)) sqrt(double d) {
 	long exponent;
 	double mantissa = decomposeDouble(d, &exponent);
 
-	double x = (double) native_sqrt((float) mantissa);
+    if((exponent & 1l) != 0l) {
+        exponent--;
+        mantissa = mantissa * 0.5 + 1;
+    }
+
+    double x = composeDouble(mantissa,  exponent >> 1l);
+
+    // start newton approximation
+    for(int i = 0; i < 4; ++i) {
+        x = (d / x + x) / 2.;
+    }
+
+
+//	double x = (double) native_sqrt((float) mantissa);
 
 	// Two steps of newton
-	x = 0.5 * (x + mantissa / x);
-	x = 0.5 * (x + mantissa / x);
+//	x = 0.5 * (x + mantissa / x);
+//	x = 0.5 * (x + mantissa / x);
 
-	if((exponent & 1l) == 1) {
-		x = x * sqrt2;
-	}
+//	if((exponent & 1l) == 1) {
+//		x = x * sqrt2;
+//	}
 
-	return composeDouble(x, exponent / 2);
+	return x; // TODO composeDouble(x, exponent / 2);
 }
 
 static double __attribute__((overloadable)) atan2(double y, double x) {
