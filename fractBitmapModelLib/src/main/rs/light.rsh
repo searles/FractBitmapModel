@@ -15,7 +15,11 @@ static float4 getPhongRefectionModelValue(float3 normalVector, float4 color) {
     float specular = pown(specularBase * specularReflection, shininess); // since the light is white, use it as white.
 
     // specular color is white
-    return color * (ambientReflection + diffuse) + specular * (float4) {1.0f, 0.0f, 0.0f, 1.0f};
+    float4 lightColor = color * (ambientReflection + diffuse);
+
+    lightColor.s3 = color.s3; // keep original alpha.
+
+    return lightColor + specular * (float4) {1.0f, 0.0f, 0.0f, 1.0f};
 }
 
 static float3 getNormalVectorOf(float3 xVec, float3 yVec) {
