@@ -14,10 +14,7 @@ static float4 getPhongRefectionModelValue(float3 normalVector, float4 color) {
     float specularBase = max(0.f, reflectionDirection.z); // viewer direction = {0,0,1}
     float specular = pown(specularBase * specularReflection, shininess); // since the light is white, use it as white.
 
-    // FIXME with or without brackets?
-    color.s0 = color.s0 * (ambientReflection + diffuse) + specular;
-
-    return color;
+    return color * (ambientReflection + diffuse) + specular * (float4) {1f, 1f, 1f, 1f};
 }
 
 static float3 getNormalVectorOf(float3 xVec, float3 yVec) {
@@ -25,10 +22,10 @@ static float3 getNormalVectorOf(float3 xVec, float3 yVec) {
 }
 
 /*
- * dzx and dzy are scaled up to screen size by the caller.
+ * dzx and dzy are scaled up to screen size by the caller. In-color
+ * is assumed to be RGB
  */
 static float4 adjustLight(float4 color, double dzx, double dzy) {
-
     float3 xVec = (float3) { 1.0f, 0.0f, (float) dzx };
     float3 yVec = (float3) { 0.0f, 1.0f, (float) dzy };
 

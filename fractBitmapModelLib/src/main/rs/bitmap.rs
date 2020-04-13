@@ -28,6 +28,7 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
     float3 p01 = bitmapData[x + (y + 1) * (width + 1)];
     float3 p11 = bitmapData[x + (y + 1) * (width + 1) + 1];
 
+    // color is YUV, ie color.s0 is intensity.
     float4 color00 = colorAt(p00.x, p00.y);
     float4 color10 = colorAt(p10.x, p10.y);
     float4 color01 = colorAt(p01.x, p01.y);
@@ -41,13 +42,15 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
 
     color.s0 = native_sqrt(brightness.s0 + brightness.s1 + brightness.s2 + brightness.s3);
 
+    float4 rgb = to8888(color);
+
     if(useLightEffect == 0) {
-        return to8888(color);
+        return rgb;
     }
 
     double scaleTo01Factor = ((double) min(width, height) / 2.0);
 
-    return to8888(adjustLight(color, (p10.z - p00.z) * scaleTo01Factor, (p01.z - p00.z) * scaleTo01Factor));
+    return to8888(adjustLight(rgb, (p10.z - p00.z) * scaleTo01Factor, (p01.z - p00.z) * scaleTo01Factor));
 }
 
 uint32_t pixelGap; // for the fast kernel.
