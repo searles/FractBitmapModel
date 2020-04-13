@@ -42,15 +42,15 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
 
     color.s0 = native_sqrt(brightness.s0 + brightness.s1 + brightness.s2 + brightness.s3);
 
-    float4 rgb = to8888(color);
-
     if(useLightEffect == 0) {
-        return rgb;
+        return to8888(color);
     }
 
     double scaleTo01Factor = ((double) min(width, height) / 2.0);
 
-    return to8888(adjustLight(rgb, (p10.z - p00.z) * scaleTo01Factor, (p01.z - p00.z) * scaleTo01Factor));
+    float4 colorLight = adjustLight(color, (p10.z - p00.z) * scaleTo01Factor, (p01.z - p00.z) * scaleTo01Factor);
+
+    return to8888(colorLight);
 }
 
 uint32_t pixelGap; // for the fast kernel.
