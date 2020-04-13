@@ -187,6 +187,9 @@ static double __attribute__((overloadable)) cos(double f) { return cos((float) f
 static double __attribute__((overloadable)) tan(double f) { return tan((float) f); }
 static double __attribute__((overloadable)) atan(double f) { return atan((float) f); }
 
+static double __attribute__((overloadable)) asin(double f) { return asin((float) f); }
+static double __attribute__((overloadable)) acos(double f) { return acos((float) f); }
+
 static double __attribute__((overloadable)) sincos(double d, double* co) {
     float fco;
     float si = sincos((float) d, &fco);
@@ -210,9 +213,12 @@ static double __attribute__((overloadable)) tanh(double f) {
 }
 
 static double __attribute__((overloadable)) atanh(double f) { return atanh((float) f); }
+
+static double __attribute__((overloadable)) asinh(double f) { return asinh((float) f); }
+static double __attribute__((overloadable)) acosh(double f) { return acosh((float) f); }
+
 static double __attribute__((overloadable)) floor(double f) { return floor((float) f); }
 static double __attribute__((overloadable)) fract(double d) { return fract((float) d); }
-
 
 static double __attribute__((overloadable)) max(double a, double b) {
     if(a > b) return a;

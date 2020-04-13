@@ -14,7 +14,8 @@ static float4 getPhongRefectionModelValue(float3 normalVector, float4 color) {
     float specularBase = max(0.f, reflectionDirection.z); // viewer direction = {0,0,1}
     float specular = pown(specularBase * specularReflection, shininess); // since the light is white, use it as white.
 
-    color.s0 = color.s0 * ambientReflection + diffuse + specular;
+    // FIXME with or without brackets?
+    color.s0 = color.s0 * (ambientReflection + diffuse) + specular;
 
     return color;
 }
