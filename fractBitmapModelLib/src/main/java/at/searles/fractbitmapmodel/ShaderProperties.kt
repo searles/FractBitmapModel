@@ -1,6 +1,5 @@
 package at.searles.fractbitmapmodel
 
-import android.graphics.Shader
 import android.os.Bundle
 import android.renderscript.Float3
 import org.json.JSONObject
@@ -12,10 +11,10 @@ class ShaderProperties(
     val useLightEffect: Boolean = true,
     val polarAngle: Double = PI / 4.0,
     val azimuthAngle: Double = 3.0 * PI / 4.0,
-    val ambientReflection: Float = 0.75f,
-    val diffuseReflection: Float = 0.25f,
+    val ambientReflection: Float = 0.67f,
+    val diffuseReflection: Float = 0.33f,
     val specularReflection: Float = 1f,
-    val shininess: Int = 16) {
+    val shininess: Int = 64) {
 
     val lightVector: Float3
         get() = getLightVector(polarAngle, azimuthAngle)
