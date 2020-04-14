@@ -104,13 +104,13 @@ static double2 __attribute__((overloadable)) atan(double2 f) {
 static double2 __attribute__((overloadable)) asin(double2 f) {
     // -i * log(iz + sqrt(1-z^2))
     double2 i = (double2) {0.0, 1.0};
-    return -i * log(i * f + sqrt((double2) {1.0, 0.0} - f * f));
+    return mul(-i, log(mul(i, f) + sqrt((double2) {1.0, 0.0} - mul(f, f))));
 }
 
 static double2 __attribute__((overloadable)) acos(double2 f) {
     // -i * ln(z + sqrt(z^2 - 1))
     double2 i = (double2) {0.0, 1.0};
-    return -i * log(f + sqrt(f * f - (double2) {1.0, 0.0}));
+    return mul(-i, log(f + sqrt(mul(f, f) - (double2) {1.0, 0.0})));
 }
 
 static double2 __attribute__((overloadable)) conj(double2 f) {
@@ -175,12 +175,12 @@ static double2 __attribute__((overloadable)) atanh(double2 a) {
 
 static double2 __attribute__((overloadable)) asinh(double2 f) {
     // ln(z + sqrt(z^2 + 1))
-    return log(f + sqrt((double2) {1.0, 0.0} + f * f));
+    return log(f + sqrt((double2) {1.0, 0.0} + mul(f, f)));
 }
 
 static double2 __attribute__((overloadable)) acosh(double2 f) {
     // ln(z + sqrt(z^2 - 1))
-    return log(f + sqrt(f * f - (double2) {1.0, 0.0}));
+    return log(f + sqrt(mul(f, f) - (double2) {1.0, 0.0}));
 }
 
 static double2 __attribute__((overloadable)) max(double2 a, double2 b) {
