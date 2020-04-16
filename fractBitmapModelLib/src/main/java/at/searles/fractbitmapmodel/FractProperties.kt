@@ -10,7 +10,7 @@ class FractProperties(
     val program: FractlangProgram,
     val customScale: Scale?,
     val customShaderProperties: ShaderProperties?,
-    val customPalettes: List<Palette?>) {
+    val customPalettes: Map<String, Palette>) {
     val sourceCode: String = program.sourceCode
 
     val scale = customScale ?: program.defaultScale
@@ -19,28 +19,29 @@ class FractProperties(
     val shaderProperties = customShaderProperties ?: fallBackShaderProperties
     val isDefaultShaderProperties = customShaderProperties == null
 
-    val paletteCount: Int = program.defaultPalettes.size
-
-    val palettes: List<Palette> by lazy {
-        (0 until paletteCount).map { getPalette(it) }
-    }
-
     val vmCode
-            get() = program.vmCode
+        get() = program.vmCode
 
-    fun getPalette(index: Int): Palette {
-        require(index in 0 until paletteCount)
-        return customPalettes.getOrNull(index) ?: program.defaultPalettes[index].defaultPalette
+    fun getPalette(label: String): Palette {
+        return customPalettes[label] ?: program.defaultPalettes.getValue(label).defaultPalette
     }
 
-    fun isDefaultPalette(index: Int): Boolean {
-        require(index in 0 until paletteCount)
-        return customPalettes.getOrNull(index) == null
+    val paletteLabels by lazy {
+        program.defaultPalettes.keys.toList().sortedBy {
+            program.defaultPalettes.getValue(it).index
+        }
     }
 
-    fun getPaletteDescription(index: Int): String {
-        require(index in 0 until paletteCount)
-        return program.defaultPalettes[index].description
+    val paletteList by lazy {
+        paletteLabels.map { getPalette(it) }
+    }
+
+    fun isDefaultPalette(label: String): Boolean {
+        return !customPalettes.containsKey(label)
+    }
+
+    fun getPaletteDescription(label: String): String {
+        return program.defaultPalettes.getValue(label).description
     }
 
     val parameterIds: Iterable<String> = program.activeParameters.keys
@@ -63,7 +64,7 @@ class FractProperties(
 
     val customParameters = program.customParameters
 
-    fun createWithNewBitmapProperties(customPalettes: List<Palette?>?, customShaderProperties: ShaderProperties?): FractProperties {
+    fun createWithNewBitmapProperties(customPalettes: Map<String, Palette>?, customShaderProperties: ShaderProperties?): FractProperties {
         return FractProperties(program,
             customScale,
             customShaderProperties ?: this.customShaderProperties,
@@ -89,13 +90,13 @@ class FractProperties(
     }
 
     companion object {
-        fun create(sourceCode: String, customParameters: Map<String, String>, customScale: Scale?, customShaderProperties: ShaderProperties?, customPalettes: List<Palette?>): FractProperties {
+        fun create(sourceCode: String, customParameters: Map<String, String>, customScale: Scale?, customShaderProperties: ShaderProperties?, customPalettes: Map<String, Palette>): FractProperties {
             val program = FractlangProgram(sourceCode, customParameters)
 
             return create(program, customScale, customShaderProperties, customPalettes)
         }
 
-        fun create(program: FractlangProgram, customScale: Scale?, customShaderProperties: ShaderProperties?, customPalettes: List<Palette?>): FractProperties {
+        fun create(program: FractlangProgram, customScale: Scale?, customShaderProperties: ShaderProperties?, customPalettes: Map<String, Palette>): FractProperties {
             return FractProperties(program,
                 customScale,
                 customShaderProperties,

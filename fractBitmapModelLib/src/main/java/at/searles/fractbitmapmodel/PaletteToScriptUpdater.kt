@@ -20,8 +20,7 @@ class PaletteToScriptUpdater(private val rs: RenderScript, private val script: S
     fun updatePalettes(properties: FractProperties) {
         val splineSegments = ArrayList<SplineSegment>()
 
-        val palettesWithSegmentIndex = (0 until properties.paletteCount).map {paletteIndex ->
-            val palette = properties.getPalette(paletteIndex)
+        val palettesWithSegmentIndex = properties.paletteList.map {palette ->
             val segmentStartIndex = splineSegments.size
             val segments = createSplineSegments(palette)
 
@@ -30,7 +29,7 @@ class PaletteToScriptUpdater(private val rs: RenderScript, private val script: S
             Pair(palette, segmentStartIndex)
         }
 
-        script._palettesCount = properties.paletteCount.toLong()
+        script._palettesCount = properties.paletteList.size.toLong()
 
         setPalettesInScript(palettesWithSegmentIndex)
         setSegmentsInScript(splineSegments)

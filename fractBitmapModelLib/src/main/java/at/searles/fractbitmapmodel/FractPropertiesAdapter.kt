@@ -1,8 +1,6 @@
 package at.searles.fractbitmapmodel
 
 import android.os.Bundle
-import android.os.Parcelable
-import android.util.SparseArray
 import at.searles.commons.color.Palette
 import at.searles.commons.math.Scale
 import at.searles.fractlang.FractlangProgram
@@ -23,7 +21,7 @@ object FractPropertiesAdapter {
 
         bundle.putBundle(parametersKey, parametersToBundle(props.customParameters))
 
-        bundle.putSparseParcelableArray(palettesKey, palettesToArray(props.customPalettes))
+        bundle.putBundle(palettesKey, palettesToBundle(props.customPalettes))
 
         if(!props.isDefaultShaderProperties) {
             bundle.putBundle(shaderPropertiesKey, props.shaderProperties.toBundle())
@@ -41,7 +39,7 @@ object FractPropertiesAdapter {
 
         val parameters = parametersFromBundle(bundle.getBundle(parametersKey)!!)
 
-        val palettes = palettesFromArray(bundle.getSparseParcelableArray<Bundle>(palettesKey)!!)
+        val palettes = palettesFromBundle(bundle.getBundle(palettesKey)!!)
 
         val shaderProperties = bundle.getBundle(shaderPropertiesKey)?.let {
             ShaderProperties.fromBundle(it)
@@ -74,47 +72,33 @@ object FractPropertiesAdapter {
         return obj
     }
 
-    private fun palettesToJson(palettes: List<Palette?>): JSONArray {
-        val palettesArray = JSONArray()
+    private fun palettesToJson(palettes: Map<String, Palette>): JSONObject {
+        val palettesObj = JSONObject()
 
-        palettes.forEach {
-            if(it == null) {
-                palettesArray.put(null)
-            } else {
-                palettesArray.put(PaletteAdapter.toJson(it))
-            }
+        palettes.forEach { (label, palette) ->
+            palettesObj.put(label, PaletteAdapter.toJson(palette))
         }
 
-        return palettesArray
+        return palettesObj
     }
 
-    private fun palettesToArray(palettes: List<Palette?>): SparseArray<out Parcelable> {
-        val array = SparseArray<Parcelable>()
-
-        palettes.forEachIndexed { index, palette ->
-            if(palette != null) {
-                array.put(index, PaletteAdapter.toBundle(palette))
-            }
+    private fun palettesToBundle(palettes: Map<String, Palette>): Bundle {
+        val bundle = Bundle()
+        palettes.forEach { (label, palette) ->
+            bundle.putBundle(label, PaletteAdapter.toBundle(palette))
         }
 
-        return array
+        return bundle
     }
 
-    private fun palettesFromArray(array: SparseArray<Bundle>): List<Palette?> {
-        val list = ArrayList<Palette?>()
+    private fun palettesFromBundle(bundle: Bundle): Map<String, Palette> {
+        val paletteMap = HashMap<String, Palette>()
 
-        repeat(array.size()) {
-            val index = array.keyAt(it)
-            val palette = PaletteAdapter.toPalette(array.valueAt(it))
-
-            while(list.size <= index) {
-                list.add(null)
-            }
-
-            list[index] = palette
+        bundle.keySet().forEach {
+            paletteMap[it] = PaletteAdapter.toPalette(bundle.getBundle(it)!!)
         }
 
-        return list
+        return paletteMap
     }
 
     private fun scaleToJson(scale: Scale): JSONArray {
@@ -127,15 +111,22 @@ object FractPropertiesAdapter {
     }
 
     fun fromJson(obj: JSONObject): FractProperties {
+        val customParameters = parametersFromJson(obj.getJSONObject(parametersKey))
+
+        val sourceCode = obj.getString(sourceCodeKey)
+
+        val program = FractlangProgram(sourceCode, customParameters)
+
         val customScale: Scale? = if(obj.has(scaleKey)) {
             scaleFromJson(obj.getJSONArray(scaleKey))
         } else {
             null
         }
 
-        val customParameters = parametersFromJson(obj.getJSONObject(parametersKey))
-
-        val customPalettes = palettesFromJson(obj.getJSONArray(palettesKey))
+        // Due to a change in palettes, this branching was needed.
+        val customPalettes: Map<String, Palette> = obj.optJSONArray(palettesKey)?.let {
+            palettesFromJsonArray(it)
+        } ?: palettesFromJsonObj(obj.getJSONObject(palettesKey))
 
         val customShaderProperties: ShaderProperties? = if(obj.has(shaderPropertiesKey)) {
             ShaderProperties.fromJson(obj.getJSONObject(shaderPropertiesKey))
@@ -143,25 +134,37 @@ object FractPropertiesAdapter {
             null
         }
 
-        val sourceCode = obj.getString(sourceCodeKey)
-
-        return FractProperties.create(sourceCode, customParameters, customScale, customShaderProperties, customPalettes)
+        return FractProperties.create(program, customScale, customShaderProperties, customPalettes)
     }
 
-    fun palettesFromJson(palettesArray: JSONArray): List<Palette?> {
-        val palettes = ArrayList<Palette?>()
+    fun palettesFromJsonObj(palettesObj: JSONObject): Map<String, Palette> {
+        val paletteMap = HashMap<String, Palette>()
 
-        for(i in 0 until palettesArray.length()) {
-            palettes.add(
-                if(palettesArray.isNull(i)) {
-                    null
-                } else {
-                    PaletteAdapter.toPalette(palettesArray.getJSONObject(i))
-                }
-            )
+        val keys = palettesObj.keys()
+
+        while(keys.hasNext()) {
+            val key = keys.next()
+            val palette = PaletteAdapter.toPalette(palettesObj.getJSONObject(key))
+            paletteMap[key] = palette
         }
 
-        return palettes
+        return paletteMap
+    }
+
+    /**
+     * This is used for Jsons that were created before Version 1.0.3
+     */
+    fun palettesFromJsonArray(palettesArray: JSONArray): Map<String, Palette> {
+        val paletteMap = HashMap<String, Palette>()
+
+        for(i in 0 until palettesArray.length()) {
+            if(!palettesArray.isNull(i)) {
+                val palette = PaletteAdapter.toPalette(palettesArray.getJSONObject(i))
+                paletteMap["$i"] = palette
+            }
+        }
+
+        return paletteMap
     }
 
     fun scaleFromJson(scaleArray: JSONArray): Scale {
@@ -216,7 +219,7 @@ object FractPropertiesAdapter {
     const val parametersKey = "parameters"
     const val scaleKey = "scale"
 
-    const val palettesKey = "palettes"
+    const val palettesKey = "palettes" // this is for palette lists.
     const val shaderPropertiesKey = "shaderProperties"
 
 }

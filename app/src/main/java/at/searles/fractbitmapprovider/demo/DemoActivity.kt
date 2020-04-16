@@ -65,7 +65,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
                 }
     }
 
-    private val defaultProperties = FractProperties(FractlangProgram(sourceCode, emptyMap()), null, null, emptyList())
+    private val defaultProperties = FractProperties(FractlangProgram(sourceCode, emptyMap()), null, null, emptyMap())
 
     private fun connectBitmapModelFragment() {
         imageView.scalableBitmapModel = bitmapModelFragment.bitmapModel
@@ -93,7 +93,9 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             val offsetX = (currentTime - startTime) / 4000f
             val offsetY = 0f
 
-            val change = PaletteOffsetChange(0, offsetX, offsetY)
+            val paletteLabel = defaultProperties.paletteLabels[0]
+
+            val change = PaletteOffsetChange(paletteLabel, offsetX, offsetY)
 
             bitmapModelFragment.bitmapModel.applyBitmapPropertiesChange(change)
             scalableImageView.invalidate()
@@ -106,9 +108,9 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         const val bitmapModelFragmentTag = "bitmapModelFragment"
         
         const val sourceCode = """
-            setResult(0, rect(-0.5:-0.5, 0.5:0.5, point), 0);
+            var paletteIndex = putPalette("Palette1", "1", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);
+            setResult(paletteIndex, rect(-0.5:-0.5, 0.5:0.5, point), 0);
             declareScale(1,0,0,1,0,0);
-            declarePalette("1", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);
             """
     }
 
