@@ -34,7 +34,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         initBitmapModelFragment()
 
         experimentButton.setOnClickListener {
-            bitmapModelFragment.bitmapModel.stopAnimation()
+            bitmapModelFragment.bitmapModel.stopLowResMode()
         }
     }
 
@@ -55,6 +55,8 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
 
     private val defaultProperties = FractProperties(FractlangProgram(sourceCode, emptyMap()), null, null, emptyMap())
 
+    var cycleTask: Runnable? = null
+
     private fun connectBitmapModelFragment() {
         imageView.scalableBitmapModel = bitmapModelFragment.bitmapModel
         imageView.visibility = View.VISIBLE
@@ -66,11 +68,14 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
     }
 
     private fun startColorCycling() {
-        val delay: Long = 10
+        if(cycleTask != null) {
+            return
+        }
+
         val handler = Handler()
-        bitmapModelFragment.bitmapModel.startAnimation(20, 100)
-        val runnable = ColorCycling(handler, delay)
-        runnable.run()
+        bitmapModelFragment.bitmapModel.startLowResMode(720)
+        cycleTask = ColorCycling(handler, 10)
+        cycleTask!!.run()
     }
 
     inner class ColorCycling(private val handler: Handler, private val delay: Long): Runnable {

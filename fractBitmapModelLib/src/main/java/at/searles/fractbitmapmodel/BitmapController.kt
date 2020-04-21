@@ -53,33 +53,31 @@ class BitmapController(
         bitmapUpdater.scheduleUpdate()
     }
 
-    fun startAnimation(delayMs: Int, maxResolution: Int) {
-        bitmapUpdater.minimumDelayMs = delayMs
-        bitmapUpdater.maxAnimationResolution = maxResolution
-
-        bitmapUpdater.isAnimation = true
+    fun startLowResMode(maxResolution: Int) {
+        bitmapUpdater.maxResolution = maxResolution
+        bitmapUpdater.isLowResolution = true
         bitmapUpdater.scheduleUpdate()
     }
 
-    fun stopAnimation() {
-        bitmapUpdater.isAnimation = false
+    fun stopLowResMode() {
+        bitmapUpdater.isLowResolution = false
         // if the animation is running, an update is scheduled anyways.
     }
 
     /**
      * Renders bitmapData into the bitmap using the current parameters.
      */
-    private fun updateBitmap(isAnimation: Boolean, maxAnimationResolution: Int) {
+    private fun updateBitmap(isLowRes: Boolean, maxRes: Int) {
         if(bitmapScript == null || interpolateGapsScript == null) {
             return
         }
 
         var currentPixelGap = bitmapAllocation.pixelGap
 
-        if(isAnimation) {
+        if(isLowRes) {
             val size = max(bitmapAllocation.width, bitmapAllocation.height)
 
-            while (size > maxAnimationResolution * currentPixelGap) {
+            while (size > maxRes * currentPixelGap) {
                 currentPixelGap *= 2
             }
         }
@@ -87,7 +85,7 @@ class BitmapController(
         bitmapScript!!._pixelGap = currentPixelGap.toLong()
 
         if(currentPixelGap == 1) {
-            if(isAnimation) {
+            if(isLowRes) {
                 bitmapScript!!.forEach_fastRoot(bitmapAllocation.rsBitmap)
             } else {
                 bitmapScript!!.forEach_root(bitmapAllocation.rsBitmap)
@@ -130,10 +128,9 @@ class BitmapController(
     }
 
     private inner class BitmapUpdater {
-        var maxAnimationResolution: Int = -1
-        var minimumDelayMs: Int = -1
+        var maxResolution: Int = -1
 
-        var isAnimation: Boolean = false
+        var isLowResolution: Boolean = false
 
         var isUpdateScheduled: Boolean = false
         var lastUpdateTimestamp: Long = -1
@@ -149,28 +146,26 @@ class BitmapController(
         }
 
         fun updateDelayed() {
-            val delay = minimumDelayMs - (System.currentTimeMillis() - lastUpdateTimestamp)
+            val delay = minDelayBetweenUpdatesMs - (System.currentTimeMillis() - lastUpdateTimestamp)
             handler.postDelayed({createUpdateTask().run()}, max(1L, delay))
         }
 
         private fun createUpdateTask(): Runnable {
-            return UpdateTask(isAnimation, maxAnimationResolution)
+            return UpdateTask(isLowResolution, maxResolution)
         }
     }
 
     @SuppressLint("StaticFieldLeak")
-    private inner class UpdateTask(private val isAnimation: Boolean, private val maxAnimationResolution: Int): Runnable {
+    private inner class UpdateTask(private val isLowRes: Boolean, private val maxRes: Int): Runnable {
         override fun run() {
-            updateBitmap(isAnimation, maxAnimationResolution)
+            updateBitmap(isLowRes, maxRes)
             bitmapUpdater.lastUpdateTimestamp = System.currentTimeMillis()
-
-            if(isAnimation) {
-                bitmapUpdater.updateDelayed()
-            } else {
-                bitmapUpdater.isUpdateScheduled = false
-            }
-
+            bitmapUpdater.isUpdateScheduled = false
             listener?.bitmapUpdated()
         }
+    }
+
+    companion object {
+        private const val minDelayBetweenUpdatesMs = 25 // max 40 frames/sec
     }
 }
