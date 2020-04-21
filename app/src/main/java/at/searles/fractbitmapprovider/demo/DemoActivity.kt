@@ -34,19 +34,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         initBitmapModelFragment()
 
         experimentButton.setOnClickListener {
-            if(bitmapModelFragment.bitmapModel.width != 2000) {
-                bitmapModelFragment.bitmapModel.scheduleBitmapModelChange(
-                    BitmapAllocationChange(
-                        BitmapAllocation(bitmapModelFragment.bitmapModel.rs, 2000, 2000)
-                    )
-                )
-            } else {
-                bitmapModelFragment.bitmapModel.scheduleBitmapModelChange(
-                    BitmapAllocationChange(
-                        BitmapAllocation(bitmapModelFragment.bitmapModel.rs, 100, 100)
-                    )
-                )
-            }
+            bitmapModelFragment.bitmapModel.stopAnimation()
         }
     }
 
@@ -60,7 +48,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             supportFragmentManager.findFragmentByTag(bitmapModelFragmentTag) as FractBitmapModelFragment?
 
         bitmapModelFragment = fragment ?:
-                FractBitmapModelFragment.createInstance(defaultProperties, 1280, 640).also {
+                FractBitmapModelFragment.createInstance(defaultProperties, 2560, 1440).also {
                     supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
     }
@@ -80,6 +68,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
     private fun startColorCycling() {
         val delay: Long = 10
         val handler = Handler()
+        bitmapModelFragment.bitmapModel.startAnimation(20, 100)
         val runnable = ColorCycling(handler, delay)
         runnable.run()
     }
@@ -98,7 +87,6 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             val change = PaletteOffsetChange(paletteLabel, offsetX, offsetY)
 
             bitmapModelFragment.bitmapModel.applyBitmapPropertiesChange(change)
-            scalableImageView.invalidate()
 
             handler.postDelayed(this, delay)
         }

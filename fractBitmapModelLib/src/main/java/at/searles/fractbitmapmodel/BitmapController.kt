@@ -1,5 +1,7 @@
 package at.searles.fractbitmapmodel
 
+import android.annotation.SuppressLint
+import android.os.Handler
 import android.renderscript.RenderScript
 import kotlin.math.max
 
@@ -10,8 +12,8 @@ class BitmapController(
     private var bitmapScript: ScriptC_bitmap? = null
     private var interpolateGapsScript: ScriptC_interpolate_gaps? = null
     private var paletteUpdater: PaletteToScriptUpdater? = null
+    private val bitmapUpdater = BitmapUpdater()
 
-    var minPixelGap: Int = 1 // use this to ensure a lower but faster resolution.
     var listener: Listener? = null
 
     var bitmapAllocation: BitmapAllocation = initialBitmapAllocation
@@ -47,19 +49,45 @@ class BitmapController(
         }
     }
 
+    fun scheduleBitmapUpdate() {
+        bitmapUpdater.scheduleUpdate()
+    }
+
+    fun startAnimation(delayMs: Int, maxResolution: Int) {
+        bitmapUpdater.minimumDelayMs = delayMs
+        bitmapUpdater.maxAnimationResolution = maxResolution
+
+        bitmapUpdater.isAnimation = true
+        bitmapUpdater.scheduleUpdate()
+    }
+
+    fun stopAnimation() {
+        bitmapUpdater.isAnimation = false
+        // if the animation is running, an update is scheduled anyways.
+    }
+
     /**
      * Renders bitmapData into the bitmap using the current parameters.
      */
-    fun updateBitmap(alwaysUseFastIfPossible: Boolean) {
+    private fun updateBitmap(isAnimation: Boolean, maxAnimationResolution: Int) {
         if(bitmapScript == null || interpolateGapsScript == null) {
             return
         }
 
-        val currentPixelGap = max(minPixelGap, bitmapAllocation.pixelGap)
+        var currentPixelGap = bitmapAllocation.pixelGap
+
+        if(isAnimation) {
+            val size = max(bitmapAllocation.width, bitmapAllocation.height)
+
+            while (size > maxAnimationResolution * currentPixelGap) {
+                currentPixelGap *= 2
+            }
+        }
+
         bitmapScript!!._pixelGap = currentPixelGap.toLong()
 
         if(currentPixelGap == 1) {
-            if(alwaysUseFastIfPossible) {
+            if(isAnimation) {
                 bitmapScript!!.forEach_fastRoot(bitmapAllocation.rsBitmap)
             } else {
                 bitmapScript!!.forEach_root(bitmapAllocation.rsBitmap)
@@ -72,7 +100,6 @@ class BitmapController(
         }
 
         bitmapAllocation.sync()
-        listener?.bitmapUpdated()
     }
 
     fun updatePalettes(props: FractProperties) {
@@ -100,5 +127,50 @@ class BitmapController(
 
     interface Listener {
         fun bitmapUpdated()
+    }
+
+    private inner class BitmapUpdater {
+        var maxAnimationResolution: Int = -1
+        var minimumDelayMs: Int = -1
+
+        var isAnimation: Boolean = false
+
+        var isUpdateScheduled: Boolean = false
+        var lastUpdateTimestamp: Long = -1
+        var handler: Handler = Handler()
+
+        fun scheduleUpdate() {
+            if(isUpdateScheduled) {
+                return
+            }
+
+            isUpdateScheduled = true
+            updateDelayed()
+        }
+
+        fun updateDelayed() {
+            val delay = minimumDelayMs - (System.currentTimeMillis() - lastUpdateTimestamp)
+            handler.postDelayed({createUpdateTask().run()}, max(1L, delay))
+        }
+
+        private fun createUpdateTask(): Runnable {
+            return UpdateTask(isAnimation, maxAnimationResolution)
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private inner class UpdateTask(private val isAnimation: Boolean, private val maxAnimationResolution: Int): Runnable {
+        override fun run() {
+            updateBitmap(isAnimation, maxAnimationResolution)
+            bitmapUpdater.lastUpdateTimestamp = System.currentTimeMillis()
+
+            if(isAnimation) {
+                bitmapUpdater.updateDelayed()
+            } else {
+                bitmapUpdater.isUpdateScheduled = false
+            }
+
+            listener?.bitmapUpdated()
+        }
     }
 }

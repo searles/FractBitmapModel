@@ -30,13 +30,18 @@ class FractBitmapModel(
         CalcController.parallelCalculationsCount
     )
 
-
     /*
      * Must be initialized before starting a calculation. This will happen in the
      * first call to startTask.
      */
     private val calcController = CalcController(rs)
-    private val bitmapController = BitmapController(rs, initialBitmapAllocation)
+    private val bitmapController = BitmapController(rs, initialBitmapAllocation).apply {
+        this.listener = object: BitmapController.Listener {
+            override fun bitmapUpdated() {
+                this@FractBitmapModel.listener?.bitmapUpdated()
+            }
+        }
+    }
 
     override val bitmapTransformMatrix = Matrix()
     override val bitmap get() = bitmapAllocation.bitmap
@@ -72,9 +77,9 @@ class FractBitmapModel(
         scheduleCalcPropertiesChange(RelativeScaleChange(relativeMatrix))
     }
 
-    fun updateBitmap(alwaysUseFastIfPossible: Boolean = false) {
+    fun scheduleBitmapUpdate() {
         if(isInitialized) {
-            bitmapController.updateBitmap(alwaysUseFastIfPossible)
+            bitmapController.scheduleBitmapUpdate()
         }
     }
 
@@ -84,13 +89,11 @@ class FractBitmapModel(
         if(isWaitingForPreview) {
             bitmapTransformMatrix.set(nextBitmapTransformMatrix)
             isWaitingForPreview = false
-            updateBitmap()
+            scheduleBitmapUpdate()
             lastPixelGap = bitmapAllocation.pixelGap
-            listener?.bitmapUpdated()
         } else if(lastPixelGap != bitmapAllocation.pixelGap) {
-            updateBitmap()
+            scheduleBitmapUpdate()
             lastPixelGap = bitmapAllocation.pixelGap
-            listener?.bitmapUpdated()
         }
 
         listener?.setProgress(progress)
@@ -124,7 +127,7 @@ class FractBitmapModel(
         require(Looper.getMainLooper().isCurrentThread)
         properties = change.accept(properties)
         updateBitmapParametersInScripts()
-        updateBitmap()
+        scheduleBitmapUpdate()
     }
 
     fun scheduleCalcPropertiesChange(change: CalcPropertiesChange) {
@@ -159,6 +162,14 @@ class FractBitmapModel(
         startTask()
     }
 
+    fun startAnimation(delayMs: Int, maxResolution: Int) {
+        bitmapController.startAnimation(delayMs, maxResolution)
+    }
+
+    fun stopAnimation() {
+        bitmapController.stopAnimation()
+    }
+
     fun hasBackHistory() = history.hasBack()
 
     fun hasForwardHistory() = history.hasForward()
@@ -180,7 +191,7 @@ class FractBitmapModel(
         updateScaleInScripts()
 
         updateBitmapParametersInScripts()
-        bitmapController.updateBitmap(false)
+        scheduleBitmapUpdate()
     }
 
     private fun updateBitmapParametersInScripts() {
