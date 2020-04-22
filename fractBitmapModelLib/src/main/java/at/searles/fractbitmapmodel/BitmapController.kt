@@ -3,7 +3,9 @@ package at.searles.fractbitmapmodel
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.renderscript.RenderScript
+import android.util.Log
 import kotlin.math.max
+import kotlin.math.min
 
 class BitmapController(
     val rs: RenderScript,
@@ -66,6 +68,8 @@ class BitmapController(
 
     /**
      * Renders bitmapData into the bitmap using the current parameters.
+     * @param isLowRes Use lower resolution and no super sampling
+     * @param maxRes maximum resolution of the longer edge
      */
     private fun updateBitmap(isLowRes: Boolean, maxRes: Int) {
         if(bitmapScript == null || interpolateGapsScript == null) {
@@ -82,6 +86,8 @@ class BitmapController(
             }
         }
 
+        Log.d("BitmapController", "pixelGap = $currentPixelGap")
+
         bitmapScript!!._pixelGap = currentPixelGap.toLong()
 
         if(currentPixelGap == 1) {
@@ -95,6 +101,7 @@ class BitmapController(
 
             bitmapScript!!.forEach_fastRoot(bitmapAllocation.rsBitmap)
             interpolateGapsScript!!.forEach_root(bitmapAllocation.rsBitmap)
+            rs.finish()
         }
 
         bitmapAllocation.sync()
@@ -162,6 +169,8 @@ class BitmapController(
             bitmapUpdater.lastUpdateTimestamp = System.currentTimeMillis()
             bitmapUpdater.isUpdateScheduled = false
             listener?.bitmapUpdated()
+
+            // TODO: Avoid artifact when
         }
     }
 

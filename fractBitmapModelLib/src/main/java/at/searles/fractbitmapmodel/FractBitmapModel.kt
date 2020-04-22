@@ -5,6 +5,7 @@ import android.os.Looper
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
+import android.util.Log
 import at.searles.commons.util.History
 import at.searles.fractbitmapmodel.changes.*
 import at.searles.fractimageview.ScalableBitmapModel
@@ -38,6 +39,7 @@ class FractBitmapModel(
     private val bitmapController = BitmapController(rs, initialBitmapAllocation).apply {
         this.listener = object: BitmapController.Listener {
             override fun bitmapUpdated() {
+                Log.d("FractBitmapModel.BitmapController.Listener", "bitmap was updated")
                 this@FractBitmapModel.listener?.bitmapUpdated()
             }
         }
@@ -89,9 +91,11 @@ class FractBitmapModel(
         if(isWaitingForPreview) {
             bitmapTransformMatrix.set(nextBitmapTransformMatrix)
             isWaitingForPreview = false
+            Log.d("FractBitmapModel.setProgress", "first preview")
             scheduleBitmapUpdate()
             lastPixelGap = bitmapAllocation.pixelGap
         } else if(lastPixelGap != bitmapAllocation.pixelGap) {
+            Log.d("FractBitmapModel.setProgress", "pixelgap changed from $lastPixelGap to ${bitmapAllocation.pixelGap}")
             scheduleBitmapUpdate()
             lastPixelGap = bitmapAllocation.pixelGap
         }
@@ -191,7 +195,6 @@ class FractBitmapModel(
         updateScaleInScripts()
 
         updateBitmapParametersInScripts()
-        scheduleBitmapUpdate()
     }
 
     private fun updateBitmapParametersInScripts() {

@@ -2,6 +2,7 @@ package at.searles.fractbitmapmodel
 
 import android.os.AsyncTask
 import android.renderscript.RenderScript
+import android.util.Log
 import kotlin.math.abs
 
 class CalcTask(private val rs: RenderScript,
@@ -18,6 +19,8 @@ class CalcTask(private val rs: RenderScript,
     private val height = bitmapAllocation.height
 
     override fun doInBackground(vararg param: Unit?) {
+        Log.d("CalcTask.doInBackground", "start")
+
         model.initialize()
 
         calcScript.value._calcData = bitmapAllocation.calcData
@@ -52,9 +55,12 @@ class CalcTask(private val rs: RenderScript,
             publishProgress(index, count)
 
             if(isCancelled) {
+                Log.d("CalcTask.doInBackground", "cancel")
                 return
             }
         }
+
+        Log.d("CalcTask.doInBackground", "end")
     }
 
     override fun onProgressUpdate(vararg values: Int?) {
