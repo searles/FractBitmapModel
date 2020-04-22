@@ -7,11 +7,9 @@ import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import at.searles.fractbitmapmodel.*
-import at.searles.fractbitmapmodel.changes.BitmapAllocationChange
 import at.searles.fractbitmapmodel.changes.PaletteOffsetChange
 import at.searles.fractimageview.ScalableImageView
 import at.searles.fractlang.FractlangProgram
-import kotlinx.android.synthetic.main.activity_main.*
 
 class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmapModel.Listener {
 
@@ -34,7 +32,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         initBitmapModelFragment()
 
         experimentButton.setOnClickListener {
-            bitmapModelFragment.bitmapModel.stopLowResMode()
+            bitmapModelFragment.bitmapModel.stopAnimation()
         }
     }
 
@@ -73,7 +71,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         }
 
         val handler = Handler()
-        bitmapModelFragment.bitmapModel.startLowResMode(720)
+        bitmapModelFragment.bitmapModel.startAnimation(720)
         cycleTask = ColorCycling(handler, 10)
         cycleTask!!.run()
     }

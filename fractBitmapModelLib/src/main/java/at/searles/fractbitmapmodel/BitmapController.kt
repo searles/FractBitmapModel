@@ -1,11 +1,9 @@
 package at.searles.fractbitmapmodel
 
-import android.annotation.SuppressLint
 import android.os.Handler
 import android.renderscript.RenderScript
 import android.util.Log
 import kotlin.math.max
-import kotlin.math.min
 
 class BitmapController(
     val rs: RenderScript,
@@ -55,14 +53,14 @@ class BitmapController(
         bitmapUpdater.scheduleUpdate()
     }
 
-    fun startLowResMode(maxResolution: Int) {
-        bitmapUpdater.maxResolution = maxResolution
-        bitmapUpdater.isLowResolution = true
+    fun startAnimation(maxResolution: Int) {
+        bitmapUpdater.maxAnimationResolution = maxResolution
+        bitmapUpdater.isAnimation = true
         bitmapUpdater.scheduleUpdate()
     }
 
-    fun stopLowResMode() {
-        bitmapUpdater.isLowResolution = false
+    fun stopAnimation() {
+        bitmapUpdater.isAnimation = false
         // if the animation is running, an update is scheduled anyways.
     }
 
@@ -134,10 +132,10 @@ class BitmapController(
         fun bitmapUpdated()
     }
 
-    private inner class BitmapUpdater {
-        var maxResolution: Int = -1
-
-        var isLowResolution: Boolean = false
+    private inner class BitmapUpdater: Runnable {
+        var maxAnimationResolution: Int = -1
+        var isAnimation: Boolean = false
+        private var isLastAnimationFrame = false
 
         var isUpdateScheduled: Boolean = false
         var lastUpdateTimestamp: Long = -1
@@ -154,23 +152,21 @@ class BitmapController(
 
         fun updateDelayed() {
             val delay = minDelayBetweenUpdatesMs - (System.currentTimeMillis() - lastUpdateTimestamp)
-            handler.postDelayed({createUpdateTask().run()}, max(1L, delay))
+            handler.postDelayed(this, max(1L, delay))
         }
 
-        private fun createUpdateTask(): Runnable {
-            return UpdateTask(isLowResolution, maxResolution)
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private inner class UpdateTask(private val isLowRes: Boolean, private val maxRes: Int): Runnable {
         override fun run() {
-            updateBitmap(isLowRes, maxRes)
+            updateBitmap(isAnimation || isLastAnimationFrame, maxAnimationResolution)
             bitmapUpdater.lastUpdateTimestamp = System.currentTimeMillis()
-            bitmapUpdater.isUpdateScheduled = false
-            listener?.bitmapUpdated()
 
-            // TODO: Avoid artifact when
+            if(isAnimation || isLastAnimationFrame) {
+                isLastAnimationFrame = isAnimation
+                updateDelayed()
+            } else {
+                bitmapUpdater.isUpdateScheduled = false
+            }
+
+            listener?.bitmapUpdated()
         }
     }
 

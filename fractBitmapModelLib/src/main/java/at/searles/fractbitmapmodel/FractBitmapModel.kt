@@ -166,12 +166,12 @@ class FractBitmapModel(
         startTask()
     }
 
-    fun startLowResMode(maxResolution: Int) {
-        bitmapController.startLowResMode(maxResolution)
+    fun startAnimation(maxResolution: Int) {
+        bitmapController.startAnimation(maxResolution)
     }
 
-    fun stopLowResMode() {
-        bitmapController.stopLowResMode()
+    fun stopAnimation() {
+        bitmapController.stopAnimation()
     }
 
     fun hasBackHistory() = history.hasBack()
