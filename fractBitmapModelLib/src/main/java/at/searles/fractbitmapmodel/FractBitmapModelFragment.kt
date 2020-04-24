@@ -43,12 +43,14 @@ class FractBitmapModelFragment : Fragment() {
         bitmapModel.startTask()
     }
 
-    fun addImageSizeChange(width: Int, height: Int) {
-        try {
+    fun addImageSizeChange(width: Int, height: Int): Boolean {
+        return try {
             val newBitmapAllocation = BitmapAllocation(rs, width, height)
             bitmapModel.scheduleBitmapModelChange(BitmapAllocationChange(newBitmapAllocation))
+            true
         } catch(th: Throwable) {
             Toast.makeText(context, th.localizedMessage, Toast.LENGTH_LONG).show()
+            false
         }
     }
 

@@ -14,6 +14,8 @@ class BitmapController(
     private var paletteUpdater: PaletteToScriptUpdater? = null
     private val bitmapUpdater = BitmapUpdater()
 
+    private var isInitialized = false
+
     var listener: Listener? = null
 
     var bitmapAllocation: BitmapAllocation = initialBitmapAllocation
@@ -28,6 +30,7 @@ class BitmapController(
         interpolateGapsScript = ScriptC_interpolate_gaps(rs)
         paletteUpdater = PaletteToScriptUpdater(rs, bitmapScript!!)
         bindToBitmapAllocation()
+        isInitialized = true
     }
 
     private fun bindToBitmapAllocation() {
@@ -70,7 +73,7 @@ class BitmapController(
      * @param maxRes maximum resolution of the longer edge
      */
     private fun updateBitmap(isLowRes: Boolean, maxRes: Int) {
-        if(bitmapScript == null || interpolateGapsScript == null) {
+        if(!isInitialized) {
             return
         }
 
@@ -156,6 +159,8 @@ class BitmapController(
         }
 
         override fun run() {
+            //
+
             updateBitmap(isAnimation || isLastAnimationFrame, maxAnimationResolution)
             bitmapUpdater.lastUpdateTimestamp = System.currentTimeMillis()
 
