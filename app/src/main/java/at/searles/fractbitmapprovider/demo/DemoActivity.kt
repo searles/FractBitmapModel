@@ -6,7 +6,10 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import at.searles.fractbitmapmodel.*
+import at.searles.fractbitmapmodel.BitmapController
+import at.searles.fractbitmapmodel.FractBitmapModel
+import at.searles.fractbitmapmodel.FractBitmapModelFragment
+import at.searles.fractbitmapmodel.FractProperties
 import at.searles.fractbitmapmodel.changes.PaletteOffsetChange
 import at.searles.fractimageview.ScalableImageView
 import at.searles.fractlang.FractlangProgram
@@ -46,12 +49,13 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             supportFragmentManager.findFragmentByTag(bitmapModelFragmentTag) as FractBitmapModelFragment?
 
         bitmapModelFragment = fragment ?:
-                FractBitmapModelFragment.createInstance(defaultProperties, 2560, 1440).also {
+                FractBitmapModelFragment.createInstance(defaultProperties, 3, 3).also {
                     supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
     }
 
-    private val defaultProperties = FractProperties(FractlangProgram(sourceCode, emptyMap()), null, null, emptyMap())
+    private val defaultProperties =
+        FractProperties(FractlangProgram(sourceCode, emptyMap()), null, null, emptyMap())
 
     var cycleTask: Runnable? = null
 
@@ -120,7 +124,6 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
 
     companion object {
         const val bitmapModelFragmentTag = "bitmapModelFragment"
-
         const val sourceCode = """
 //            var paletteIndex = putPalette("Palette1", "1", 4, 1, [0,0,#ffff0000], [1,0,#ffffff00], [2,0,#ff00ff00], [3,0,#ff0000ff]);
 //            setResult(paletteIndex, rect(-0.5:-0.5, 0.5:0.5, point), 0);

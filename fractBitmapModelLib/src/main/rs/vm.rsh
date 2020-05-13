@@ -2,15 +2,27 @@
 #include "imod.rsh"
 
 static float3 createResult(int layer, double2 value, double height) {
-    float2 fValue = convert_float2(value);
+    float colorX = (float) value.x;
+    colorX -= floor(colorX);
 
-    fValue = fValue - floor(fValue);
+    float colorY = (float) value.y;
+    colorY -= floor(colorY);
 
-    return (float3) {
-        (float) (fValue.x + layer),
-        (float) fValue.y,
+    // add layer to colorX
+    colorX += layer;
+
+    // correct rounding mistake
+    if(colorX >= (float) (layer + 1)) {
+        colorX = layer;
+    }
+
+    float3 retVal = (float3) {
+        colorX,
+        colorY,
         (float) height
     };
+
+    return retVal;
 }
 
 int *code;
