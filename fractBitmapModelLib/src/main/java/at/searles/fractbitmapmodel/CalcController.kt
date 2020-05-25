@@ -40,7 +40,7 @@ class CalcController(val rs: RenderScript) {
         codeAllocation.destroy()
 
         // should be at least 1 even if code is empty to avoid a RSIllegalArgumentException.
-        codeAllocation = Allocation.createSized(rs, Element.I32(rs), max(1, vmCode.size))
+        codeAllocation = Allocation.createSized(rs, Element.I32(rs), max(16, vmCode.size))
 
         codeAllocation.copyFrom(vmCode)
 
