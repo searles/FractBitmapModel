@@ -3,6 +3,7 @@ package at.searles.fractbitmapmodel
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
+import kotlin.math.max
 
 /**
  * This class has 3 purposes:
@@ -37,7 +38,9 @@ class CalcController(val rs: RenderScript) {
         val vmCode = properties.vmCode
 
         codeAllocation.destroy()
-        codeAllocation = Allocation.createSized(rs, Element.I32(rs), vmCode.size)
+
+        // should be at least 1 even if code is empty to avoid a RSIllegalArgumentException.
+        codeAllocation = Allocation.createSized(rs, Element.I32(rs), max(1, vmCode.size))
 
         codeAllocation.copyFrom(vmCode)
 

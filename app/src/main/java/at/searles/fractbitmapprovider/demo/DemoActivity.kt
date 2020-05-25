@@ -60,7 +60,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
     var cycleTask: Runnable? = null
 
     private fun connectBitmapModelFragment() {
-        imageView.scalableBitmapModel = bitmapModelFragment.bitmapModel
+        imageView.bitmapModel = bitmapModelFragment.bitmapModel
         imageView.visibility = View.VISIBLE
         imageView.invalidate()
 
