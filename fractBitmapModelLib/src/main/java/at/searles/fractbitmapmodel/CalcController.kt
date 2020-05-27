@@ -37,9 +37,8 @@ class CalcController(val rs: RenderScript) {
 
         val vmCode = properties.vmCode
 
-        codeAllocation.destroy()
-
         if(vmCode.isNotEmpty()) {
+            codeAllocation.destroy()
             codeAllocation = Allocation.createSized(rs, Element.I32(rs), vmCode.size)
             codeAllocation.copyFrom(vmCode)
             calcScript!!.bind_code(codeAllocation)
