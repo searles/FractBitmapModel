@@ -49,7 +49,7 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
             supportFragmentManager.findFragmentByTag(bitmapModelFragmentTag) as FractBitmapModelFragment?
 
         bitmapModelFragment = fragment ?:
-                FractBitmapModelFragment.createInstance(defaultProperties, 3, 3).also {
+                FractBitmapModelFragment.createInstance(defaultProperties, 1280, 720).also {
                     supportFragmentManager.beginTransaction().add(it, bitmapModelFragmentTag).commit()
                 }
     }
@@ -75,9 +75,9 @@ class DemoActivity : AppCompatActivity(), BitmapController.Listener, FractBitmap
         }
 
         val handler = Handler()
-        bitmapModelFragment.bitmapModel.startAnimation(720)
-        cycleTask = ColorCycling(handler, 10)
-        cycleTask!!.run()
+     //   bitmapModelFragment.bitmapModel.startAnimation(720)
+       // cycleTask = ColorCycling(handler, 10)
+//        cycleTask!!.run()
     }
 
     inner class ColorCycling(private val handler: Handler, private val delay: Long): Runnable {

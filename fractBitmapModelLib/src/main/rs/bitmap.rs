@@ -34,13 +34,11 @@ uchar4 RS_KERNEL root(uint32_t x, uint32_t y) {
     float4 color01 = colorAt(p01.x, p01.y);
     float4 color11 = colorAt(p11.x, p11.y);
 
-    float4 color = (color00 + color10 + color01 + color11) / 4.f;
+    // correct brightness by using average of squares
+    float avgSqrY = native_sqrt((color00.s0 * color00.s0 + color10.s0 * color10.s0 + color01.s0 * color01.s0 + color11.s0 * color11.s0) / 4.f);
 
-    // correct brightness
-    float4 brightness = (float4) { color00.s0, color10.s0, color01.s0, color11.s0 };
-    brightness = brightness * brightness / 4.f;
-
-    color.s0 = native_sqrt(brightness.s0 + brightness.s1 + brightness.s2 + brightness.s3);
+    float4 color = (color00 + color10 + color01 + color11) / 4.0f;
+    color.s0 = avgSqrY;
 
     if(useLightEffect == 0) {
         return to8888(color);
